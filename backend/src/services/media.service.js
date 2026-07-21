@@ -2,6 +2,7 @@ import { prisma } from '../config/db.js';
 import fs         from 'fs';
 import path       from 'path';
 import { config } from '../config/app.config.js';
+import cloudinary from '../config/cloudinary.js';
 
 export const MediaService = {
 
@@ -52,7 +53,7 @@ export const MediaService = {
         prisma.media.create({
           data: {
             filename:     file.filename,
-            url:          `/uploads/${file.filename}`,
+            url:          file.path, // This is the Cloudinary URL returned by multer-storage-cloudinary
             mimetype:     file.mimetype,
             size:         file.size,
             originalName: file.originalname,
@@ -85,14 +86,16 @@ export const MediaService = {
   },
 
   async delete(id) {
-    const media = await prisma.media.findUnique({ where: { id: Number(id) } });
-    if (!media) return null;
+  const media = await prisma.media.findUnique({ where: { id: Number(id) } });
+  if (!media) return null;
 
-    // Delete file from disk
-    const filePath = path.join(config.upload.dir, media.filename);
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  // Delete file from Cloudinary using the stored public_id
+  if (media.filename) {
+    await cloudinary.uploader.destroy(media.filename);
+  }
 
-    // Delete DB record
-    return prisma.media.delete({ where: { id: Number(id) } });
-  },
+  // Delete DB record
+  return prisma.media.delete({ where: { id: Number(id) } });
+},
+
 };

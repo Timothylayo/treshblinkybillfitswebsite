@@ -1,26 +1,23 @@
 // ================================================================
 // src/middleware/upload.middleware.js
-// Multer config for handling image uploads to /api/media/upload
+// Multer config — uploads images directly to Cloudinary
 // ================================================================
 
 import multer from 'multer';
-import path   from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import cloudinary from '../config/cloudinary.js';
 import { config } from '../config/app.config.js';
 
-// ---- Storage: save to disk in uploads/ folder ----
-const storage = multer.diskStorage({
-  destination(req, file, cb) {
-    cb(null, config.upload.dir);
-  },
-  filename(req, file, cb) {
-    // uuid + original extension — prevents name collisions
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, `${uuidv4()}${ext}`);
+// ---- Storage: upload straight to Cloudinary instead of local disk ----
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'tbf-uploads',            // groups files in Cloudinary's dashboard
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
   },
 });
 
-// ---- File filter: images only ----
+// ---- File filter: images only (same as before) ----
 function fileFilter(req, file, cb) {
   if (config.upload.allowedTypes.includes(file.mimetype)) {
     cb(null, true);
@@ -29,16 +26,14 @@ function fileFilter(req, file, cb) {
   }
 }
 
-// ---- Multer instance ----
 export const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize:  config.upload.maxSizeMB * 1024 * 1024,
-    files:     10,   // max 10 files per upload request
+    fileSize: config.upload.maxSizeMB * 1024 * 1024,
+    files: 10,
   },
 });
 
-// ---- Middleware presets used in routes ----
-export const uploadSingle  = upload.single('file');        // single file field named "file"
-export const uploadMultiple = upload.array('files', 10);   // up to 10 files, field named "files"
+export const uploadSingle   = upload.single('file');
+export const uploadMultiple = upload.array('files', 10);
