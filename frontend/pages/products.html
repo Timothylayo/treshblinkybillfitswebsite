@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Collections — TreshBlinkybill Fits</title>
+  <link rel="stylesheet" href="../styles/main.css"/>
+  <style>
+    .tab-bar { background:var(--white); border-bottom:1px solid var(--border-2); display:flex; }
+    .tab { flex:1; padding:14px 8px; font-size:12px; font-weight:500; text-align:center; cursor:pointer; color:var(--text-muted); border:none; border-bottom:2.5px solid transparent; background:none; transition:all 0.18s; }
+    .tab.active { color:var(--navy); border-bottom-color:var(--navy); }
+
+    .cat-hero { padding:26px var(--space-md) 20px; position:relative; overflow:hidden; transition:background 0.3s; }
+    .cat-hero::before { content:''; position:absolute; top:-30px; right:-40px; width:150px; height:150px; border-radius:50%; border:1px solid rgba(178,237,228,0.15); pointer-events:none; }
+    .ch-tag   { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--mint); font-weight:500; margin-bottom:10px; }
+    .ch-title { font-family:var(--font-display); font-size:28px; font-weight:700; color:#fff; line-height:1.2; }
+    .ch-title em { font-style:italic; color:var(--blue-light); }
+    .ch-sub   { font-size:12px; color:var(--text-soft); margin-top:6px; }
+
+    .featured-strip { margin:16px var(--space-md) 0; background:var(--navy); border-radius:var(--radius-md); padding:18px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .fs-tag   { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--mint); margin-bottom:5px; }
+    .fs-title { font-family:var(--font-display); font-size:17px; font-weight:600; color:#fff; }
+    .fs-sub   { font-size:10px; color:var(--text-soft); margin-top:3px; }
+
+    .prod-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; padding:16px var(--space-md) 24px; }
+    @media(min-width:640px) { .prod-grid { grid-template-columns:repeat(3,1fr); padding:16px var(--space-xl) 24px; } }
+    @media(min-width:1024px) { .prod-grid { grid-template-columns:repeat(4,1fr); } }
+
+    .p-img { 
+      aspect-ratio: 3/4; /* This gives it a tall, professional portrait shape */
+      height: auto; 
+      position: relative; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      overflow: hidden; 
+    }
+    .p-img img { width:100%; height:100%; object-fit:cover; position:absolute; inset:0; }
+    .p-badge-pos { position:absolute; top:10px; left:10px; }
+    .p-fav { position:absolute; top:10px; right:10px; font-size:16px; cursor:pointer; background:none; border:none; transition:transform 0.15s; }
+    .p-fav:hover { transform:scale(1.2); }
+    .p-body { padding:11px 13px 14px; }
+    .p-name  { font-size:13px; font-weight:500; color:var(--navy); }
+    .p-sub   { font-size:11px; color:var(--text-muted); margin-top:2px; }
+    .p-tags  { display:flex; gap:5px; margin-top:8px; flex-wrap:wrap; }
+    .p-tag   { font-size:9px; padding:3px 8px; border-radius:10px; background:var(--blue-pale); color:var(--navy-mid); font-weight:500; }
+    .p-actions { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:10px; }
+  </style>
+</head>
+<body>
+
+  <div id="nav-slot"></div>
+
+  <div class="tab-bar" id="tabBar">
+    <button class="tab active" data-tab="natives" onclick="switchTab('natives',this)">Natives</button>
+    <button class="tab" data-tab="english" onclick="switchTab('english',this)">English Wear</button>
+    <button class="tab" data-tab="agbada"  onclick="switchTab('agbada',this)">Agbada</button>
+  </div>
+
+  <div id="catHero" class="cat-hero grad-1">
+    <div class="ch-tag"   id="heroTag">Native Collection</div>
+    <div class="ch-title" id="heroTitle">Rooted in <em>Tradition</em></div>
+    <div class="ch-sub"   id="heroSub">Premium native wear — Ankara, Aso-Oke & more</div>
+  </div>
+
+  <div style="background:var(--white);padding:10px var(--space-md);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-2);">
+    <div style="font-size:12px;color:var(--text-muted);" id="sortCount"></div>
+    <select style="font-size:12px;border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 10px;color:var(--navy);background:var(--bg);outline:none;cursor:pointer;">
+      <option>Newest</option><option>Popular</option><option>A–Z</option>
+    </select>
+  </div>
+
+  <div class="featured-strip">
+    <div>
+      <div class="fs-tag">Bespoke Service</div>
+      <div class="fs-title" id="featuredTitle">Custom Native Fit</div>
+      <div class="fs-sub">Tailored to your exact measurements</div>
+    </div>
+  </div>
+
+  <a href="checkout.html" id="floatingCart" class="floating-cart" style="display: none;">
+    🛒 View Cart (<span id="cartItemCount">0</span>)
+  </a>
+  <div class="prod-grid" id="prodGrid"></div>
+
+  <div id="footer-slot"></div>
+
+  <script src="../api/api.js"></script>
+  <script src="../services/services.js"></script>
+  <script>
+    const heroData = {
+      natives: { grad:'grad-1', tag:'Native Collection', title:'Rooted in <em>Tradition</em>', sub:'Premium native wear — Ankara, Aso-Oke & more', ft:'Custom Native Fit' },
+      english: { grad:'grad-2', tag:'English Wear',      title:'Sharp. <em>Refined.</em>',      sub:'Corporate & smart English tailoring',          ft:'Bespoke English Suit' },
+      agbada:  { grad:'grad-4', tag:'Agbada Collection', title:'Dressed for <em>Royalty</em>',  sub:'Ceremonial & occasion Agbada fits',            ft:'Custom Agbada Order' },
+    }; 
+
+    let liveCollections = [];
+
+    // Global Style Bag Handler
+    window.addToStyleBag = function(event, designId, name, image) {
+      event.preventDefault(); 
+      
+      if (!designId || designId === 'null' || designId === 'undefined') {
+         TBF.Utils.showToast('Please contact us directly for this bespoke item.', 'error');
+         return;
+      }
+      
+      TBF.CartService.addItem({
+        designId: designId,
+        name: name,
+        image: image,
+        qty: 1
+      });
+    };
+
+    function switchTab(tab, el) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      const h = heroData[tab];
+      document.getElementById('catHero').className = 'cat-hero ' + h.grad;
+      document.getElementById('heroTag').textContent = h.tag;
+      document.getElementById('heroTitle').innerHTML = h.title;
+      document.getElementById('heroSub').textContent  = h.sub;
+      document.getElementById('featuredTitle').textContent = h.ft;
+      renderProducts(tab);
+    } 
+
+    // Render dynamic outfits filtered by category tab
+    function renderProducts(tab) {
+      const prods = liveCollections.filter(item => (item.category || '').toLowerCase() === tab);
+      
+      document.getElementById('sortCount').textContent = `${prods.length} outfit${prods.length !== 1 ? 's' : ''}`; 
+
+      document.getElementById('prodGrid').innerHTML = prods.length ? prods.map(p => {
+        // Securely escape quotes so buttons don't break
+        const safeTitle = (p.title || 'Custom Tailored Fit').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        
+        return `
+        <div class="card card--hover">
+          <div class="p-img" style="background:var(--navy);">
+            <img src="${p.url ? 'http://localhost:5000' + p.url : ''}" style="width:100%; height:100%; object-fit:cover;" alt="${safeTitle}" loading="lazy"/>
+            <div class="p-badge-pos"><span class="badge badge--production">${p.designNum || 'Bespoke'}</span></div>
+            <button class="p-fav" onclick="TBF.Utils.showToast('Saved to wishlist')">🤍</button>
+          </div>
+          <div class="p-body">
+            <div class="p-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.title || 'Custom Tailored Fit'}</div>
+            <div class="p-sub" style="color:var(--blue);">Blueprint Ref: ${p.designNum || 'Bespoke'}</div>
+            
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:14px; width:100%;">
+              <button class="btn btn--mint" style="width:100%; padding:8px 0; font-size:12px; font-weight:600; border-radius:6px; border:none; cursor:pointer; text-align:center; box-shadow:0 2px 4px rgba(0,0,0,0.1);" 
+                    onclick="window.addToStyleBag(event, '${p.designId}', '${safeTitle}', '${p.url || ''}')">Tailor This Design →</button>
+              <button class="btn btn--ghost btn--sm" style="width:100%;" onclick="openOutfitDetails('${p.batchId}', '${safeTitle}', '${p.designNum || ''}')">View Angles</button>
+            </div>
+            
+          </div>
+        </div>`;
+      }).join('') 
+        : `<div class="empty-state" style="grid-column:1/-1; padding:60px 0;"><div class="empty-state__icon">🖼️</div>No finished outfits logged under ${tab.toUpperCase()} yet.</div>`;
+    } 
+
+    // Multi-Angle Modal View triggered by Batch ID
+    async function openOutfitDetails(batchId, title, designNum) {
+      if (!batchId || batchId === 'null' || batchId === 'undefined') {
+        return TBF.Utils.showToast('No secondary angle shots logged for this outfit', 'warning');
+      }
+
+      const modalId = 'multiAngleModalOverlay';
+      document.getElementById(modalId)?.remove();
+
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      modal.id = modalId;
+      modal.innerHTML = `
+        <div class="modal-box" style="max-width:680px;">
+          <div class="modal__header">
+            <div>
+              <div class="modal__title">${title}</div>
+              <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Showing all logged camera angles for this build</div>
+            </div>
+            <button class="modal__close" onclick="document.getElementById('${modalId}').remove()">✕</button>
+          </div>
+          <div class="modal__body" id="modalAnglesGrid" style="min-height:160px; display:flex; align-items:center; justify-content:center;">
+            <span style="font-size:12px; color:var(--text-muted);">Pulling secondary angles from server...</span>
+          </div>
+          <div class="modal__footer" style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:11px; color:var(--text-muted);">Base Blueprint: <strong style="color:var(--navy);">${designNum || 'Bespoke Instance'}</strong></div>
+            <button class="btn btn--mint" style="padding: 10px 20px; font-size: 13px; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; transition: transform 0.2s;" 
+                onmouseover="this.style.transform='scale(1.05)'" 
+                onmouseout="this.style.transform='scale(1)'"
+                onclick="window.addToStyleBag(event, '${designNum}', '${title}', '')">Tailor This Design →</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      try {
+        // Safely fetch images and handle data wrapping
+        const res = await window.TBF_API.Media.getAll({ batchId });
+        const angles = Array.isArray(res) ? res : (res.data || []);
+
+        const gridEl = document.getElementById('modalAnglesGrid');
+        if (!angles.length) {
+          gridEl.innerHTML = '<div class="empty-state__text">No extra angles found.</div>';
+          return;
+        }
+
+        gridEl.style.display = 'grid';
+        gridEl.style.gridTemplateColumns = 'repeat(auto-fit, minmax(200px, 1fr))';
+        gridEl.style.gap = '16px'; 
+        gridEl.innerHTML = angles.map(a => `
+          <div style="border-radius:8px; overflow:hidden; border:1px solid var(--border); background:var(--bg); display:flex; justify-content:center;">
+            <img src="http://localhost:5000${a.url}" style="width:100%; max-height:400px; object-fit:contain; border-radius:8px;" alt="Outfit Angle"/>
+          </div>
+        `).join('');
+      } catch (err) {
+        document.getElementById('modalAnglesGrid').innerHTML = '<span style="color:var(--red);">Failed to fetch outfit angles.</span>';
+      }
+    }
+
+    async function init() {
+      await TBF.ComponentLoader.init('products');
+      
+      try { 
+        // Safely fetch collections and handle data wrapping
+        const res = await window.TBF_API.Media.getAll({ isPrimary: true });
+        liveCollections = Array.isArray(res) ? res : (res.data || []);
+      } 
+      catch (e) { 
+        console.warn('Backend offline; collections rendered empty'); 
+        liveCollections = [];
+      }
+
+      const tabParam = new URLSearchParams(location.search).get('tab');
+      const activeTab = tabParam && heroData[tabParam] ? tabParam : 'natives';
+      const tabButton = document.querySelector(`[data-tab="${activeTab}"]`);
+      
+      if (tabButton) switchTab(activeTab, tabButton);
+      
+      if (typeof window.TBF !== 'undefined' && window.TBF.CartService) {
+        window.TBF.CartService.updateWidget();
+      }
+    } 
+
+    init();
+  </script>
+</body>
+</html>

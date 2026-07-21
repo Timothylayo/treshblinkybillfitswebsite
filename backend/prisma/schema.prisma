@@ -1,0 +1,211 @@
+// ================================================================
+// prisma/schema.prisma
+// TreshBlinkybill Fits — Full Database Schema
+//
+// TO SWITCH TO POSTGRESQL LATER:
+//   1. Change provider from "sqlite" to "postgresql"
+//   2. Update DATABASE_URL in .env to your postgres connection string
+//   3. Run: npx prisma migrate dev --name switch-to-postgres
+// ================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ================================================================
+// CATEGORY
+// Stores all categories for both designs and products
+// Examples: Native Monogram, Native Normal, Agbada, English Wear
+// ================================================================
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String // "Native Monogram"
+  slug      String   @unique // "native-monogram"
+  type      String // "design" | "product"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  designs  Design[]
+  products Product[]
+}
+
+// ================================================================
+// DESIGN
+// The actual monogram / native designs in the catalog
+// Each design has a unique number like TBF-001
+// ================================================================
+model Design {
+  id         Int      @id @default(autoincrement())
+  name       String // "Royal Monogram I"
+  number     String   @unique // "TBF-001"
+  badge      String   @default("") // "new" | "popular" | ""
+  imageUrl   String? // URL to the design image
+  categoryId Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  category   Category    @relation(fields: [categoryId], references: [id])
+  orderItems OrderItem[]
+}
+
+// ================================================================
+// PRODUCT
+// Physical clothing items (Ankara Senator, Agbada Royale, etc.)
+// ================================================================
+model Product {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique // "Ankara Senator"
+  badge      String   @default("") // "new" | "bespoke" | ""
+  imageUrl   String?
+  tags       String   @default("") // stored as comma-separated: "Ankara,Senator,Formal"
+  categoryId Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  category Category @relation(fields: [categoryId], references: [id])
+}
+
+// ================================================================
+// USER
+// Customer information — created when they place an order
+// ================================================================
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String   @unique
+  whatsapp  String
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  orders Order[]
+}
+
+// ================================================================
+// ORDER
+// The main order record — links customer to their order
+// Status moves: pending → confirmed → production → ready → delivered
+// ================================================================
+model Order {
+  id           String  @id
+  userId       Int
+  status       String  @default("pending")
+  deliveryMode String  @default("pickup")
+  deliveryFee  Decimal @default(0)
+  grandTotal   Decimal @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user    User        @relation(fields: [userId], references: [id])
+  items   OrderItem[] //1-to-many
+  invoice Invoice?
+}
+
+// ================================================================
+// ORDER items
+// Full details of what was ordered — measurements, design, event etc.
+// Separated from Order so Order stays lightweight for list views
+// ================================================================
+model OrderItem {
+  id       Int    @id @default(autoincrement())
+  orderId  String
+  designId Int?
+
+  // Financials for this specific item
+  qty       Int     @default(1)
+  unitPrice Decimal @default(0)
+  itemTotal Decimal @default(0)
+
+  //Custom design
+  name String?
+  image String?
+  isCustom Boolean @default(false)
+
+  // Details specific to this item
+  event String?
+  notes String?
+
+  // Measurements (all in cm)
+  chest         Float?
+  waist         Float?
+  hip           Float?
+  shoulder      Float?
+  sleeveLength  Float?
+  bodyLength    Float?
+  trouserLength Float?
+  thigh         Float?
+
+  // Relation back to the Parent Order
+  order  Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  design Design? @relation(fields: [designId], references: [id])
+}
+
+// ================================================================
+// INVOICE
+// Generated after order is confirmed — tracks pricing
+// ================================================================
+model Invoice {
+  id          Int      @id @default(autoincrement())
+  orderId     String   @unique
+  invoiceRef  String   @unique // "INV-TBF-2026-0047"
+  items       String // JSON string of line items array
+  subtotal    Float    @default(0)
+  deliveryFee Float    @default(0)
+  total       Float    @default(0)
+  status      String   @default("draft") // "draft" | "sent" | "paid"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  order Order @relation(fields: [orderId], references: [id])
+}
+
+// ================================================================
+// MEDIA
+// All uploaded images — designs, products, fabric references, events
+// ================================================================
+model Media {
+  id           Int    @id @default(autoincrement())
+  filename     String // uuid filename on disk e.g. "abc123.jpg"
+  url          String // "/uploads/abc123.jpg"
+  mimetype     String // "image/jpeg"
+  size         Int // file size in bytes
+  category     String @default("general") // "designs"|"natives"|"english"|"agbada"|"general"
+  originalName String // original filename user uploaded
+
+  // ==============================================================
+  // NEW: PORTFOLIO / BATCH FIELDS
+  // ==============================================================
+  batchId   String? // Groups multiple angles of the same job (e.g. "batch_17192...")
+  title     String? // Job Ref (e.g. "Chief Okeke White Senator")
+  designNum String? // Linked Base Blueprint (e.g. "TBF-001")
+  isPrimary Boolean @default(false) // True if this is the Cover Photo for the batch
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ================================================================
+// ADMIN
+// Admin user for the dashboard — separate from customers
+// Password is stored as a bcrypt hash, NEVER plain text
+// ================================================================
+model Admin {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

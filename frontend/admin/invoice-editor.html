@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Invoice - Admin TBF</title>
+  <style>
+    :root {
+      --navy: #0b1c3c;
+      --navy-light: #162b54;
+      --mint: #b2ede4;
+      --text: #1f2937;
+      --text-soft: #6b7280;
+      --bg: #f3f4f6;
+      --white: #ffffff;
+      --border: #e5e7eb;
+      --accent-bg: #f0f4f8; /* The light blue in the totals section */
+    }
+
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); padding: 40px 20px; }
+    
+    .admin-container { max-width: 800px; margin: 0 auto; }
+    
+    /* Action Bar (Top) */
+    .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .btn { padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; font-size: 14px; }
+    .btn--primary { background: var(--navy); color: var(--white); }
+    .btn--whatsapp { background: #25D366; color: white; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+
+    /* Main Invoice Card (Matches image_a4478e.png) */
+    .invoice-card { background: var(--white); border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); overflow: hidden; margin-bottom: 24px; border: 1px solid var(--border); }
+    
+    /* Header */
+    .invoice-header { background: var(--navy); color: var(--white); padding: 30px; display: flex; justify-content: space-between; align-items: center; }
+    .invoice-header__brand { display: flex; align-items: center; gap: 15px; }
+    .brand-logo { 
+      width: 60px; 
+      height: 60px; 
+      border-radius: 50%; 
+      background: var(--white); 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      overflow: hidden; /* Ensures the image stays in the circle */
+      border: 2px solid rgba(178,237,228,0.5);
+      flex-shrink: 0;
+    }
+    .brand-logo img { 
+      width: 100%; 
+      height: 100%; 
+      object-fit: cover; 
+    }
+    .brand-text h1 { font-size: 20px; margin: 0 0 4px 0; font-weight: 500; }
+    .brand-text h1 span { color: var(--mint); }
+    .brand-text p { font-size: 12px; color: #9ca3af; margin: 0; }
+    .invoice-meta { text-align: right; }
+    .invoice-meta h2 { margin: 0 0 4px 0; font-size: 16px; font-weight: 500; color: #d1d5db; }
+    .invoice-meta p { margin: 0; font-size: 13px; color: #9ca3af; }
+
+    /* Customer Grid */
+    .customer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 30px; border-bottom: 1px solid var(--border); }
+    .info-block label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-soft); margin-bottom: 6px; font-weight: 600; }
+    .info-block div { font-size: 15px; font-weight: 600; color: var(--navy); }
+
+    /* Items Section */
+    .items-section { padding: 30px; }
+    .section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-soft); font-weight: 600; margin-bottom: 20px; }
+    
+    .item-row { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 20px; margin-bottom: 20px; border-bottom: 1px dashed var(--border); flex-wrap: wrap; }
+    .item-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .item-details { display: flex; gap: 15px; align-items: center; }
+    .item-icon { width: 44px; height: 44px; background: var(--navy); color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: serif; font-style: italic; font-size: 18px; }
+    .item-name { font-weight: 600; color: var(--navy); font-size: 15px; margin-bottom: 4px; }
+    .item-qty { font-size: 13px; color: var(--text-soft); }
+    
+    /* Interactive Admin Inputs */
+    .price-input-group { display: flex; align-items: center; gap: 10px; }
+    .price-input-group span { font-weight: 600; color: var(--text-soft); }
+    .admin-input { border: 1px solid #ccc; padding: 8px 12px; border-radius: 6px; width: 120px; font-size: 14px; text-align: right; font-family: inherit; font-weight: 600; color: var(--navy); background: #fff; transition: border-color 0.2s; }
+    .admin-input:focus { outline: none; border-color: var(--navy); }
+
+    /* Measurements Panel (Hidden by default) */
+    .measurements-btn { background: none; border: none; color: #3b82f6; font-size: 12px; cursor: pointer; font-weight: 600; padding: 0; margin-top: 8px; text-decoration: underline; }
+    .measurements-grid { width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
+    .measurements-grid .info-block input { width: 100%; box-sizing: border-box; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; }
+
+    /* Totals Box */
+    .totals-box { background: var(--accent-bg); padding: 30px; border-top: 1px solid var(--border); }
+    .total-row { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 14px; color: var(--text-soft); align-items: center; }
+    .total-row.grand { font-size: 18px; font-weight: 700; color: var(--navy); margin-top: 15px; padding-top: 15px; border-top: 1px solid #d1d5db; margin-bottom: 0; }
+
+    /* Delivery Details Card */
+    .delivery-card { background: var(--white); border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); padding: 30px; border: 1px solid var(--border); }
+    .delivery-card h3 { font-size: 16px; color: var(--navy); margin: 0 0 20px 0; }
+    .delivery-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .delivery-row:last-child { border-bottom: none; }
+    .delivery-label { color: var(--text-soft); }
+    .delivery-value { font-weight: 500; color: var(--navy); text-align: right; max-width: 60%; }
+
+    /* --- PRINT STYLES --- */
+    /* --- PRINT STYLES --- */
+    @media print {
+      /* 1. Hide buttons and inputs, but KEEP the delivery card */
+      .action-bar, .measurements-btn, .measurements-grid { 
+        display: none !important; 
+      }
+      
+      /* 2. Reset page backgrounds for clean white paper */
+      body { background: var(--white); padding: 0; margin: 0; }
+      .admin-container { max-width: 100%; margin: 0; }
+      
+      /* 3. Remove shadows and borders so it looks like one single document */
+      .invoice-card { box-shadow: none; border: none; margin: 0; padding-bottom: 0; }
+      
+      /* 4. Format the delivery card for paper */
+      .delivery-card { 
+        box-shadow: none !important; 
+        border: none !important; 
+        border-top: 2px dashed var(--border) !important; /* Nice dashed separator */
+        border-radius: 0 !important;
+        margin: 0 !important;
+        page-break-inside: avoid; /* Prevents it from being cut in half across two pages */
+      }
+
+      /* 5. Magically turn inputs and dropdowns into plain text */
+      .admin-input, #cStatusSelect { 
+        border: none !important; 
+        background: transparent !important; 
+        padding: 0 !important; 
+        appearance: none !important; 
+        -webkit-appearance: none; 
+        -moz-appearance: none;
+        color: var(--navy) !important;
+        font-weight: 600;
+        text-align: right;
+      }
+
+      /* Force background colors to print (for the headers and totals) */
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+    }
+    /* ================================================================
+       MOBILE RESPONSIVE PATCH FOR INVOICE EDITOR
+       ================================================================ */
+    @media (max-width: 767px) {
+      body { padding: 20px 10px; }
+
+      /* 1. Stack the Top Buttons */
+      .action-bar { flex-direction: column; align-items: stretch; gap: 12px; }
+      .action-bar > div { flex-direction: column; width: 100%; }
+      .action-bar .btn { width: 100%; justify-content: center; }
+
+      /* 2. Stack the Header & Logo */
+      .invoice-header { padding: 20px; flex-direction: column; align-items: flex-start; gap: 16px; }
+      .invoice-meta { text-align: left; }
+
+      /* 3. Customer Details (1 Column instead of 2) */
+      .customer-grid { grid-template-columns: 1fr; padding: 20px; gap: 16px; }
+
+      /* 4. Fix padding on small screens */
+      .items-section, .totals-box, .delivery-card { padding: 20px; }
+
+      /* 5. Stack the Items & Price Inputs */
+      .item-row { flex-direction: column; gap: 16px; align-items: stretch; }
+      .price-input-group { justify-content: space-between; width: 100%; background: #f8fafc; padding: 8px; border-radius: 6px; }
+      
+      /* 6. Measurements Grid (2 Columns instead of 4) */
+      .measurements-grid { grid-template-columns: 1fr 1fr; } 
+
+      /* 7. Totals & Delivery Inputs */
+      .total-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .total-row.grand { flex-direction: row; align-items: center; justify-content: space-between; }
+      
+      .delivery-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+      .delivery-value { text-align: left; max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="admin-container">
+    
+    <div class="action-bar">
+      <a href="admin.html" style="color: var(--text-soft); text-decoration: none; font-weight: 600;">← Back to Orders</a>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn--ghost" onclick="window.print()" style="background: white; border: 1px solid var(--border);">🖨️ Print</button>
+        <button class="btn btn--primary" onclick="saveInvoice()">Save Database</button>
+        <a href="#" id="whatsappBtn" class="btn btn--whatsapp" target="_blank">
+          Send via WhatsApp
+        </a>
+      </div>
+    </div>
+
+    <!-- MAIN INVOICE CARD -->
+    <div class="invoice-card" id="invoiceArea">
+      
+      <!-- Header -->
+      <div class="invoice-header">
+        <div class="invoice-header__brand">
+          <div class="brand-logo">
+            <img src="../assets/logo.png" alt="TreshBlinkybill Fits Logo">
+          </div>
+          <div class="brand-text">
+            <h1>TreshBlinkybill <span>Fits</span></h1>
+            <p>Official Invoice</p>
+          </div>
+        </div>
+        <div class="invoice-meta">
+          <h2 id="displayOrderId">#Loading...</h2>
+          <p id="displayDate">--</p>
+        </div>
+      </div>
+
+      <!-- Customer Grid -->
+      <div class="customer-grid">
+        <div class="info-block">
+          <label>Customer</label>
+          <div id="cName">--</div>
+        </div>
+        <div class="info-block">
+          <label>Phone</label>
+          <div id="cPhone">--</div>
+        </div>
+        <div class="info-block">
+          <label>Status</label>
+          <select id="cStatusSelect" class="admin-input" style="width: 100%; max-width: 120px; padding: 4px 8px; font-size: 14px; margin-top: 4px; text-align: left;">
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="production">In Production</option>
+            <option value="ready">Ready</option>
+            <option value="delivered">Delivered</option>
+          </select>
+        </div>
+        <div class="info-block">
+          <label>Date Ordered</label>
+          <div id="cNeededBy">--</div>
+        </div>
+      </div>
+
+      <!-- Items List -->
+      <div class="items-section">
+        <div class="section-title">Items Ordered</div>
+        <div id="itemsContainer">
+          <!-- JS will inject items here -->
+          <div style="padding: 20px; text-align: center; color: var(--text-soft);">Loading items...</div>
+        </div>
+      </div>
+
+      <!-- Totals -->
+      <div class="totals-box">
+        <div class="total-row">
+          <span>Subtotal</span>
+          <span style="font-weight: 600; color: var(--navy);" id="displaySubtotal">₦ 0</span>
+        </div>
+        <div class="total-row">
+          <span>Delivery</span>
+          <div class="price-input-group">
+            <span>₦</span>
+            <input type="number" class="admin-input" id="deliveryInput" value="0" oninput="calculateTotals()">
+          </div>
+        </div>
+        <div class="total-row grand">
+          <span>Total</span>
+          <span id="displayGrandTotal">₦ 0</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- DELIVERY DETAILS CARD -->
+    <div class="delivery-card">
+      <h3>Delivery Details</h3>
+      <div class="delivery-row">
+        <span class="delivery-label">Address</span>
+        <span class="delivery-value" id="dAddress">--</span>
+      </div>
+      <div class="delivery-row">
+        <span class="delivery-label">WhatsApp</span>
+        <span class="delivery-value" id="dWhatsapp">--</span>
+      </div>
+      <div class="delivery-row">
+        <span class="delivery-label">Mode</span>
+        <span class="delivery-value" id="dMode" style="text-transform: capitalize;">--</span>
+      </div>
+      <div class="delivery-row">
+        <span class="delivery-label">Customer Notes</span>
+        <span class="delivery-value" id="dNotes">--</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="../api/api.js"></script>
+  <script src="../services/services.js"></script>
+ <script>
+    let currentOrder = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Get Order ID from URL (?id=TBF-2026-XXXX)
+      const urlParams = new URLSearchParams(window.location.search);
+      const orderId = urlParams.get('id');
+
+      if (!orderId) {
+        alert("No Order ID provided!");
+        window.location.href = 'orders.html';
+        return;
+      }
+
+      try {
+        // 2. Fetch the order entirely through the secure Service layer
+        // No raw fetch, no localStorage, cookies are handled automatically by api.js
+        currentOrder = await TBF.OrderService.getById(orderId);
+
+        // 3. Render the data
+        renderOrderData();
+
+      } catch (error) {
+        alert("Failed to load invoice. Please ensure you are logged in.");
+        console.error("Invoice Load Error:", error);
+      }
+    });
+
+    function renderOrderData() {
+      // Header & Customer
+      document.getElementById('displayOrderId').textContent = '#' + currentOrder.id;
+      document.getElementById('displayDate').textContent = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      
+      document.getElementById('cName').textContent = currentOrder.user?.name || 'Unknown';
+      document.getElementById('cPhone').textContent = currentOrder.user?.phone || '--';
+      document.getElementById('cStatusSelect').value = currentOrder.status;
+      document.getElementById('cNeededBy').textContent = new Date(currentOrder.createdAt).toLocaleDateString();
+
+      // Delivery Card
+      document.getElementById('dAddress').textContent = currentOrder.user?.address || 'No address provided';
+      document.getElementById('dWhatsapp').textContent = currentOrder.user?.whatsapp || '--';
+      document.getElementById('dMode').textContent = currentOrder.deliveryMode;
+      
+      // Grab notes from the first item
+      document.getElementById('dNotes').textContent = (currentOrder.items && currentOrder.items[0]?.notes) || 'None';
+
+      // Items & Pricing
+      const container = document.getElementById('itemsContainer');
+      document.getElementById('deliveryInput').value = currentOrder.deliveryFee || 0;
+
+      if (!currentOrder.items || currentOrder.items.length === 0) {
+        container.innerHTML = '<div>No items found.</div>';
+        return;
+      }
+
+      container.innerHTML = currentOrder.items.map((item, index) => {
+        // Fallback safely if design object isn't populated
+        // 1. Get the name and initial
+        const itemName = item.name || item.design?.name || `Design ${item.designId || ''}`;
+        const initial = itemName.charAt(0).toUpperCase();
+
+        // 2. Safely split the comma-separated string to get ONLY the cover image!
+        let rawImageString = item.image || item.design?.imageUrl || item.design?.image || '';
+        let imageArray = rawImageString.split(',').filter(url => url.trim() !== '');
+        let finalImage = imageArray.length > 0 ? imageArray[0] : '';
+
+        // 3. Render the visual (Image or Initial)
+        let visualHtml = `<div style="width:40px; height:40px; background:var(--navy); color:white; border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:serif; font-style:italic; font-size:18px;">${initial}</div>`;
+        
+        if (finalImage) {
+          const imgSrc = finalImage.startsWith('http') ? finalImage : `http://localhost:5000${finalImage}`;
+          visualHtml = `<img src="${imgSrc}" style="width:40px; height:40px; border-radius:6px; object-fit:cover; border:1px solid var(--border-2);" alt="Item"/>`;
+        }
+        const initialPrice = item.unitPrice || 0;
+        
+        return `
+          <div class="item-row">
+            <div class="item-details">
+              
+              <!-- 👇 FIXED: We inject visualHtml here instead of the hardcoded letter -->
+              ${visualHtml}
+              
+              <div>
+                <!-- 👇 FIXED: Changed designName (which was undefined) to itemName -->
+                <div class="item-name">${itemName}</div>
+                <div class="item-qty">Qty: ${item.qty}</div>
+                <button class="measurements-btn" onclick="toggleMeasurements(${index})">Edit Measurements</button>
+              </div>
+            </div>
+            
+            <div class="price-input-group">
+              <span>₦</span>
+              <input type="number" class="admin-input item-price-input" 
+                     data-item-id="${item.id}" 
+                     data-qty="${item.qty}"
+                     value="${initialPrice}" 
+                     oninput="calculateTotals()"
+                     placeholder="Price per item">
+            </div>
+
+            <div class="measurements-grid" id="measure-${index}" style="display: none;">
+              <div class="info-block"><label>Chest</label><input type="number" id="chest-${item.id}" value="${item.chest || ''}"></div>
+              <div class="info-block"><label>Waist</label><input type="number" id="waist-${item.id}" value="${item.waist || ''}"></div>
+              <div class="info-block"><label>Shoulder</label><input type="number" id="shoulder-${item.id}" value="${item.shoulder || ''}"></div>
+              <div class="info-block"><label>Sleeve</label><input type="number" id="sleeve-${item.id}" value="${item.sleeveLength || ''}"></div>
+              <div class="info-block"><label>Tr. Length</label><input type="number" id="trouser-${item.id}" value="${item.trouserLength || ''}"></div>
+              <div class="info-block"><label>Thigh</label><input type="number" id="thigh-${item.id}" value="${item.thigh || ''}"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      calculateTotals();
+    }
+
+    function toggleMeasurements(index) {
+      const el = document.getElementById(`measure-${index}`);
+      el.style.display = el.style.display === 'none' ? 'grid' : 'none';
+    }
+
+    function calculateTotals() {
+      const priceInputs = document.querySelectorAll('.item-price-input');
+      const deliveryFee = Number(document.getElementById('deliveryInput').value) || 0;
+      
+      let subtotal = 0;
+      let itemizedText = ""; // We will build the WhatsApp list here
+
+      priceInputs.forEach(input => {
+        const price = Number(input.value) || 0;
+        const qty = Number(input.getAttribute('data-qty')) || 1;
+        const itemId = parseInt(input.getAttribute('data-item-id'));
+        
+        subtotal += (price * qty);
+
+        // Find the original item to get its real name
+        const itemObj = currentOrder.items.find(i => i.id === itemId);
+        const itemName = itemObj?.design?.name || itemObj?.name || 'Custom Design';
+
+        // Clean, minimal formatting (No special characters)
+        itemizedText += `${qty}x ${itemName} : ₦${(price * qty).toLocaleString('en-NG')}\n`;
+      });
+
+      const grandTotal = subtotal + deliveryFee;
+
+      // Update DOM
+      document.getElementById('displaySubtotal').textContent = `₦ ${subtotal.toLocaleString('en-NG')}`;
+      document.getElementById('displayGrandTotal').textContent = `₦ ${grandTotal.toLocaleString('en-NG')}`;
+
+      // Pass everything to the WhatsApp generator
+      updateWhatsAppLink(grandTotal, deliveryFee, itemizedText);
+    }
+
+    function updateWhatsAppLink(grandTotal, deliveryFee, itemizedText) {
+      const phone = currentOrder.user?.whatsapp || currentOrder.user?.phone;
+      if (!phone) return;
+
+      // Format phone number for wa.me
+      let cleanPhone = phone.replace(/\D/g, '');
+      if (cleanPhone.startsWith('0')) cleanPhone = '234' + cleanPhone.substring(1);
+
+      // Clean formatting for delivery
+      const deliveryText = deliveryFee > 0 ? `Delivery Fee : ₦${deliveryFee.toLocaleString('en-NG')}\n` : '';
+
+      // Construct the final WhatsApp message
+      const message = `Hello ${currentOrder.user?.name},\n\nYour request with TreshBlinkybill Fits (#${currentOrder.id}) has been reviewed!\n\n*Invoice Breakdown:*\n${itemizedText}${deliveryText}\n*Grand Total: ₦${grandTotal.toLocaleString('en-NG')}*\n\nPlease let me know when you are ready to proceed with payment and measurements.`;
+      
+      document.getElementById('whatsappBtn').href = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    }
+
+    async function saveInvoice() {
+      const saveBtn = document.querySelector('.btn--primary');
+      saveBtn.textContent = "Saving...";
+      saveBtn.disabled = true;
+
+      // 1. Gather all the inputs
+      const deliveryFee = Number(document.getElementById('deliveryInput').value) || 0;
+      const priceInputs = document.querySelectorAll('.item-price-input');
+      
+      let subtotal = 0;
+      const itemsData = Array.from(priceInputs).map(input => {
+        const itemId = input.getAttribute('data-item-id');
+        const price = Number(input.value) || 0;
+        const qty = Number(input.getAttribute('data-qty')) || 1;
+        subtotal += (price * qty);
+
+        return {
+          id: parseInt(itemId),
+          unitPrice: price,
+          chest: parseFloat(document.getElementById(`chest-${itemId}`).value) || null,
+          waist: parseFloat(document.getElementById(`waist-${itemId}`).value) || null,
+          shoulder: parseFloat(document.getElementById(`shoulder-${itemId}`).value) || null,
+          sleeveLength: parseFloat(document.getElementById(`sleeve-${itemId}`).value) || null,
+          trouserLength: parseFloat(document.getElementById(`trouser-${itemId}`).value) || null,
+          thigh: parseFloat(document.getElementById(`thigh-${itemId}`).value) || null,
+        };
+      });
+
+      const payload = {
+        deliveryFee: deliveryFee,
+        grandTotal: subtotal + deliveryFee,
+        items: itemsData
+      };
+
+      const newStatus = document.getElementById('cStatusSelect')?.value ;
+      try {
+       await Promise.all([
+          TBF.OrderService.updatePricing(currentOrder.id, payload),
+          TBF.OrderService.updateStatus(currentOrder.id, newStatus)
+        ]);
+        alert("Invoice saved successfully!");
+      } catch (error) {
+        alert("Failed to save changes: " + error.message);
+      } finally {
+        saveBtn.textContent = "Save Changes";
+        saveBtn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

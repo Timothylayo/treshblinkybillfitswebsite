@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Login — TreshBlinkybill Fits</title>
+  <link rel="stylesheet" href="../../styles/main.css"/>
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--navy);
+    }
+    .login-box {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 40px 32px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: var(--shadow-lg);
+      text-align: center;
+    }
+    .login-logo {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin: 0 auto 20px;
+      border: 3px solid var(--mint-light);
+    }
+    .login-logo img { width: 100%; height: 100%; object-fit: cover; }
+    .login-title {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+    .login-title span { color: var(--blue); }
+    .login-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+    .login-error {
+      background: #fee2e2;
+      color: #dc2626;
+      font-size: 12px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 16px;
+      display: none;
+      text-align: left;
+    }
+    .login-error.show { display: block; }
+  </style>
+</head>
+<body>
+
+  <div class="login-box">
+    <div class="login-logo">
+      <img src="../../assets/logo.png" alt="TreshBlinkybill Fits"/>
+    </div>
+    <div class="login-title">TreshBlinkybill <span>Fits</span></div>
+    <div class="login-sub">Admin Dashboard · Sign in to continue</div>
+
+    <div class="login-error" id="loginError"></div>
+
+    <div class="field" style="text-align:left;">
+      <label class="field__label">Email Address</label>
+      <input
+        class="field__input"
+        type="email"
+        id="emailInput"
+        placeholder="admin@treshblinkybillfits.com"
+        onkeydown="if(event.key==='Enter') submitLogin()"
+      />
+    </div>
+
+    <div class="field" style="text-align:left;">
+      <label class="field__label">Password</label>
+      <input
+        class="field__input"
+        type="password"
+        id="passwordInput"
+        placeholder="Enter your password"
+        onkeydown="if(event.key==='Enter') submitLogin()"
+      />
+    </div>
+
+    <button
+      class="btn btn--dark btn--full"
+      style="margin-top:8px;font-size:14px;padding:13px;"
+      onclick="submitLogin()"
+      id="loginBtn"
+    >
+      Sign In →
+    </button>
+  </div>
+
+  <script>
+    async function submitLogin() {
+  const email    = document.getElementById('emailInput').value.trim();
+  const password = document.getElementById('passwordInput').value.trim();
+  const errorEl  = document.getElementById('loginError');
+  const btn      = document.getElementById('loginBtn');
+
+  errorEl.classList.remove('show');
+
+  if (!email || !password) {
+    errorEl.textContent = 'Please enter both email and password.';
+    errorEl.classList.add('show');
+    return;
+  }
+
+  btn.textContent = 'Signing in...';
+  btn.disabled    = true;
+
+  try {
+    const res = await fetch('http://localhost:5000/api/auth/login', {
+      method:      'POST',
+      headers:     { 'Content-Type': 'application/json' },
+      credentials: 'include', // sends and receives cookies
+      body:        JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      // Store only non-sensitive display info — NO token in JS
+      sessionStorage.setItem('tbf_admin_name',  data.data.name);
+      sessionStorage.setItem('tbf_admin_email', data.data.email);
+      window.location.href = './admin.html';
+    } else {
+      errorEl.textContent = data.error || 'Invalid email or password.';
+      errorEl.classList.add('show');
+      btn.textContent = 'Sign In →';
+      btn.disabled    = false;
+    }
+  } catch (err) {
+    errorEl.textContent = 'Could not connect to server. Is the backend running?';
+    errorEl.classList.add('show');
+    btn.textContent = 'Sign In →';
+    btn.disabled    = false;
+  }
+}
+  </script>
+
+</body>
+</html>

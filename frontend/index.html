@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TreshBlinkybill Fits — Premium Tailoring, Lagos</title>
+  <link rel="stylesheet" href="styles/main.css"/>
+  <style>
+    /* INDEX-SPECIFIC STYLES */
+    .hero {
+      background: linear-gradient(155deg, var(--navy) 0%, var(--navy-mid) 55%, var(--navy-light) 100%);
+      padding: 44px var(--space-md) 36px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before,.hero::after {
+      content:''; position:absolute; border-radius:50%; pointer-events:none;
+      border: 1px solid rgba(178,237,228,0.12);
+    }
+    .hero::before { top:-60px; right:-80px; width:280px; height:280px; }
+    .hero::after  { bottom:-40px; left:-50px; width:200px; height:200px; }
+
+    .hero__logo-row {
+      display:flex; align-items:center; gap:16px; margin-bottom:28px;
+    }
+    .hero__logo-circle {
+      width:72px; height:72px; border-radius:50%;
+      background:rgba(255,255,255,0.07);
+      border:2.5px solid rgba(178,237,228,0.35);
+      overflow:hidden; flex-shrink:0;
+    }
+    .hero__logo-circle img { width:100%; height:100%; object-fit:cover; }
+    .hero__brand-name {
+      font-family:var(--font-display); font-size:22px; font-weight:700; color:#fff; line-height:1.1;
+    }
+    .hero__brand-name span { color:var(--mint); }
+    .hero__brand-sub {
+      font-size:10px; color:var(--text-soft); letter-spacing:2px;
+      text-transform:uppercase; margin-top:4px;
+    }
+    .hero__tag  { font-size:10px; letter-spacing:2.5px; color:var(--mint); text-transform:uppercase; font-weight:500; margin-bottom:14px; }
+    .hero__title { font-family:var(--font-display); font-size:42px; font-weight:700; color:#fff; line-height:1.1; margin-bottom:12px; }
+    .hero__title em { font-style:italic; color:var(--blue-light); }
+    .hero__sub  { font-size:13px; color:var(--text-soft); line-height:1.7; margin-bottom:28px; max-width:320px; }
+    .hero__btns { display:flex; gap:12px; flex-wrap:wrap; }
+
+    .cat-strip { background:var(--white); padding:14px var(--space-md); border-bottom:1px solid var(--border-2); }
+
+    .mono-card {
+      min-width:152px; height:208px; border-radius:var(--radius-md);
+      position:relative; overflow:hidden; cursor:pointer; flex-shrink:0;
+      transition:transform 0.2s;
+    }
+    .mono-card:hover { transform:scale(1.03); }
+    .mono-card__badge { position:absolute; top:10px; right:10px; }
+    .mono-card__img   { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+    .mono-card__deco  { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+    .mono-card__info  { position:absolute; bottom:0; left:0; right:0; padding:14px; background:linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%); }
+    .mono-card__name  { font-size:12px; font-weight:500; color:#fff; }
+    .mono-card__cat   { font-size:10px; color:var(--mint); margin-top:2px; }
+
+    .native-card {
+      min-width:168px; height:224px; border-radius:var(--radius-md);
+      position:relative; overflow:hidden; cursor:pointer; flex-shrink:0;
+      transition:transform 0.2s; text-decoration:none; display:block;
+    }
+    .native-card:hover { transform:scale(1.03); }
+    .native-card__info { position:absolute; bottom:0; left:0; right:0; padding:14px; background:linear-gradient(to top, rgba(10,31,68,0.85) 0%, transparent 100%); }
+    .native-card__name  { font-size:13px; font-weight:500; color:#fff; }
+    .native-card__price { font-size:11px; color:var(--mint); margin-top:3px; }
+
+    .cta-band { margin:0 var(--space-md) var(--space-lg); background:var(--navy); border-radius:var(--radius-xl); padding:30px 22px; text-align:center; position:relative; overflow:hidden; }
+    .cta-band::before { content:''; position:absolute; top:-30px; right:-30px; width:130px; height:130px; border-radius:50%; background:rgba(91,159,255,0.07); pointer-events:none; }
+    .cta-band__title { font-family:var(--font-display); font-size:26px; font-weight:600; font-style:italic; color:#fff; margin-bottom:10px; line-height:1.2; }
+    .cta-band__sub   { font-size:12px; color:var(--text-soft); margin-bottom:22px; line-height:1.6; }
+
+    .social-box { background:var(--white); margin:0 var(--space-md) var(--space-lg); border-radius:var(--radius-lg); padding:20px; border:1px solid var(--border-2); }
+    .social-box__title { font-size:13px; font-weight:500; color:var(--navy); margin-bottom:14px; }
+    .social-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .social-item { display:flex; align-items:center; gap:10px; padding:12px; border-radius:var(--radius-sm); background:var(--bg); border:1px solid var(--border-2); text-decoration:none; transition:border-color 0.18s; }
+    .social-item:hover { border-color:var(--blue); }
+    .social-item__icon { width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
+    .social-item__label { font-size:11px; font-weight:500; color:var(--navy); }
+
+
+    .floating-cart {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #000;
+    color: #fff;
+    padding: 15px 25px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    font-family: sans-serif;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+    transition: transform 0.2s;
+  }
+  .floating-cart:hover {
+    transform: scale(1.05);
+  }
+
+  @media(min-width:640px) {
+    .hero__title { font-size:52px; }
+    .social-grid  { grid-template-columns:repeat(4,1fr); }
+  }
+  </style>
+</head>
+<body>
+  <!-- NAV SLOT — loaded by ComponentLoader -->
+  <div id="nav-slot"></div>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero__logo-row">
+      <div class="hero__logo-circle">
+        <img src="assets/logo.png" alt="TreshBlinkybill Fits"/>
+      </div>
+      <div>
+        <div class="hero__brand-name">TreshBlinkybill <span>Fits</span></div>
+        <div class="hero__brand-sub">Premium Tailoring · Lagos</div>
+      </div>
+    </div>
+    <div class="hero__tag">Est. Lagos · Premium Tailoring</div>
+    <h1 class="hero__title">Dressed to<br><em>Define</em> You.</h1>
+    <p class="hero__sub">Native wear, English fits & monogram designs — crafted with precision for every occasion.</p>
+    <div class="hero__btns">
+      <button onclick="openCustomOrderModal()" class="btn btn--mint btn--lg">Place an Order</button>
+    </div>
+  </section>
+
+ <div class="section">
+    <div class="section-hdr">
+      <h2 class="section-hdr__title">Designs</h2>
+      <a href="pages/designs.html" class="section-hdr__link">See all →</a>
+    </div>
+    <div class="carousel" id="designsCarousel"></div>
+  </div>
+
+  <div class="section" style="padding-top:0;">
+    <div class="section-hdr">
+      <h2 class="section-hdr__title">Collections</h2>
+      <a href="pages/products.html" class="section-hdr__link">See all →</a>
+    </div>
+    <div class="carousel" id="collectionsCarousel"></div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-band">
+    <div class="cta-band__title">Ready for your<br>perfect fit?</div>
+    <p class="cta-band__sub">Tell us your style, measurements & event —<br>we'll handle the rest.</p>
+    <button onclick="openCustomOrderModal()" class="btn btn--mint btn--lg">Place an Order</button>
+  </div>
+
+  <!-- SOCIAL LINKS -->
+  <div class="social-box">
+    <div class="social-box__title">Find us on social media</div>
+    <div class="social-grid">
+      <a class="social-item" href="https://wa.link/s4la7a" target="_blank">
+        <div class="social-item__icon" style="background:#e8f5e9;">💬</div>
+        <div class="social-item__label">WhatsApp</div>
+      </a>
+      <a class="social-item" href="https://www.instagram.com/treshblinkybill" target="_blank">
+        <div class="social-item__icon" style="background:#fce4ec;">📸</div>
+        <div class="social-item__label">Instagram</div>
+      </a>
+      <a class="social-item" href="https://www.tiktok.com/@treshblinkyfits" target="_blank">
+        <div class="social-item__icon" style="background:#e3f2fd;">🎵</div>
+        <div class="social-item__label">TikTok</div>
+      </a>
+      <a class="social-item" href="https://snapchat.com/add/treasure_trust" target="_blank">
+        <div class="social-item__icon" style="background:#fff8e1;">👻</div>
+        <div class="social-item__label">Snapchat</div>
+      </a>
+    </div>
+  </div>
+
+  <a href="pages/checkout.html" id="floatingCart" class="floating-cart" style="display: none;">
+  🛒 View Cart (<span id="cartItemCount">0</span>)
+</a>
+  <!-- FOOTER SLOT -->
+  <div id="footer-slot"></div>
+
+  <script src="api/api.js"></script>
+  <script src="services/services.js"></script>
+  <script src="api/api.js"></script>
+  <script src="services/services.js"></script>
+  <script>
+    // Override component paths for index (one level up)
+    ComponentLoader.loadNav = async function(active) {
+      const el = document.querySelector('#nav-slot');
+      if (!el) return;
+      try {
+        const res = await fetch('components/nav.html');
+        el.innerHTML = await res.text();
+        // Fix paths for root index
+        el.querySelectorAll('[href*="../"]').forEach(a => { a.href = a.href.replace('../', ''); });
+        el.querySelectorAll('[src*="../"]').forEach(i => { i.src = i.src.replace('../', ''); });
+        el.querySelectorAll('.nav__link').forEach(l => l.classList.toggle('nav__link--active', l.dataset.page === active));
+      } catch {}
+    };
+    ComponentLoader.loadFooter = async function() {
+      const el = document.querySelector('#footer-slot');
+      if (!el) return;
+      try {
+        const res = await fetch('components/footer.html');
+        el.innerHTML = await res.text();
+        el.querySelectorAll('[href*="../"]').forEach(a => { a.href = a.getAttribute('href').replace('../', ''); });
+        el.querySelectorAll('[src*="../"]').forEach(i => { i.src = i.getAttribute('src').replace('../', ''); });
+      } catch {}
+    };
+
+    // Global Style Bag Handler
+    window.addToStyleBag = function(event, designId, name, image) {
+      event.preventDefault(); 
+      
+      if (!designId || designId === 'null' || designId === 'undefined') {
+         TBF.Utils.showToast('Please contact us directly for this bespoke item.', 'error');
+         return;
+      }
+      
+      TBF.CartService.addItem({
+        designId: designId,
+        name: name,
+        image: image,
+        qty: 1
+      });
+    };
+
+    /* ============================================================
+       BESPOKE CUSTOM UPLOAD MODAL (Multiple Images + Optional Name)
+       ============================================================ */
+    /* ============================================================
+       BESPOKE CUSTOM UPLOAD MODAL (Multiple Styles Support)
+       ============================================================ */
+    function openCustomOrderModal() {
+      const modalId = 'customOrderModal';
+      document.getElementById(modalId)?.remove();
+      
+      customImageArray = [];
+
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      modal.id = modalId;
+      modal.style.alignItems = 'center'; 
+      modal.innerHTML = `
+        <div class="modal-box" style="align-self: center; max-height: 90vh; border-radius: var(--radius-lg);">
+          <div class="modal__header">
+            <div class="modal__title">Bespoke Order</div>
+            <button class="modal__close" onclick="document.getElementById('${modalId}').remove()">✕</button>
+          </div>
+          <div class="modal__body">
+            <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Have your own style? Upload your inspiration pictures and we'll tailor it to perfection.</p>
+            
+            <div class="field">
+              <label class="field__label">Style Description <span style="color:var(--text-soft); text-transform:none;">(Optional)</span></label>
+              <input type="text" id="customStyleName" class="field__input" placeholder="e.g. Chief's Blue Agbada" />
+            </div>
+
+            <div class="field">
+              <label class="field__label">Inspiration Pictures *</label>
+              <div class="upload-box" onclick="document.getElementById('customStyleImage').click()">
+                <div class="upload-box__icon">📸</div>
+                <div class="upload-box__text"><strong>Click to upload</strong> one or more design photos<br>JPEG, PNG, HEIC.</div>
+              </div>
+              <input type="file" id="customStyleImage" accept="image/*" multiple style="display:none" onchange="previewCustomImages(this)"/>
+              
+              <div id="customImagePreview" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; justify-content:center; display:none;">
+              </div>
+            </div>
+          </div>
+          
+          <!-- 👇 FIXED: Two buttons for flexible shopping -->
+          <div class="modal__footer" style="padding: 16px 20px; gap: 8px;">
+            <button class="btn btn--ghost" onclick="document.getElementById('${modalId}').remove()">Cancel</button>
+            <button class="btn btn--outline" id="customAddBtn" style="border-color: var(--navy); color: var(--navy);" onclick="processCustomOrder(false)">+ Add & Keep Browsing</button>
+            <button class="btn btn--mint" id="customCheckoutBtn" onclick="processCustomOrder(true)">Add & Checkout →</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    let customImageArray = [];
+
+    function previewCustomImages(input) {
+      const previewContainer = document.getElementById('customImagePreview');
+      
+      if (input.files && input.files.length > 0) {
+        previewContainer.style.display = 'flex';
+        
+        Array.from(input.files).forEach(file => {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const base64Data = e.target.result;
+            customImageArray.push(base64Data);
+            
+            const img = document.createElement('img');
+            img.src = base64Data;
+            img.style.cssText = 'width:60px; height:60px; object-fit:cover; border-radius:6px; border:1px solid var(--border-2); box-shadow: var(--shadow-sm);';
+            previewContainer.appendChild(img);
+          }
+          reader.readAsDataURL(file);
+        });
+      }
+    }
+
+    // Helper Function
+    function dataURLtoFile(dataurl, filename) {
+      let arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+          bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+      while(n--){ u8arr[n] = bstr.charCodeAt(n); }
+      return new File([u8arr], filename, {type:mime});
+    }
+
+    // 👇 FIXED: Accepts a boolean to decide whether to redirect or reset the form
+    async function processCustomOrder(redirectToCheckout = true) {
+      let name = document.getElementById('customStyleName').value.trim();
+      if (customImageArray.length === 0) return TBF.Utils.showToast('Please upload at least one inspiration picture', 'error');
+
+      const addBtn = document.getElementById('customAddBtn');
+      const checkoutBtn = document.getElementById('customCheckoutBtn');
+      if(addBtn) addBtn.disabled = true;
+      if(checkoutBtn) checkoutBtn.disabled = true;
+
+      try {
+        const bespokeId = 'Bespoke-' + Math.floor(1000 + Math.random() * 9000);
+        if (!name) name = 'Custom Design (' + bespokeId + ')';
+
+        let files = customImageArray.map((base64, idx) => dataURLtoFile(base64, `custom_upload_${idx}.jpg`));
+        
+        const apiService = window.TBF ? window.TBF.MediaService : TBF.MediaService;
+        let response = await apiService.upload(files, { title: name, category: 'bespoke' });
+        let uploaded = response.data || response;
+        
+        // Extract all URLs
+        let allUrls = uploaded.map(u => u.url);
+
+        // SECURE ARCHITECTURE: Join all URLs into a single comma-separated string
+        // so it saves cleanly into the single `image` column in your database!
+        const cartService = window.TBF ? window.TBF.CartService : TBF.CartService;
+        cartService.addItem({
+          designId: bespokeId,
+          name: name,
+          image: allUrls.join(','), 
+          qty: 1,
+          isCustom: true
+        });
+
+        if (redirectToCheckout) {
+          window.location.href = window.location.pathname.includes('index.html') || window.location.pathname === '/' ? 'pages/checkout.html' : 'checkout.html';
+        } else {
+          TBF.Utils.showToast('Style added to your bag!', 'success');
+          document.getElementById('customOrderModal').remove();
+          cartService.updateWidget();
+        }
+      } catch (err) {
+        TBF.Utils.showToast('Upload failed.', 'error');
+        if(addBtn) addBtn.disabled = false;
+        if(checkoutBtn) checkoutBtn.disabled = false;
+      }
+    }
+    
+    async function init() {
+      await TBF.ComponentLoader.loadNav('home');
+      await TBF.ComponentLoader.loadFooter();
+
+      // 1. Fetch Designs (Blueprints)
+      let designsData = [];
+      try {
+        designsData = await TBF.DesignService.getAll();
+      } catch(e) { console.warn("Could not load designs"); }
+      const topDesigns = designsData.slice(0, 8); // Get the latest 8
+
+      // 2. Fetch Collections (Finished Jobs marked as Primary)
+      let collectionsData = [];
+      try {
+        const res = await window.TBF_API.Media.getAll();
+        // Secure array handling
+        const dataArr = Array.isArray(res) ? res : (res.data || []);
+        collectionsData = dataArr.filter(item => item.category !== 'designs' && item.category !== 'bespoke');
+      } catch(e) { console.warn("Could not load collections"); }
+      const topCollections = collectionsData.slice(0, 8);
+
+      // 3. Render Designs Carousel (Stacked Responsive Layout)
+      document.getElementById('designsCarousel').innerHTML = topDesigns.length ? topDesigns.map(d => {
+        const safeName = (d.name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const imgUrl = d.imageUrl || d.image || '';
+
+        return `
+        <div class="mono-card ${d.grad || 'grad-1'}" style="background:var(--navy); text-decoration:none;">
+          ${imgUrl 
+            ? `<img src="http://localhost:5000${imgUrl}" class="mono-card__img" alt="${safeName}"/>` 
+            : `<div class="mono-card__deco"><span class="mono-deco">${(d.name || 'D').charAt(0)}</span></div>`
+          }
+          ${d.badge ? `<div class="mono-card__badge"><span class="badge badge--${d.badge === 'new' ? 'new' : 'pop'}">${d.badge}</span></div>` : ''}
+          
+          <div class="mono-card__info" style="display:flex; flex-direction:column; gap:8px;">
+            <div>
+              <div class="mono-card__name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${d.name}</div>
+              <div class="mono-card__cat">${d.num || d.number || 'Blueprint'}</div>
+            </div>
+            <button class="btn btn--mint" style="width:100%; padding:6px 0; font-size:11px; font-weight:600; border-radius:4px; border:none; cursor:pointer; text-align:center; box-shadow:0 2px 4px rgba(0,0,0,0.1);" 
+                    onclick="window.addToStyleBag(event, '${d.id}', '${safeName}', '${imgUrl}')">Tailor This</button>
+          </div>
+        </div>`;
+      }).join('') : '<div style="padding: 20px; font-size:12px; color:var(--text-muted);">No designs available yet.</div>';
+
+      // 4. Render Collections Carousel (Stacked Responsive Layout)
+      document.getElementById('collectionsCarousel').innerHTML = topCollections.length ? topCollections.map(p => {
+        const safeTitle = (p.title || 'Custom Tailored Fit').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        
+        return `
+        <div class="native-card" style="background:var(--navy);">
+          ${p.url 
+            ? `<img src="http://localhost:5000${p.url}" class="mono-card__img" alt="${safeTitle}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"/>` 
+            : `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><span class="mono-deco">📸</span></div>`
+          }
+          <div class="native-card__info" style="display:flex; flex-direction:column; gap:8px;">
+            <div>
+              <div class="native-card__name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.title || 'Custom Tailored Fit'}</div>
+              <div class="native-card__price">Ref: ${p.designNum || 'Bespoke'}</div>
+            </div>
+            <button class="btn btn--mint" style="width:100%; padding:6px 0; font-size:11px; font-weight:600; border-radius:4px; border:none; cursor:pointer; text-align:center; box-shadow:0 2px 4px rgba(0,0,0,0.1);" 
+                    onclick="window.addToStyleBag(event, '${p.designId}', '${safeTitle}', '${p.url || ''}')">Tailor This</button>
+          </div>
+        </div>`;
+      }).join('') : '<div style="padding: 20px; font-size:12px; color:var(--text-muted);">No finished jobs available yet.</div>';
+
+      if (typeof window.TBF !== 'undefined' && window.TBF.CartService) {
+        window.TBF.CartService.updateWidget();
+      }
+    }
+
+    init();
+  </script>
+  <!-- The Floating Cart Widget -->
+</body>
+</html>

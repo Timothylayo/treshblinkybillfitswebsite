@@ -1,0 +1,93 @@
+<!-- ============================================================
+     COMPONENT: Navbar
+     Usage: Include via JS component loader (see utils.js loadComponent)
+     Or copy-paste into page if using plain HTML.
+     Set data-page on <body> to auto-highlight active link.
+     ============================================================ -->
+<nav class="navbar" id="mainNav">
+  <div class="nav-inner">
+
+    <!-- LOGO -->
+    <a href="../pages/index.html" class="nav-logo">
+      <div class="nav-logo-img">
+        <img src="../assets/logo.png" alt="TreshBlinkybill Fits Logo"/>
+      </div>
+      <div class="nav-brand">
+        <span class="nav-brand-main">TreshBlinkybill</span>
+        <span class="nav-brand-sub">Fits</span>
+      </div>
+    </a>
+
+    <!-- LINKS -->
+    <div class="nav-links" id="navLinks">
+      <a class="nav-link" data-page="index"    href="../pages/index.html">Home</a>
+      <a class="nav-link" data-page="products" href="../pages/products.html">Collections</a>
+      <a class="nav-link" data-page="designs"  href="../pages/designs.html">Designs</a>
+      <a class="nav-link" data-page="order"    href="../pages/order.html">Order</a>
+      <a class="nav-link" data-page="about"    href="../pages/about.html">About</a>
+    </div>
+
+    <!-- MOBILE TOGGLE -->
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<style>
+  .navbar {
+    background: var(--navy);
+    height: var(--nav-height);
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.25);
+  }
+  .nav-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 100%; padding: 0 20px; max-width: 1280px; margin: 0 auto;
+  }
+  .nav-logo {
+    display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0;
+  }
+  .nav-logo-img {
+    width: 40px; height: 40px; border-radius: 10px; overflow: hidden;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(91,159,255,0.25);
+    flex-shrink: 0;
+  }
+  .nav-logo-img img { width: 100%; height: 100%; object-fit: cover; }
+  .nav-brand { display: flex; flex-direction: column; line-height: 1.15; }
+  .nav-brand-main {
+    font-family: var(--font-display); font-size: 15px; font-weight: 700; color: #e8f1ff;
+  }
+  .nav-brand-sub {
+    font-family: var(--font-display); font-size: 13px; font-weight: 400;
+    font-style: italic; color: var(--blue);
+  }
+  .nav-links {
+    display: flex; gap: 0; overflow-x: auto; scrollbar-width: none;
+  }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-link {
+    font-size: 12px; font-weight: 400; color: var(--text-soft);
+    padding: 8px 12px; white-space: nowrap; border-bottom: 2.5px solid transparent;
+    transition: color 0.2s, border-color 0.2s; text-decoration: none;
+  }
+  .nav-link:hover { color: #fff; }
+  .nav-link.active { color: #fff; border-bottom-color: var(--blue); }
+  .nav-toggle {
+    display: none; flex-direction: column; gap: 5px; background: none; border: none; padding: 4px;
+  }
+  .nav-toggle span { display: block; width: 22px; height: 2px; background: #fff; border-radius: 2px; transition: all 0.2s; }
+
+  @media (max-width: 600px) {
+    .nav-brand-main { font-size: 13px; }
+    .nav-links { display: none; }
+    .nav-toggle { display: flex; }
+    .nav-links.open {
+      display: flex; flex-direction: column;
+      position: absolute; top: var(--nav-height); left: 0; right: 0;
+      background: var(--navy); padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.08); z-index: 99;
+    }
+    .nav-link { padding: 12px 20px; border-bottom: none; border-left: 3px solid transparent; }
+    .nav-link.active { border-left-color: var(--blue); border-bottom: none; }
+  }
+</style>

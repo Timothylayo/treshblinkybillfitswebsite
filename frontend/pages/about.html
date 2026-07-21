@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About — TreshBlinkybill Fits</title>
+  <link rel="stylesheet" href="../styles/main.css"/>
+  <style>
+    .about-hero { background:linear-gradient(155deg,var(--navy),var(--navy-mid),var(--navy-light)); padding:40px var(--space-md) 32px; text-align:center; position:relative; overflow:hidden; }
+    .about-hero::before { content:''; position:absolute; top:-50px; right:-60px; width:200px; height:200px; border-radius:50%; border:1px solid rgba(178,237,228,0.12); pointer-events:none; }
+
+    .brand-circle { width:100px; height:100px; border-radius:50%; background:rgba(255,255,255,0.07); border:2.5px solid rgba(178,237,228,0.3); overflow:hidden; margin:0 auto var(--space-md); }
+    .brand-circle img { width:100%; height:100%; object-fit:cover; }
+    .brand-big-name { font-family:var(--font-display); font-size:26px; font-weight:700; color:#fff; }
+    .brand-big-name span { color:var(--mint); }
+    .brand-big-tag { font-size:10px; color:var(--text-soft); letter-spacing:2px; text-transform:uppercase; margin-top:5px; }
+    .about-sub { font-size:13px; color:var(--text-soft); line-height:1.7; max-width:360px; margin:16px auto 0; }
+
+    .stats-row { display:grid; grid-template-columns:repeat(3,1fr); background:var(--border-2); gap:1px; }
+    .stat-item { background:var(--white); padding:20px 10px; text-align:center; }
+    .stat-num   { font-family:var(--font-display); font-size:30px; font-weight:700; color:var(--navy); }
+    .stat-label { font-size:10px; color:var(--text-muted); margin-top:4px; }
+
+    .story-card { background:var(--white); margin:16px var(--space-md); border-radius:var(--radius-lg); border:1px solid var(--border-2); padding:22px; }
+    .story-tag   { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--blue); font-weight:500; margin-bottom:10px; }
+    .story-title { font-family:var(--font-display); font-size:24px; font-weight:600; color:var(--navy); margin-bottom:14px; }
+    .story-title em { font-style:italic; }
+    .story-text  { font-size:13px; color:#2a4060; line-height:1.8; }
+
+    .values { margin:0 var(--space-md) var(--space-md); display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .val-card { background:var(--white); border:1px solid var(--border-2); border-radius:var(--radius-md); padding:16px; }
+    .val-icon  { font-size:22px; margin-bottom:8px; }
+    .val-title { font-size:13px; font-weight:500; color:var(--navy); margin-bottom:4px; }
+    .val-text  { font-size:11px; color:var(--text-muted); line-height:1.6; }
+
+    .contact-card { background:var(--white); margin:0 var(--space-md) var(--space-md); border-radius:var(--radius-lg); border:1px solid var(--border-2); overflow:hidden; }
+    .contact-hdr  { background:var(--navy); padding:16px 20px; }
+    .contact-hdr-title { font-family:var(--font-display); font-size:20px; font-weight:600; color:#fff; }
+    .contact-hdr-sub   { font-size:11px; color:var(--text-soft); margin-top:3px; }
+    .contact-items { padding:16px 20px; display:flex; flex-direction:column; gap:12px; }
+    .contact-item { display:flex; align-items:center; gap:14px; padding:12px; background:var(--bg); border-radius:var(--radius-sm); border:1px solid var(--border-2); text-decoration:none; transition:border-color 0.18s; }
+    .contact-item:hover { border-color:var(--blue); }
+    .contact-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+    .contact-label { font-size:12px; color:var(--text-muted); }
+    .contact-value { font-size:13px; font-weight:500; color:var(--navy); margin-top:1px; }
+
+    .qr-section { margin:0 var(--space-md) var(--space-lg); background:var(--white); border-radius:var(--radius-lg); border:1px solid var(--border-2); padding:20px; }
+    .qr-title { font-size:13px; font-weight:500; color:var(--navy); margin-bottom:4px; }
+    .qr-sub   { font-size:11px; color:var(--text-muted); margin-bottom:16px; line-height:1.6; }
+    .qr-grid  { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+    @media(min-width:640px) { .qr-grid { grid-template-columns:repeat(4,1fr); } }
+    .qr-item  { display:flex; flex-direction:column; align-items:center; gap:8px; padding:14px; background:var(--bg); border-radius:var(--radius-sm); border:1px solid var(--border-2); text-decoration:none; transition:border-color 0.18s; }
+    .qr-item:hover { border-color:var(--blue); }
+    .qr-box   { width:80px; height:80px; background:var(--border-2); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:28px; overflow:hidden; }
+    .qr-box img { width:100%; height:100%; object-fit:cover; }
+    .qr-label { font-size:11px; font-weight:500; color:var(--navy); }
+
+    .cta-about { background:var(--navy); margin:0 var(--space-md) var(--space-lg); border-radius:var(--radius-xl); padding:30px 22px; text-align:center; }
+    .cta-about__title { font-family:var(--font-display); font-size:24px; font-weight:700; font-style:italic; color:#fff; margin-bottom:8px; }
+    .cta-about__sub   { font-size:12px; color:var(--text-soft); margin-bottom:22px; line-height:1.7; }
+  </style>
+</head>
+<body>
+
+  <div id="nav-slot"></div>
+
+  <div class="about-hero">
+    <div class="brand-circle"><img src="../assets/logo.png" alt="TreshBlinkybill Fits Logo"/></div>
+    <div class="brand-big-name">TreshBlinkybill <span>Fits</span></div>
+    <div class="brand-big-tag">Premium Tailoring · Lagos</div>
+    <p class="about-sub">We craft premium native and English wear for every occasion — from monogram masterpieces to timeless Agbada, all tailored to perfection.</p>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-item"><div class="stat-num">500+</div><div class="stat-label">Orders Completed</div></div>
+    <div class="stat-item"><div class="stat-num">50+</div><div class="stat-label">Unique Designs</div></div>
+    <div class="stat-item"><div class="stat-num">5★</div><div class="stat-label">Customer Rating</div></div>
+  </div>
+
+  <div class="story-card">
+    <div class="story-tag">Our Story</div>
+    <div class="story-title">Stitched with <em>Purpose</em></div>
+    <p class="story-text">TreshBlinkybill Fits was born from a passion for precision and style. Based in Lagos, we blend the richness of Nigerian tradition with sharp modern tailoring — creating outfits that don't just fit your body, but tell your story.<br/><br/>Whether you need a stunning native monogram for a wedding, a sharp English suit for a board meeting, or a grand Agbada for a ceremony — we bring every vision to life, one stitch at a time.</p>
+  </div>
+
+  <div class="values">
+    <div class="val-card"><div class="val-icon">✂️</div><div class="val-title">Precision</div><div class="val-text">Every measurement matters. Every stitch counts.</div></div>
+    <div class="val-card"><div class="val-icon">🎨</div><div class="val-title">Creativity</div><div class="val-text">Unique designs tailored to your personality.</div></div>
+    <div class="val-card"><div class="val-icon">⏱️</div><div class="val-title">On Time</div><div class="val-text">We deliver before your event, always.</div></div>
+    <div class="val-card"><div class="val-icon">💬</div><div class="val-title">Responsive</div><div class="val-text">We stay in touch throughout your order.</div></div>
+  </div>
+
+  <div class="contact-card">
+    <div class="contact-hdr"><div class="contact-hdr-title">Get In Touch</div><div class="contact-hdr-sub">We'd love to hear from you</div></div>
+    <div class="contact-items">
+      <a class="contact-item" href="https://wa.link/s4la7a" target="_blank">
+        <div class="contact-icon" style="background:#e8f5e9;">💬</div><div><div class="contact-label">WhatsApp</div><div class="contact-value">+2349036877717</div></div>
+      </a>
+      <a class="contact-item" href="https://www.instagram.com/treshblinkybill" target="_blank">
+        <div class="contact-icon" style="background:#fce4ec;">📸</div><div><div class="contact-label">Instagram</div><div class="contact-value">@treshblinkybill</div></div>
+      </a>
+      <a class="contact-item" href="https://www.tiktok.com/@treshblinkyfits" target="_blank">
+        <div class="contact-icon" style="background:#e3f2fd;">🎵</div><div><div class="contact-label">TikTok</div><div class="contact-value">@treshblinkybillfits</div></div>
+      </a>
+      <a class="contact-item" href="https://snapchat.com/t/qZOQrLn4" target="_blank">
+        <div class="contact-icon" style="background:#fff8e1;">👻</div><div><div class="contact-label">Snapchat</div><div class="contact-value">@treasure_trust</div></div>
+      </a>
+      <div class="contact-item">
+        <div class="contact-icon" style="background:#e8f1ff;">📍</div><div><div class="contact-label">Location</div><div class="contact-value">Lagos, Nigeria</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-about">
+    <div class="cta-about__title">Ready to look your best?</div>
+    <p class="cta-about__sub">Let's create something extraordinary together.</p>
+    <button onclick="openCustomOrderModal()" class="btn btn--mint btn--lg">Place Your Order Now</button>
+  </div>
+
+  <div id="footer-slot"></div>
+
+  <script src="../api/api.js"></script>
+  <script src="../services/services.js"></script>
+  <script>TBF.ComponentLoader.init('about');
+    /* ============================================================
+       BESPOKE CUSTOM UPLOAD MODAL (Multiple Images + Optional Name)
+       ============================================================ */
+    /* ============================================================
+       BESPOKE CUSTOM UPLOAD MODAL (Multiple Styles Support)
+       ============================================================ */
+    function openCustomOrderModal() {
+      const modalId = 'customOrderModal';
+      document.getElementById(modalId)?.remove();
+      
+      customImageArray = [];
+
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      modal.id = modalId;
+      modal.style.alignItems = 'center'; 
+      modal.innerHTML = `
+        <div class="modal-box" style="align-self: center; max-height: 90vh; border-radius: var(--radius-lg);">
+          <div class="modal__header">
+            <div class="modal__title">Bespoke Order</div>
+            <button class="modal__close" onclick="document.getElementById('${modalId}').remove()">✕</button>
+          </div>
+          <div class="modal__body">
+            <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Have your own style? Upload your inspiration pictures and we'll tailor it to perfection.</p>
+            
+            <div class="field">
+              <label class="field__label">Style Description <span style="color:var(--text-soft); text-transform:none;">(Optional)</span></label>
+              <input type="text" id="customStyleName" class="field__input" placeholder="e.g. Chief's Blue Agbada" />
+            </div>
+
+            <div class="field">
+              <label class="field__label">Inspiration Pictures *</label>
+              <div class="upload-box" onclick="document.getElementById('customStyleImage').click()">
+                <div class="upload-box__icon">📸</div>
+                <div class="upload-box__text"><strong>Click to upload</strong> one or more design photos<br>JPEG, PNG, HEIC.</div>
+              </div>
+              <input type="file" id="customStyleImage" accept="image/*" multiple style="display:none" onchange="previewCustomImages(this)"/>
+              
+              <div id="customImagePreview" style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; justify-content:center; display:none;">
+              </div>
+            </div>
+          </div>
+          
+          <!-- 👇 FIXED: Two buttons for flexible shopping -->
+          <div class="modal__footer" style="padding: 16px 20px; gap: 8px;">
+            <button class="btn btn--ghost" onclick="document.getElementById('${modalId}').remove()">Cancel</button>
+            <button class="btn btn--outline" id="customAddBtn" style="border-color: var(--navy); color: var(--navy);" onclick="processCustomOrder(false)">+ Add & Keep Browsing</button>
+            <button class="btn btn--mint" id="customCheckoutBtn" onclick="processCustomOrder(true)">Add & Checkout →</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    let customImageArray = [];
+
+    function previewCustomImages(input) {
+      const previewContainer = document.getElementById('customImagePreview');
+      
+      if (input.files && input.files.length > 0) {
+        previewContainer.style.display = 'flex';
+        
+        Array.from(input.files).forEach(file => {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const base64Data = e.target.result;
+            customImageArray.push(base64Data);
+            
+            const img = document.createElement('img');
+            img.src = base64Data;
+            img.style.cssText = 'width:60px; height:60px; object-fit:cover; border-radius:6px; border:1px solid var(--border-2); box-shadow: var(--shadow-sm);';
+            previewContainer.appendChild(img);
+          }
+          reader.readAsDataURL(file);
+        });
+      }
+    }
+
+    // Helper Function
+    function dataURLtoFile(dataurl, filename) {
+      let arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+          bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+      while(n--){ u8arr[n] = bstr.charCodeAt(n); }
+      return new File([u8arr], filename, {type:mime});
+    }
+
+   async function processCustomOrder(redirectToCheckout = true) {
+      let name = document.getElementById('customStyleName').value.trim();
+      if (customImageArray.length === 0) return TBF.Utils.showToast('Please upload at least one inspiration picture', 'error');
+
+      const addBtn = document.getElementById('customAddBtn');
+      const checkoutBtn = document.getElementById('customCheckoutBtn');
+      if(addBtn) addBtn.disabled = true;
+      if(checkoutBtn) checkoutBtn.disabled = true;
+
+      try {
+        const bespokeId = 'Bespoke-' + Math.floor(1000 + Math.random() * 9000);
+        if (!name) name = 'Custom Design (' + bespokeId + ')';
+
+        let files = customImageArray.map((base64, idx) => dataURLtoFile(base64, `custom_upload_${idx}.jpg`));
+        
+        const apiService = window.TBF ? window.TBF.MediaService : TBF.MediaService;
+        let response = await apiService.upload(files, { title: name, category: 'bespoke' });
+        let uploaded = response.data || response;
+        
+        // Extract all URLs
+        let allUrls = uploaded.map(u => u.url);
+
+        // SECURE ARCHITECTURE: Join all URLs into a single comma-separated string
+        // so it saves cleanly into the single `image` column in your database!
+        const cartService = window.TBF ? window.TBF.CartService : TBF.CartService;
+        cartService.addItem({
+          designId: bespokeId,
+          name: name,
+          image: allUrls.join(','), 
+          qty: 1,
+          isCustom: true
+        });
+
+        if (redirectToCheckout) {
+          window.location.href = window.location.pathname.includes('index.html') || window.location.pathname === '/' ? 'pages/checkout.html' : 'checkout.html';
+        } else {
+          TBF.Utils.showToast('Style added to your bag!', 'success');
+          document.getElementById('customOrderModal').remove();
+          cartService.updateWidget();
+        }
+      } catch (err) {
+        TBF.Utils.showToast('Upload failed.', 'error');
+        if(addBtn) addBtn.disabled = false;
+        if(checkoutBtn) checkoutBtn.disabled = false;
+      }
+    }
+    
+    </script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complete Your Request - TBF</title>
+  <link rel="stylesheet" href="../styles/main.css"> <!-- Adjust path if needed -->
+  <style>
+    body { background: var(--bg); font-family: var(--font-body); color: var(--text); }
+    .checkout-wrap { max-width: 1000px; margin: 40px auto; padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+    
+    /* Left Side: Form */
+    .form-section { background: var(--white); padding: 30px; border-radius: var(--radius-lg); border: 1px solid var(--border); }
+    .form-section h2 { font-family: var(--font-display); font-size: 24px; color: var(--navy); margin-bottom: 20px; }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: var(--navy); }
+    .input-group input, .input-group select, .input-group textarea { 
+      width: 100%; padding: 12px; border: 1px solid var(--border-2); border-radius: var(--radius-sm); font-family: inherit;
+    }
+    
+    /* Right Side: Style Bag */
+    .bag-section { background: #f8fafc; padding: 30px; border-radius: var(--radius-lg); border: 1px solid var(--border-2); height: fit-content; }
+    .bag-section h3 { font-family: var(--font-display); font-size: 20px; color: var(--navy); margin-bottom: 20px; }
+    
+    .bag-item { display: flex; gap: 15px; background: var(--white); padding: 15px; border-radius: var(--radius-md); margin-bottom: 15px; border: 1px solid var(--border-2); }
+    .bag-item__img { width: 70px; height: 70px; border-radius: var(--radius-sm); object-fit: cover; background: var(--navy-light); }
+    .bag-item__details { flex: 1; }
+    .bag-item__title { font-weight: 600; font-size: 14px; color: var(--navy); margin-bottom: 4px; }
+    .bag-item__qty { font-size: 12px; color: var(--text-soft); }
+    .remove-btn { background: none; border: none; color: #ef4444; font-size: 11px; cursor: pointer; padding: 0; margin-top: 8px; font-weight: 500; }
+
+    .notice { font-size: 12px; color: var(--text-soft); margin-top: 20px; line-height: 1.6; padding: 15px; background: rgba(0,0,0,0.03); border-radius: var(--radius-sm); }
+    
+    @media(max-width: 768px) {
+      .checkout-wrap { grid-template-columns: 1fr; }
+      .bag-section { order: -1; } /* Puts the bag on top on mobile */
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV SLOT -->
+  <div id="nav-slot"></div>
+
+  <div class="checkout-wrap">
+    
+    <!-- LEFT: Customer Form -->
+    <div class="form-section">
+      <h2>Your Details</h2>
+      <form id="requestForm">
+        <div class="input-group">
+          <label>Full Name</label>
+          <input type="text" id="custName" required placeholder="e.g. Emeka Johnson">
+        </div>
+        <div class="input-group">
+          <label>Phone Number</label>
+          <input type="tel" id="custPhone" required placeholder="08012345678">
+        </div>
+        <div class="input-group">
+          <label>WhatsApp Number (For consultation)</label>
+          <input type="tel" id="custWhatsApp" required placeholder="08012345678">
+        </div>
+        <div class="input-group">
+          <label>Delivery Preference</label>
+          <select id="deliveryMode">
+            <option value="pickup">I will pick up at the store</option>
+            <option value="dispatch">Dispatch Rider Delivery</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>Delivery Address (If dispatch is selected)</label>
+          <textarea id="custAddress" rows="2" placeholder="Your full address..."></textarea>
+        </div>
+        <div class="input-group">
+          <label>Event Date & Special Notes (Optional)</label>
+          <textarea id="custNotes" rows="2" placeholder="e.g. Wedding on Dec 12th. I want a velvet fabric..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn--mint btn--lg" style="width: 100%; margin-top: 10px;" id="submitBtn">Submit Request</button>
+      </form>
+    </div>
+
+    <!-- RIGHT: Style Bag Summary -->
+    <div class="bag-section">
+      <h3>Your Style Bag</h3>
+      <div id="bagItemsContainer">
+        <!-- JS injects items here -->
+      </div>
+      
+      <div class="notice">
+        <strong>What happens next?</strong><br>
+        1. We receive your style choices.<br>
+        2. We contact you via WhatsApp to discuss fabrics and arrange your measurements.<br>
+        3. We send you a finalized invoice with exact pricing.
+      </div>
+    </div>
+
+  </div>
+
+  <script src="../api/api.js"></script>
+  <script src="../services/services.js"></script>
+  <script>
+    // Sync Phone and WhatsApp Fields
+    document.addEventListener('DOMContentLoaded', () => {
+      const phoneInput = document.getElementById('custPhone');
+      const whatsappInput = document.getElementById('custWhatsApp');
+      
+      let isWhatsappManuallyEdited = false;
+
+      if (phoneInput && whatsappInput) {
+        whatsappInput.addEventListener('input', () => {
+          isWhatsappManuallyEdited = whatsappInput.value.length > 0;
+        });
+
+        phoneInput.addEventListener('input', (e) => {
+          if (!isWhatsappManuallyEdited) {
+            whatsappInput.value = e.target.value;
+          }
+        });
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const cartItems = TBF.CartService.getItems();
+      
+      if (cartItems.length === 0) {
+        alert("Your style bag is empty. Let's find you a great design!");
+        window.location.href = "../index.html";
+        return;
+      }
+
+      renderBagItems(cartItems);
+
+      document.getElementById('requestForm').addEventListener('submit', handleSubmission);
+    });
+
+    function renderBagItems(items) {
+      const container = document.getElementById('bagItemsContainer');
+      container.innerHTML = items.map((item, index) => {
+        // 👉 FIXED: Safely render standard URLs OR our temporary Base64 custom image previews
+        let imgSrc = '';
+        if (item.image) {
+          if (item.image.startsWith('data:image')) {
+            imgSrc = item.image; // It's the custom Base64 preview!
+          } else if (item.image.startsWith('http')) {
+            imgSrc = item.image; // Absolute URL
+          } else {
+            imgSrc = `http://localhost:5000${item.image}`; // Relative server URL
+          }
+        }
+        
+        const imgTag = imgSrc ? `<img src="${imgSrc}" class="bag-item__img" alt="${item.name}">` : `<div class="bag-item__img" style="display:flex;align-items:center;justify-content:center;font-size:24px;">👔</div>`;
+
+        return `
+          <div class="bag-item">
+            ${imgTag}
+            <div class="bag-item__details">
+              <div class="bag-item__title">${item.name} ${item.isCustom ? '<span style="font-size:10px; background:var(--mint); color:var(--navy); padding:2px 6px; border-radius:4px; margin-left:6px;">Bespoke</span>' : ''}</div>
+              <div class="bag-item__qty">Qty: ${item.qty} | Ref: ${item.designId}</div>
+              <button type="button" class="remove-btn" onclick="removeItem(${index})">Remove</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.removeItem = function(index) {
+      TBF.CartService.removeItem(index);
+      window.location.reload(); 
+    };
+
+    // Helper Function: Converts our temporary Base64 string back into a real File for the server
+    function dataURLtoFile(dataurl, filename) {
+      let arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+          bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+      while(n--){
+          u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new File([u8arr], filename, {type:mime});
+    }
+
+    async function handleSubmission(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      btn.textContent = "Processing Order...";
+      btn.disabled = true;
+
+      try {
+        // Generate Order ID
+        const orderId = 'TBF-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
+        
+        // Grab items and attach the notes to the first item
+        const cartData = TBF.CartService.getItems().map((item, i) => {
+          if (i === 0) item.notes = document.getElementById('custNotes').value;
+          return item;
+        });
+
+        const payload = {
+          id: orderId,
+          customer: document.getElementById('custName').value,
+          phone: document.getElementById('custPhone').value,
+          whatsapp: document.getElementById('custWhatsApp').value,
+          address: document.getElementById('custAddress').value,
+          deliveryMode: document.getElementById('deliveryMode').value,
+          cart: cartData
+        };
+
+        // Send to backend
+        await TBF.OrderService.placeOrder(payload);
+
+        // Success! Clear the bag and go to success page
+        TBF.CartService.clearCart();
+        window.location.href = `success.html?id=${orderId}`;
+
+      } catch (error) {
+        alert("Failed to submit request. Please try again or contact us on WhatsApp.");
+        btn.textContent = "Submit Request";
+        btn.disabled = false;
+        console.error(error);
+      }
+    }
+    
+  </script>
+</body>
+</html>

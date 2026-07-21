@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Designs — TreshBlinkybill Fits</title>
+  <link rel="stylesheet" href="../styles/main.css"/>
+  <style>
+    .design-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 12px;
+      padding: 16px var(--space-md) var(--space-lg);
+    }
+    @media(min-width:640px)  { .design-grid { grid-template-columns: repeat(3,1fr); padding: 16px var(--space-xl); } }
+    @media(min-width:1024px) { .design-grid { grid-template-columns: repeat(4,1fr); } }
+  </style>
+</head>
+<body>
+
+  <div id="nav-slot"></div>
+
+  <div class="page-hdr page-hdr--gradient">
+    <div class="page-hdr__tag">Our Collection</div>
+    <div class="page-hdr__title">All <em>Designs</em></div>
+    <div class="page-hdr__sub">Browse & pick a design, then place your order</div>
+  </div>
+
+ <div style="background:var(--white);padding:20px var(--space-md) 16px;border-bottom:1px solid var(--border-2);">
+  <div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-weight:600;margin-bottom:12px;">Designs Category</div>
+  
+  <div class="pill-bar" id="filterPills" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;">
+    <button class="pill pill--active"   data-filter="all"             onclick="setFilter('all', this)">All</button>
+    <button class="pill pill--inactive" data-filter="native-monogram" onclick="setFilter('native-monogram', this)">Native Monogram</button>
+    <button class="pill pill--inactive" data-filter="native-normal"   onclick="setFilter('native-normal', this)">Native Normal</button>
+    <button class="pill pill--inactive" data-filter="agbada"          onclick="setFilter('agbada', this)">Agbada</button>
+    <button class="pill pill--inactive" data-filter="english"         onclick="setFilter('english', this)">English Wear</button>
+  </div>
+</div>
+
+  <div style="padding:14px var(--space-md) 0;display:flex;justify-content:space-between;align-items:center;">
+    <div style="font-family:var(--font-display);font-size:20px;font-weight:600;">Designs</div>
+    <div style="font-size:12px;color:var(--text-muted);" id="countLabel"></div>
+  </div>
+
+  <a href="checkout.html" id="floatingCart" class="floating-cart" style="display: none;">
+    🛒 View Cart (<span id="cartItemCount">0</span>)
+  </a>
+  <div class="design-grid" id="designGrid"></div>
+
+  <div id="footer-slot"></div>
+
+  <script src="../api/api.js"></script>
+  <script src="../services/services.js"></script>
+  <script>
+    let activeFilter = 'all';
+    let allLoadedDesigns = [];
+
+    // Global Style Bag Handler
+    window.addToStyleBag = function(event, designId, name, image) {
+      event.preventDefault(); 
+      
+      if (!designId || designId === 'null' || designId === 'undefined') {
+         TBF.Utils.showToast('Please contact us directly for this bespoke item.', 'error');
+         return;
+      }
+      
+      TBF.CartService.addItem({
+        designId: designId,
+        name: name,
+        image: image,
+        qty: 1
+      });
+    };
+
+    function setFilter(cat, el) {
+      activeFilter = cat;
+      document.querySelectorAll('#filterPills .pill').forEach(p => { 
+        p.classList.remove('pill--active');
+        p.classList.add('pill--inactive');
+      });
+      el.classList.remove('pill--inactive');
+      el.classList.add('pill--active');
+      fetchAndRenderDesigns();
+    }
+
+    async function fetchAndRenderDesigns() {
+      document.getElementById('designGrid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;">Loading designs...</div>';
+      
+      const params = {};
+      if (activeFilter !== 'all') params.category = activeFilter;
+
+      allLoadedDesigns = await window.TBF.DesignService.getAll(params);
+      renderDesignCards();
+    }
+
+    function renderDesignCards() {
+      document.getElementById('countLabel').textContent = `${allLoadedDesigns.length} design${allLoadedDesigns.length !== 1 ? 's' : ''}`;
+      const grid = document.getElementById('designGrid');
+      
+      if (!allLoadedDesigns.length) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;text-align:center;padding:40px;"><div class="empty-state__icon">🎨</div>No designs found for this category</div>';
+        return;
+      }
+
+      grid.innerHTML = allLoadedDesigns.map(d => {
+        const designNum = d.num || d.number || '';
+        // Securely escape quotes so the buttons don't break
+        const safeName = (d.name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const imgUrl = d.imageUrl || d.image || '';
+        
+        return `
+        <div class="card card--hover">
+          <div style="aspect-ratio:3/4; overflow:hidden; position:relative; background:var(--navy); display:flex; align-items:center; justify-content:center;">
+            ${imgUrl ? `<img src="http://localhost:5000${imgUrl}" style="width:100%;height:100%;object-fit:cover;object-position: top; border-radius: 8px 8px 0 0;" alt="${safeName}" loading="lazy"/>` : `<span style="font-size:40px; color:rgba(255,255,255,0.3); font-style:italic; font-family:var(--font-display);">${d.name.charAt(0)}</span>`}
+            ${d.badge ? `<div style="position:absolute;top:10px;right:10px;"><span class="badge badge--${d.badge==='new'?'new':'pop'}">${d.badge}</span></div>` : ''}
+          </div>
+          <div style="padding:14px;">
+            <div style="font-size:14px; font-weight:600; color:var(--navy); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${d.name}</div>
+            <div style="font-size:11px; color:var(--blue); margin-top:2px; font-weight:500;">Ref: ${designNum}</div>
+            
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:14px; width:100%;">
+              <button class="btn btn--mint" style="width:100%; padding:8px 0; font-size:12px; font-weight:600; border-radius:6px; border:none; cursor:pointer; text-align:center; box-shadow:0 2px 4px rgba(0,0,0,0.1);" 
+                    onclick="window.addToStyleBag(event, '${d.id}', '${safeName}', '${imgUrl}')">Tailor This Design →</button>
+              <button class="btn btn--ghost btn--sm" style="width:100%;" 
+                    onclick="openDesignDetails('${d.id}', '${designNum}', '${safeName}', '${imgUrl}')">View Details</button>
+            </div>
+            
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    async function openDesignDetails(designId, designNum, title, imgUrl) {
+      const modalId = 'designModalOverlay';
+      document.getElementById(modalId)?.remove();
+
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      modal.id = modalId;
+      modal.innerHTML = `
+        <div class="modal-box" style="max-width:680px;">
+          <div class="modal__header">
+            <div>
+              <div class="modal__title">${title}</div>
+              <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Blueprint Reference: ${designNum}</div>
+            </div>
+            <button class="modal__close" onclick="document.getElementById('${modalId}').remove()">✕</button>
+          </div>
+          <div class="modal__body" id="modalAnglesGrid" style="min-height:160px; display:flex; align-items:center; justify-content:center;">
+            <span style="font-size:12px; color:var(--text-muted);">Pulling design photos...</span>
+          </div>
+          <div class="modal__footer" style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:11px; color:var(--text-muted);">Base Blueprint: <strong style="color:var(--navy);">${designNum || 'Bespoke Instance'}</strong></div>
+            <button class="btn btn--mint" style="padding: 10px 20px; font-size: 13px; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; transition: transform 0.2s;" 
+              onmouseover="this.style.transform='scale(1.05)'" 
+              onmouseout="this.style.transform='scale(1)'"
+              onclick="window.addToStyleBag(event, '${designId}', '${title}', '${imgUrl}')">Tailor This Design →</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      try {
+        // 👇 THE FIX: Check both the designNum AND the title for "Bespoke"
+        let isBespoke = String(designNum).includes('Bespoke') || String(title).includes('Bespoke');
+        let photos = [];
+
+        if (isBespoke) {
+            // 1. Extract the actual Bespoke ID from the title (e.g. pulls "Bespoke-9387" out of "Custom Design (Bespoke-9387)")
+            const bespokeMatch = String(title).match(/(Bespoke-\d+)/i) || String(designNum).match(/(Bespoke-\d+)/i);
+            const bespokeId = bespokeMatch ? bespokeMatch[1] : null;
+
+            // 2. Fetch the bespoke media category
+            let res = await window.TBF.MediaService.getAll({ category: 'bespoke' });
+            let media = Array.isArray(res) ? res : (res?.data || []);
+
+            // Fallback just in case backend ignores category filters
+            if (media.length === 0) {
+                const fallbackRes = await window.TBF.MediaService.getAll();
+                media = Array.isArray(fallbackRes) ? fallbackRes : (fallbackRes?.data || []);
+            }
+
+            // 3. Search the data for the extracted Bespoke ID!
+            photos = media.filter(m => {
+                if (!m || !bespokeId) return false;
+                const stringifiedData = JSON.stringify(m).toLowerCase();
+                return stringifiedData.includes(bespokeId.toLowerCase());
+            });
+
+        } else {
+            // For normal designs (like TBF-009), do the standard strict lookup
+            const res = await window.TBF.MediaService.getAll({ designNum: designNum, category: 'designs' });
+            photos = Array.isArray(res) ? res : (res?.data || []);
+        }
+
+        // Guarantee the Cover Photo is ALWAYS in the array and at the very front
+        let finalUrls = [];
+        if (imgUrl && imgUrl !== 'undefined' && imgUrl !== 'null') {
+            finalUrls.push(imgUrl);
+        }
+
+        photos.forEach(p => {
+            if (p.url && !finalUrls.includes(p.url)) {
+                finalUrls.push(p.url);
+            }
+        });
+
+        const gridEl = document.getElementById('modalAnglesGrid');
+        if (finalUrls.length === 0) {
+          gridEl.innerHTML = '<div class="empty-state__text">No photos found for this design.</div>';
+          return;
+        }
+
+        gridEl.style.display = 'grid';
+        gridEl.style.gridTemplateColumns = 'repeat(auto-fit, minmax(200px, 1fr))';
+        gridEl.style.gap = '16px';
+        
+        // Render the gallery
+        gridEl.innerHTML = finalUrls.map(url => {
+          const cleanUrl = url.startsWith('http') ? url : `http://localhost:5000${url}`;
+          return `
+          <div style="border-radius:8px; overflow:hidden; border:1px solid var(--border); background:var(--bg); display:flex; justify-content:center;">
+            <img src="${cleanUrl}" style="width:100%; max-height:400px; object-fit:contain; border-radius:8px;" alt="${title} view"/>
+          </div>
+          `;
+        }).join('');
+        
+      } catch (err) {
+        console.error("Gallery Fetch Error:", err);
+        document.getElementById('modalAnglesGrid').innerHTML = '<span style="color:var(--red);">Failed to fetch photos.</span>';
+      }
+    }
+    
+    async function init() {
+      await TBF.ComponentLoader.init('designs');
+      
+      const catParam = new URLSearchParams(location.search).get('cat');
+      if (catParam) {
+        const pill = document.querySelector(`[data-filter="${catParam}"]`);
+        if (pill) {
+          activeFilter = catParam;
+          document.querySelectorAll('#filterPills .pill').forEach(p => { 
+            p.classList.remove('pill--active');
+            p.classList.add('pill--inactive');
+          });
+          pill.classList.remove('pill--inactive');
+          pill.classList.add('pill--active');
+        }
+      }
+      
+      if (typeof window.TBF !== 'undefined' && window.TBF.CartService) {
+        window.TBF.CartService.updateWidget();
+      }
+      
+      fetchAndRenderDesigns();
+    }
+    
+    init();
+  </script>
+</body>
+</html>

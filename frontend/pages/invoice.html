@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Order Confirmed — TreshBlinkybill Fits</title>
+  <link rel="stylesheet" href="../styles/main.css"/>
+  <style>
+    .success-band { background:linear-gradient(135deg,var(--navy),var(--navy-mid)); padding:36px var(--space-md) 28px; text-align:center; }
+    .success-icon { width:60px; height:60px; background:var(--mint); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:26px; color:var(--navy); }
+    .success-title { font-family:var(--font-display); font-size:30px; font-weight:700; color:#fff; }
+    .success-title em { font-style:italic; color:var(--blue-light); }
+    .success-sub  { font-size:12px; color:var(--text-soft); margin-top:8px; line-height:1.7; }
+    .order-chip   { display:inline-block; background:rgba(178,237,228,0.15); border:1px solid rgba(178,237,228,0.3); border-radius:20px; padding:7px 20px; font-size:13px; font-weight:500; color:var(--mint); margin-top:14px; letter-spacing:1.5px; }
+
+    .inv-card { background:var(--white); margin:14px var(--space-md); border-radius:var(--radius-lg); border:1px solid var(--border-2); overflow:hidden; }
+    .inv-card__hdr { background:var(--navy); padding:16px 20px; display:flex; align-items:center; justify-content:space-between; }
+    .inv-brand { font-family:var(--font-display); font-size:18px; font-weight:700; color:#fff; }
+    .inv-brand span { color:var(--mint); }
+    .inv-logo { width:40px; height:40px; border-radius:50%; overflow:hidden; background:var(--mint-light); flex-shrink:0; }
+    .inv-logo img { width:100%; height:100%; object-fit:cover; }
+
+    .inv-meta { display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:16px 20px; border-bottom:1px solid var(--border-2); }
+    .im-label { font-size:9px; text-transform:uppercase; letter-spacing:0.8px; color:var(--text-muted); font-weight:600; }
+    .im-value { font-size:13px; color:var(--navy); font-weight:500; margin-top:3px; }
+
+    .inv-items { padding:16px 20px; }
+    .inv-items-label { font-size:10px; text-transform:uppercase; letter-spacing:0.8px; color:var(--text-muted); font-weight:500; margin-bottom:12px; }
+    .inv-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--bg); }
+    .inv-row:last-child { border-bottom:none; }
+    .inv-dot  { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-size:20px; font-style:italic; color:rgba(255,255,255,0.5); flex-shrink:0; }
+    .inv-item-name  { font-size:13px; font-weight:500; color:var(--navy); }
+    .inv-item-sub   { font-size:11px; color:var(--text-muted); margin-top:2px; }
+    .inv-item-price { font-size:13px; font-weight:500; color:var(--navy); white-space:nowrap; }
+
+    .inv-totals { background:var(--bg); padding:14px 20px; }
+    .tot-row { display:flex; justify-content:space-between; padding:4px 0; }
+    .tot-label,.tot-val { font-size:12px; color:var(--text-muted); }
+    .tot-val { color:var(--navy); font-weight:500; }
+    .tot-row.total { border-top:1px solid var(--border); margin-top:8px; padding-top:12px; }
+    .tot-row.total .tot-label { font-size:14px; font-weight:500; color:var(--navy); }
+    .tot-row.total .tot-val   { font-size:16px; font-weight:700; color:var(--navy); font-family:var(--font-display); }
+
+    .cust-card { background:var(--white); margin:0 var(--space-md) var(--space-md); border-radius:var(--radius-lg); border:1px solid var(--border-2); padding:16px 20px; }
+    .cust-title { font-size:13px; font-weight:500; color:var(--navy); margin-bottom:12px; }
+    .cust-row { display:flex; justify-content:space-between; align-items:flex-start; padding:6px 0; border-bottom:1px solid var(--bg); gap:12px; }
+    .cust-row:last-child { border-bottom:none; }
+    .cust-key { font-size:12px; color:var(--text-muted); flex-shrink:0; }
+    .cust-val { font-size:12px; color:var(--navy); font-weight:500; text-align:right; }
+
+    .actions { padding:4px var(--space-md) 36px; display:flex; flex-direction:column; gap:10px; }
+    /* --- PRINT STYLES --- */
+    @media print {
+      /* 1. Force the browser to print all background colors, gradients, and logos */
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      /* 2. Keep the main page background clean */
+      body { 
+        background: var(--white) !important; 
+      }
+
+      /* 3. Hide the website UI (nav, success banner, timeline, buttons, footer) */
+      #nav-slot, 
+      .success-band, 
+      .card--padded, /* This hides the timeline */
+      .actions, 
+      #footer-slot { 
+        display: none !important; 
+      }
+
+      /* 4. Keep your exact design, but center it nicely for the paper */
+      .inv-card, .cust-card { 
+        margin: 0 auto 24px auto !important; /* Centers the cards and adds spacing */
+        max-width: 100%; /* Ensures it fits on the paper */
+        page-break-inside: avoid; /* Prevents the card from awkwardly splitting across two pages */
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="nav-slot"></div>
+
+  <div class="success-band">
+    <div class="success-icon">✓</div>
+    <div class="success-title">Order <em>Confirmed!</em></div>
+    <div class="success-sub">Your order has been received.<br>We'll reach you via WhatsApp within 24 hours.</div>
+    <div class="order-chip" id="orderChip">#TBF-2026-0001</div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="card card--padded" style="margin:14px var(--space-md);">
+    <div style="font-size:13px;font-weight:500;color:var(--navy);margin-bottom:16px;">Order Status</div>
+    <div class="timeline">
+      <div class="timeline__item">
+        <div class="timeline__left"><div class="timeline__dot timeline__dot--done">✓</div><div class="timeline__line timeline__line--done"></div></div>
+        <div class="timeline__content"><div class="timeline__label">Order Placed</div><div class="timeline__time" id="orderTime">Today</div></div>
+      </div>
+      <div class="timeline__item">
+        <div class="timeline__left"><div class="timeline__dot timeline__dot--active">→</div><div class="timeline__line"></div></div>
+        <div class="timeline__content"><div class="timeline__label">Awaiting Confirmation</div><div class="timeline__time">Pending tailor review</div></div>
+      </div>
+      <div class="timeline__item">
+        <div class="timeline__left"><div class="timeline__dot timeline__dot--pending"></div><div class="timeline__line"></div></div>
+        <div class="timeline__content"><div class="timeline__label timeline__label--muted">In Production</div><div class="timeline__time">—</div></div>
+      </div>
+      <div class="timeline__item">
+        <div class="timeline__left"><div class="timeline__dot timeline__dot--pending"></div></div>
+        <div class="timeline__content"><div class="timeline__label timeline__label--muted">Ready / Delivered</div><div class="timeline__time">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVOICE -->
+  <div class="inv-card">
+    <div class="inv-card__hdr">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="inv-logo"><img src="../assets/logo.png" alt="Logo"/></div>
+        <div><div class="inv-brand">TreshBlinkybill <span>Fits</span></div><div style="font-size:10px;color:var(--text-soft);">Official Invoice</div></div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:12px;color:var(--text-soft);" id="invId">#TBF-2026-0001</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;" id="invDate"></div>
+      </div>
+    </div>
+    <div class="inv-meta">
+      <div><div class="im-label">Customer</div><div class="im-value" id="invName">—</div></div>
+      <div><div class="im-label">Phone</div><div class="im-value" id="invPhone">—</div></div>
+      <div><div class="im-label">Event</div><div class="im-value" id="invEvent">—</div></div>
+      <div><div class="im-label">Needed By</div><div class="im-value" id="invNeeded">—</div></div>
+    </div>
+    <div class="inv-items">
+      <div class="inv-items-label">Items Ordered</div>
+      <div class="inv-row">
+        <div class="inv-dot grad-1">D</div>
+        <div style="flex:1;">
+          <div class="inv-item-name" id="invDesign">Design —</div>
+          <div class="inv-item-sub"  id="invQty">Qty: 1</div>
+        </div>
+        <div class="inv-item-price">Contact for price</div>
+      </div>
+    </div>
+    <div class="inv-totals">
+      <div class="tot-row"><div class="tot-label">Subtotal</div><div class="tot-val">To be confirmed</div></div>
+      <div class="tot-row"><div class="tot-label">Delivery</div><div class="tot-val">TBC</div></div>
+      <div class="tot-row total"><div class="tot-label">Total</div><div class="tot-val">To be confirmed</div></div>
+    </div>
+  </div>
+
+  <div class="cust-card">
+    <div class="cust-title">Delivery Details</div>
+    <div class="cust-row"><div class="cust-key">Address</div><div class="cust-val" id="invAddr">—</div></div>
+    <div class="cust-row"><div class="cust-key">WhatsApp</div><div class="cust-val" id="invWa">—</div></div>
+    <div class="cust-row"><div class="cust-key">Design No.</div><div class="cust-val" id="invDesign2">—</div></div>
+    <div class="cust-row"><div class="cust-key">Notes</div><div class="cust-val" id="invNotes">—</div></div>
+  </div>
+
+  <div class="actions">
+    <a class="btn btn--wa btn--full btn--lg" id="waLink" href="wa.link/03a8yw" target="_blank">💬 Chat with us on WhatsApp</a>
+    <a class="btn btn--dark btn--full" href="../index.html">Back to Home</a>
+    <button class="btn btn--ghost btn--full" onclick="window.print()">⬇ Print / Download Invoice</button>
+  </div>
+
+  <div id="footer-slot"></div>
+
+  <script src="../api/api.js"></script>
+  <script src="../services/services.js"></script>
+ <script>
+    async function init() {
+      await TBF.ComponentLoader.init('');
+      
+      // 1. Get the raw response from the cache
+      const rawResponse = await TBF.OrderService.getLatest() || {};
+      
+      // 2. Unwrap the data (checks if your backend nested it inside 'data' or 'order')
+      const order = rawResponse.data || rawResponse.order || rawResponse;
+      
+      const now   = new Date();
+      const id    = order.id || TBF.Utils.generateOrderId();
+
+      document.getElementById('orderChip').textContent = '#' + id;
+      document.getElementById('invId').textContent     = '#' + id;
+      document.getElementById('invDate').textContent   = TBF.Utils.formatDate(now.toISOString());
+      document.getElementById('orderTime').textContent = 'Today, ' + TBF.Utils.formatTime(now.toISOString());
+
+      if (order.customer) {
+        document.getElementById('invName').textContent    = order.customer;
+        document.getElementById('invPhone').textContent   = order.phone || '—';
+        document.getElementById('invEvent').textContent   = order.event || '—';
+        document.getElementById('invNeeded').textContent  = order.neededBy || '—';
+        document.getElementById('invAddr').textContent    = order.address || '—';
+        document.getElementById('invWa').textContent      = order.whatsapp || '—';
+        document.getElementById('invDesign').textContent  = 'Design ' + (order.design || '—');
+        document.getElementById('invDesign2').textContent = order.design || '—';
+        document.getElementById('invQty').textContent     = 'Qty: ' + (order.qty || 1);
+        document.getElementById('invNotes').textContent   = order.notes || 'None';
+
+        const msg = encodeURIComponent(`Hello TreshBlinkybill Fits!\nOrder: #${id}\nName: ${order.customer}\nDesign: ${order.design}\nEvent: ${order.event}\nQty: ${order.qty}`);
+        document.getElementById('waLink').href = `https://wa.me/234XXXXXXXXXX?text=${msg}`;
+      }
+    }
+    init();
+  </script>
+</body>
+</html>

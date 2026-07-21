@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin — TreshBlinkybill Fits</title>
+  <link rel="stylesheet" href="../../styles/main.css"/>
+  <style>
+    body { background: #f4f7fb; }
+
+    /* ================================================================
+       SIDEBAR TOGGLE LOGIC (Mobile specific overrides)
+       ================================================================ */
+    .sidebar-toggle { display:none; background:none; border:none; font-size:22px; cursor:pointer; color:var(--navy); }
+    
+    @media(max-width:1024px) {
+      .sidebar-toggle { display:block; }
+      .admin-sidebar  { transform:translateX(-100%); transition:transform 0.25s; position:fixed; z-index:300; width:240px; min-height:100vh; }
+      .admin-sidebar.open { transform:translateX(0); }
+      .admin-main { margin-left:0 !important; }
+      .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:299; }
+      .sidebar-overlay.open { display:block; }
+    }
+
+    /* ================================================================
+       COMPONENTS (Tabs, Selects, Uploads, Cards)
+       ================================================================ */
+    .admin-tabs { display:flex; gap:0; border-bottom:1px solid var(--border-2); background:var(--white); padding:0 var(--space-lg); overflow-x: auto; }
+    .admin-tabs::-webkit-scrollbar { display: none; }
+    .admin-tab { padding:13px 16px; font-size:12px; font-weight:500; cursor:pointer; color:var(--text-muted); border:none; background:none; border-bottom:2.5px solid transparent; transition:all 0.18s; white-space:nowrap; }
+    .admin-tab.active { color:var(--navy); border-bottom-color:var(--navy); }
+
+    .tbl-actions { display:flex; gap:6px; align-items:center; }
+    .status-select { font-size:11px; font-family:var(--font-body); border:1px solid var(--border); border-radius:var(--radius-sm); padding:4px 8px; color:var(--navy); background:var(--bg); outline:none; cursor:pointer; }
+
+    .upload-zone { border:2px dashed var(--border); border-radius:var(--radius-md); padding:32px var(--space-md); text-align:center; cursor:pointer; background:var(--white); transition:all 0.18s; }
+    .upload-zone:hover, .upload-zone.drag-over { border-color:var(--blue); background:var(--blue-pale); }
+    .upload-zone__icon { font-size:36px; margin-bottom:10px; }
+    .upload-zone__text { font-size:13px; color:var(--text-muted); line-height:1.6; }
+    .upload-zone__text strong { color:#2d6fca; }
+
+    .img-card { border-radius:var(--radius-sm); overflow:hidden; position:relative; aspect-ratio:1; background:var(--bg); border:1px solid var(--border-2); }
+    .img-card__visual { width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
+    .img-card__visual img { width:100%; height:100%; object-fit:cover; }
+    .img-card__overlay { position:absolute; inset:0; background:rgba(10,31,68,0.7); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; opacity:0; transition:opacity 0.2s; }
+    .img-card:hover .img-card__overlay { opacity:1; }
+    .img-card__meta { position:absolute; bottom:0; left:0; right:0; background:linear-gradient(to top,rgba(10,31,68,0.85),transparent); padding:8px; }
+    .img-card__name { font-size:10px; color:#fff; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .img-card__cat  { font-size:9px; color:var(--mint); }
+
+    /* ================================================================
+       DRAWERS & DETAILS (Slide-out panels)
+       ================================================================ */
+    .drawer { position:fixed; top:0; right:0; width:100%; max-width:420px; height:100vh; background:var(--white); box-shadow:var(--shadow-lg); z-index:400; transform:translateX(100%); transition:transform 0.28s ease; overflow-y:auto; display:flex; flex-direction:column; }
+    .drawer.open { transform:translateX(0); }
+    .drawer__hdr { background:var(--navy); padding:18px var(--space-md); display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:1; flex-shrink:0; }
+    .drawer__title { font-family:var(--font-display); font-size:18px; font-weight:600; color:#fff; }
+    .drawer__close { background:none; border:none; color:#fff; font-size:20px; cursor:pointer; line-height:1; padding:4px 8px; border-radius:4px; transition:background 0.15s; }
+    .drawer__close:hover { background:rgba(255,255,255,0.15); }
+    .drawer__body { padding:var(--space-md); flex:1; }
+    .drawer-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:399; display:none; }
+    .drawer-overlay.open { display:block; }
+
+    .detail-section { background:var(--bg); border-radius:var(--radius-md); padding:14px; margin-bottom:14px; }
+    .detail-section__label { font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:10px; }
+    .detail-row { display:flex; justify-content:space-between; align-items:flex-start; padding:9px 0; border-bottom:1px solid rgba(0,0,0,0.05); gap:12px; }
+    .detail-row:last-child { border-bottom:none; padding-bottom:0; }
+    .detail-key { font-size:11px; color:var(--text-muted); flex-shrink:0; font-weight:500; }
+    .detail-val { font-size:12px; color:var(--navy); text-align:right; font-weight:500; }
+
+    .drawer-actions { display:flex; flex-direction:column; gap:8px; margin-top:16px; padding-top:16px; border-top:1px solid var(--border-2); }
+    .drawer-status-row { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:var(--bg); border-radius:var(--radius-md); margin-bottom:14px; }
+
+    .empty-state { text-align:center; padding:40px 20px; color:var(--text-muted); font-size:13px; }
+    .empty-state__icon { font-size:32px; margin-bottom:10px; }
+
+    /* ================================================================
+       PRINT STYLES
+       ================================================================ */
+    @media print {
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      .sidebar, .admin-sidebar, .page-hdr, #nav-slot, .no-print, button { display: none !important; }
+      .admin-content, .main-content, main { margin: 0 !important; padding: 0 !important; width: 100% !important; box-shadow: none !important; }
+      .brand-name, h1, h2, h3 { color: var(--navy) !important; }
+      .brand-name span { color: var(--mint) !important; }
+      th, .invoice-total-row { background-color: var(--bg) !important; color: var(--navy) !important; }
+      table { page-break-inside: auto; }
+      tr    { page-break-inside: avoid; page-break-after: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="admin-sidebar__logo">
+      <div class="admin-sidebar__logo-img">
+        <img src="../assets/logo.png" alt="Logo"/>
+      </div>
+      <div>
+        <div class="admin-sidebar__brand">TreshBlinkybill <span>Fits</span></div>
+        <div style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:1px;text-transform:uppercase;margin-top:2px;">Admin Panel</div>
+      </div>
+    </div>
+
+    <div class="admin-sidebar__section-label">Dashboard</div>
+    <a class="admin-sidebar__link admin-sidebar__link--active" href="#" onclick="return showTab('overview',this)">
+      <span class="admin-sidebar__icon">📊</span> Overview
+    </a>
+
+    <div class="admin-sidebar__section-label">Management</div>
+    <a class="admin-sidebar__link" href="#" onclick="return showTab('orders',this)">
+      <span class="admin-sidebar__icon">📦</span> Orders
+    </a>
+    <a class="admin-sidebar__link" href="#" onclick="return showTab('media',this)">
+      <span class="admin-sidebar__icon">🖼️</span> Media & Images
+    </a>
+    <a class="admin-sidebar__link" href="#" onclick="return showTab('designs',this)">
+      <span class="admin-sidebar__icon">🎨</span> Designs
+    </a>
+    <a class="admin-sidebar__link" href="#" onclick="return showTab('customers',this)">
+      <span class="admin-sidebar__icon">👥</span> Customers
+    </a>
+    <a class="admin-sidebar__link" href="#" onclick="return showTab('invoices',this)">
+      <span class="admin-sidebar__icon">🧾</span> Invoices
+    </a>
+    <div class="admin-sidebar__section-label" style="margin-top:auto;">Site</div>
+    <a class="admin-sidebar__link" href="../index.html" target="_blank">
+      <span class="admin-sidebar__icon">🌐</span> View Website
+    </a>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="admin-main">
+
+    <!-- TOPBAR -->
+    <div class="admin-topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+        <div class="admin-topbar__title" id="topbarTitle">Overview</div>
+      </div>
+      <div class="admin-topbar__right">
+        <div class="admin-topbar__badge" id="pendingBadge">— pending</div>
+        <span id="admin-name" style="font-size:12px;color:var(--text-muted);margin-right:8px;"></span>
+        <button class="btn btn--ghost btn--sm" onclick="logout()">Logout</button>
+        <a href="../index.html" class="btn btn--ghost btn--sm" target="_blank">View Site →</a>
+      </div>
+    </div>
+
+    <!-- TAB: OVERVIEW -->
+    <div id="tab-overview" class="admin-content">
+      <div class="stat-cards" id="statCards">
+        <div class="stat-card"><div class="stat-card__num" id="statTotal">—</div><div class="stat-card__label">Total Orders</div><div class="stat-card__trend stat-card__trend--up">↑ All time</div></div>
+        <div class="stat-card"><div class="stat-card__num" id="statPending">—</div><div class="stat-card__label">Pending</div><div class="stat-card__trend stat-card__trend--down">Needs action</div></div>
+        <div class="stat-card"><div class="stat-card__num" id="statProduction">—</div><div class="stat-card__label">In Production</div><div class="stat-card__trend">Active</div></div>
+        <div class="stat-card"><div class="stat-card__num" id="statDelivered">—</div><div class="stat-card__label">Delivered</div><div class="stat-card__trend stat-card__trend--up">Completed</div></div>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section__header">
+          <div class="admin-section__title">Recent Orders</div>
+          <button class="btn btn--ghost btn--sm" onclick="goToOrders()">See all →</button>
+        </div>
+        <div class="tbl-wrap">
+          <table class="data-table">
+            <thead><tr><th>Order ID</th><th>Customer</th><th>Design</th><th>Event</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="recentOrdersTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: ORDERS -->
+    <div id="tab-orders" class="admin-content" style="display:none;">
+      <div class="filter-row">
+        <input type="text" id="orderSearch" placeholder="🔍 Search by name, ID, design..." oninput="renderOrdersTable()"/>
+        <select id="statusFilter" onchange="renderOrdersTable()">
+          <option value="all">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="production">In Production</option>
+          <option value="ready">Ready</option>
+          <option value="delivered">Delivered</option>
+        </select>
+      </div>
+      <div class="admin-section">
+        <div class="admin-section__header">
+          <div class="admin-section__title">All Orders</div>
+          <div id="ordersCount" style="font-size:12px;color:var(--text-muted);"></div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="data-table">
+            <thead><tr><th>Order ID</th><th>Customer</th><th>Phone</th><th>Design</th><th>Event</th><th>Needed By</th><th>Qty</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="allOrdersTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: MEDIA -->
+  <!-- TAB: MEDIA & IMAGES -->
+    <div id="tab-media" class="admin-content" style="display:none;">
+      <div class="admin-section" style="margin-bottom:var(--space-md);">
+        <div class="admin-section__header">
+          <div class="admin-section__title">Log Finished Job (Multi-Angle Upload)</div>
+        </div>
+        <div style="padding:var(--space-md);">
+          
+          <div class="field-row-3" style="margin-bottom: 16px;">
+            <div class="field">
+              <label class="field__label">Job Ref / Title *</label>
+              <input type="text" id="mediaJobTitle" class="field__input" placeholder="e.g. Chief Okeke White Senator" />
+            </div>
+            <div class="field">
+              <label class="field__label">Base Design Blueprint *</label>
+              <select id="mediaDesignSelect" class="field__select">
+                <option value="">Loading designs...</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field__label">Collection Category *</label>
+              <select id="mediaCatSelect" class="field__select">
+                <option value="natives">Natives</option>
+                <option value="english">English Wear</option>
+                <option value="agbada">Agbada</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="upload-zone" id="uploadZone"
+               ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event)"
+               onclick="document.getElementById('mediaFileInput').click()">
+            <div class="upload-zone__icon">📸</div>
+            <div class="upload-zone__text"><strong>Tap or drag multiple photos</strong> of this exact outfit instance<br>First photo acts as the Collection cover; remaining photos feed the outfit Details page.</div>
+          </div>
+          <!-- 'multiple' attribute allows selecting 2+ photos of the same cloth at once -->
+          <input type="file" id="mediaFileInput" accept="image/*" multiple style="display:none" onchange="handleFileSelect(this.files)"/>
+          
+          <div id="uploadProgress" style="margin-top:12px;display:none;">
+            <div style="background:var(--border-2);border-radius:4px;height:6px;overflow:hidden;">
+              <div id="progressBar" style="height:100%;background:var(--blue);width:0%;transition:width 0.3s;border-radius:4px;"></div>
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:6px;" id="progressLabel">Uploading...</div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="filter-row">
+        <input type="text" id="mediaSearch" placeholder="🔍 Search uploaded jobs..." oninput="renderMediaGrid()"/>
+        <select id="mediaCatFilter" onchange="renderMediaGrid()">
+          <option value="all">All Collection Categories</option>
+          <option value="natives">Natives</option>
+          <option value="english">English Wear</option>
+          <option value="agbada">Agbada</option>
+        </select>
+      </div>
+
+      <div class="admin-section">
+        <div class="admin-section__header">
+          <div class="admin-section__title">Finished Jobs Library</div>
+          <div id="mediaCount" style="font-size:12px;color:var(--text-muted);"></div>
+        </div>
+        <div class="image-grid" id="mediaGrid"></div>
+      </div>
+    </div>
+    <!-- TAB: DESIGNS -->
+    <div id="tab-designs" class="admin-content" style="display:none;">
+      <div class="admin-section">
+        <div class="admin-section__header">
+          <div class="admin-section__title">Manage Designs</div>
+          <button class="btn btn--dark btn--sm" onclick="openAddDesign()">+ Add Design</button>
+        </div>
+        <div class="tbl-wrap">
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Name</th><th>Category</th><th>Design No.</th><th>Badge</th><th>Actions</th></tr></thead>
+            <tbody id="designsTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: CUSTOMERS -->
+    <div id="tab-customers" class="admin-content" style="display:none;">
+      <div class="admin-section">
+        <div class="admin-section__header">
+          <div class="admin-section__title">Customers</div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="data-table">
+            <thead><tr><th>Name</th><th>Phone</th><th>WhatsApp</th><th>Orders</th><th>Last Order</th><th>Actions</th></tr></thead>
+            <tbody id="customersTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: INVOICES -->
+<div id="tab-invoices" class="admin-content" style="display:none;">
+  <div class="admin-section">
+    <div class="admin-section__header">
+      <div class="admin-section__title">Invoices</div>
+      <div id="invoicesCount" style="font-size:12px;color:var(--text-muted);"></div>
+    </div>
+    <div class="tbl-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Invoice Ref</th>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Delivery</th>
+            <th>Total (₦)</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="invoicesTbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+  </main>
+</div>
+
+<!-- ORDER DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="orderDrawer">
+  <div class="drawer__hdr">
+    <div class="drawer__title" id="drawerTitle">Order Details</div>
+    <button class="drawer__close" onclick="closeDrawer()" aria-label="Close">✕</button>
+  </div>
+  <div class="drawer__body" id="drawerBody"></div>
+</div>
+
+<div class="drawer" id="customerDrawer">
+  <div class="drawer__hdr">
+    <div class="drawer__title" id="customerDrawerTitle">Customer History</div>
+    <button class="drawer__close" onclick="closeCustomerDrawer()" aria-label="Close">✕</button>
+  </div>
+  <div class="drawer__body" id="customerDrawerBody">
+    </div>
+</div>
+
+<!-- ============================================================
+     SCRIPT LOADING — safe loader prevents one broken external
+     file from killing showTab and every other function
+     ============================================================ -->
+<script src="../api/api.js" onerror="console.error('api.js failed to load — check for syntax errors in that file')"></script>
+<script src="../services/services.js" onerror="console.error('services.js failed to load — check for syntax errors in that file')"></script>
+
+<script>
+  /* ============================================================
+     STATE
+     ============================================================ */
+  let allOrders  = [];
+  let allMedia   = [];
+  let allDesigns = [];
+  let allInvoices = [];
+  let activeTab  = 'overview';
+
+  /* ============================================================
+     SIDEBAR / NAV
+     ============================================================ */
+  function goToOrders() {
+    const el = document.querySelector('.admin-sidebar__link[onclick*="orders"]');
+    showTab('orders', el);
+  }
+
+  function toggleSidebar() {
+    document.getElementById('adminSidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('open');
+  }
+
+  function closeSidebar() {
+    document.getElementById('adminSidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('open');
+  }
+
+  function showTab(tab, el) {
+    closeSidebar();
+    activeTab = tab;
+    document.querySelectorAll('[id^="tab-"]').forEach(t => t.style.display = 'none');
+    document.getElementById('tab-' + tab).style.display = 'block';
+    document.querySelectorAll('.admin-sidebar__link').forEach(l => l.classList.remove('admin-sidebar__link--active'));
+    if (el) el.classList.add('admin-sidebar__link--active');
+    const titles = { overview:'Overview', orders:'Orders', media:'Media & Images', designs:'Designs', customers:'Customers', invoices:'Invoices' };
+    document.getElementById('topbarTitle').textContent = titles[tab] || tab;
+    if (tab === 'orders')    renderOrdersTable();
+    if (tab === 'media')     renderMediaGrid();
+    if (tab === 'designs')   renderDesignsTable();
+    if (tab === 'customers') renderCustomersTable();
+    if (tab === 'invoices')  renderInvoicesTable();
+    return false;
+  }
+
+  /* ============================================================
+     SHARED HELPERS
+     ============================================================ */
+  function statusBadge(status) {
+    const map = {
+      pending:    'badge--pending',
+      confirmed:  'badge--confirmed',
+      production: 'badge--production',
+      ready:      'badge--ready',
+      delivered:  'badge--delivered',
+    };
+    return `<span class="badge ${map[status] || 'badge--pending'}">${status}</span>`;
+  }
+
+  function statusSelectHTML(orderId, currentStatus) {
+    const statuses = ['pending','confirmed','production','ready','delivered'];
+    return `<select class="status-select" onchange="updateStatus('${orderId}', this.value)">
+      ${statuses.map(s => `<option value="${s}" ${currentStatus === s ? 'selected' : ''}>${s}</option>`).join('')}
+    </select>`;
+  }
+
+  /* ============================================================
+     WHATSAPP — looks up order by ID, never uses object reference
+     ============================================================ */
+  function openWaLink(orderId) {
+    const o = allOrders.find(o => o.id === orderId);
+    if (!o) return;
+    const phone = (o.whatsapp || o.phone || '').replace(/\D/g, '');
+    const msg   = 'Hello ' + o.customer + '! Regarding your order #' + o.id;
+    window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
+  }
+
+  /* ============================================================
+     ORDERS TABLE
+     ============================================================ */
+  function renderOrderRow(o, minimal = false) {
+    if (minimal) {
+      return `<tr>
+        <td><code style="font-size:11px;">${o.id}</code></td>
+        <td>${o.customer}</td>
+        <td>${o.design || '—'}</td>
+        <td>${o.event || '—'}</td>
+        <td>${statusBadge(o.status)}</td>
+        <td><button class="btn btn--ghost btn--sm" onclick="openDrawer('${o.id}')">View</button></td>
+      </tr>`;
+    }
+    return `<tr>
+      <td><code style="font-size:11px;">${o.id}</code></td>
+      <td style="font-weight:500;">${o.customer}</td>
+      <td>${o.phone || '—'}</td>
+      <td>${o.design || '—'}</td>
+      <td>${o.event || '—'}</td>
+      <td>${TBF.Utils.formatDate(o.neededBy || o.createdAt)}</td>
+      <td style="text-align:center;">${o.qty || 1}</td>
+      <td>${statusSelectHTML(o.id, o.status)}</td>
+      <td>${o.deliveryMode || 'pickup'}</td>
+      <td>
+        <div class="tbl-actions">
+          <button class="btn btn--ghost btn--sm" onclick="openDrawer('${o.id}')">Details</button>
+          <a href="invoice-editor.html?id=${o.id}" class="btn btn--dark btn--sm" style="text-decoration:none;">📝 Edit Invoice</a>
+        </div>
+      </td>
+    </tr>`;
+  }
+
+  function renderOrdersTable() {
+    const q      = (document.getElementById('orderSearch')?.value || '').toLowerCase();
+    const status = document.getElementById('statusFilter')?.value || 'all';
+    const filtered = allOrders.filter(o => {
+      const matchStatus = status === 'all' || o.status === status;
+      const matchQ = !q || o.customer.toLowerCase().includes(q) || o.id.toLowerCase().includes(q) || (o.design||'').toLowerCase().includes(q);
+      return matchStatus && matchQ;
+    });
+    document.getElementById('ordersCount').textContent = `${filtered.length} order${filtered.length !== 1 ? 's' : ''}`;
+    document.getElementById('allOrdersTbody').innerHTML = filtered.length
+      ? filtered.map(o => renderOrderRow(o)).join('')
+      : '<tr><td colspan="9"><div class="empty-state"><div class="empty-state__icon">📭</div>No orders found</div></td></tr>';
+  }
+
+  async function updateStatus(id, status) {
+    try {
+      await TBF.OrderService.updateStatus(id, status);
+    
+    const order = allOrders.find(o => o.id === id);
+    if (order) order.status = status;
+    
+    // Sync open drawer badge live without reopening
+    const drawerTitle = document.getElementById('drawerTitle');
+    if (drawerTitle && drawerTitle.textContent === id) {
+      const badge = document.querySelector('#orderDrawer .badge');
+      if (badge) {
+        badge.textContent = status;
+        badge.className = `badge badge--${status}`;
+      }
+    }
+    updateStats();
+    TBF.Utils.showToast(`Order ${id} → ${status}`);
+    } catch (error) {
+      TBF.Utils.showToast(`Failed to update status`, "error");
+    }
+  }
+
+  /* ============================================================
+     PRINT ORDER
+     ============================================================ */
+  function printOrder(orderId) {
+    const o = allOrders.find(o => o.id === orderId);
+    if (!o) return;
+
+    const printWindow = window.open('', '_blank', 'width=620,height=750');
+    printWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <title>Order ${o.id}</title>
+  <style>
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; padding:32px; color:#0a1f44; }
+    .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; padding-bottom:16px; border-bottom:2px solid #0a1f44; }
+    .order-id { font-size:22px; font-weight:700; }
+    .brand { font-size:11px; color:#888; text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
+    .badge { display:inline-block; padding:4px 12px; border-radius:20px; background:#e8f5e9; color:#2e7d32; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; }
+    .section { margin-top:20px; }
+    .section-title { font-size:10px; font-weight:700; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+    .row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0f0f0; font-size:13px; }
+    .row:last-child { border-bottom:none; }
+    .key { color:#666; }
+    .val { font-weight:600; text-align:right; }
+    .notes-box { background:#f9f9f9; border-radius:6px; padding:12px; margin-top:8px; font-size:13px; line-height:1.7; color:#333; }
+    .footer { margin-top:32px; padding-top:12px; border-top:1px solid #eee; font-size:10px; color:#bbb; text-align:center; }
+    @media print { body { padding:20px; } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <div class="order-id">${o.id}</div>
+      <div class="brand">TreshBlinkybill Fits</div>
+    </div>
+    <span class="badge">${o.status}</span>
+  </div>
+  <div class="section">
+    <div class="section-title">Customer</div>
+    <div class="row"><span class="key">Name</span><span class="val">${o.customer}</span></div>
+    <div class="row"><span class="key">Phone</span><span class="val">${o.phone || '—'}</span></div>
+    <div class="row"><span class="key">WhatsApp</span><span class="val">${o.whatsapp || '—'}</span></div>
+    <div class="row"><span class="key">Address</span><span class="val">${o.address || '—'}</span></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Order Details</div>
+    <div class="row"><span class="key">Design No.</span><span class="val">${o.design || '—'}</span></div>
+    <div class="row"><span class="key">Category</span><span class="val">${o.category || '—'}</span></div>
+    <div class="row"><span class="key">Event</span><span class="val">${o.event || '—'}</span></div>
+    <div class="row"><span class="key">Quantity</span><span class="val">${o.qty || 1}</span></div>
+    <div class="row"><span class="key">Needed By</span><span class="val">${TBF.Utils.formatDate(o.neededBy) || '—'}</span></div>
+    <div class="row"><span class="key">Placed</span><span class="val">${TBF.Utils.formatDate(o.createdAt)}</span></div>
+  </div>
+  ${o.notes ? `<div class="section"><div class="section-title">Notes</div><div class="notes-box">${o.notes}</div></div>` : ''}
+  <div class="footer">Printed ${new Date().toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'})}</div>
+</${'body'}>
+</html>`);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  }
+
+  /* ============================================================
+     ORDER DRAWER
+     ============================================================ */
+      // 👇 THE FIX: Safely passes data to the modal without breaking HTML strings!
+
+  function triggerPromote(orderId, itemIndex) {
+    const order = allOrders.find(o => o.id === orderId);
+    if (!order || !order.items[itemIndex]) return;
+    
+    const item = order.items[itemIndex];
+    const rawImage = item.image || item.design?.imageUrl || item.design?.image || '';
+    let name = item.name || item.design?.name || '';
+    let num = item.designId;
+    
+    // Fallbacks to ensure the modal never breaks
+    if (!num || num.trim() === '') num = 'TBF-' + Math.floor(1000 + Math.random() * 9000);
+    if (!name || name.trim() === '') name = 'Custom Design (' + num + ')';
+    
+    closeDrawer();
+    // Safely passes data to the Modal!
+    openDesignModal({ 
+        id: null, 
+        name: name, 
+        imageUrl: rawImage, 
+        number: num,
+        category: 'native-monogram' 
+    });
+  }
+
+  async function openDrawer(orderId) {
+    const o = allOrders.find(o => o.id === orderId);
+    if (!o) return;
+
+    document.getElementById('drawerTitle').textContent = orderId;
+    document.getElementById('drawerBody').innerHTML = `<div style="padding:40px; text-align:center; color:var(--text-muted); font-size:13px;">Loading details...</div>`;
+    document.getElementById('orderDrawer').classList.add('open');
+    document.getElementById('drawerOverlay').classList.add('open');
+
+    let itemsListHtml = '';
+    if (o.items && o.items.length > 0) {
+      let tempHtml = '';
+      
+      // We now loop with an index so we can fetch exact item data later!
+      for (let i = 0; i < o.items.length; i++) {
+        let item = o.items[i];
+        let finalName = item.name || item.design?.name || `Design ${item.designId || ''}`;
+        
+        let rawImageString = item.image || item.design?.imageUrl || item.design?.image || '';
+        let imageArray = rawImageString.split(',').filter(url => url.trim() !== '');
+        
+        let coverImage = imageArray.length > 0 ? imageArray[0] : '';
+        let extraImages = imageArray.slice(1);
+        
+        const isCustom = item.isCustom || String(item.designId || '').includes('Bespoke') || String(finalName).includes('Bespoke');
+        
+        let galleryHtml = '';
+        if (extraImages.length > 0) {
+          galleryHtml = `
+            <div style="margin-top:10px; font-size:10px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Additional Angles:</div>
+            <div style="display:flex; gap:6px; margin-top:4px; flex-wrap:wrap;">
+              ${extraImages.map(imgUrl => {
+                const cleanUrl = imgUrl.startsWith('http') ? imgUrl : `http://localhost:5000${imgUrl}`;
+                return `<a href="${cleanUrl}" target="_blank"><img src="${cleanUrl}" style="width:36px; height:36px; object-fit:cover; border-radius:4px; border:1px solid var(--border-2);"/></a>`;
+              }).join('')}
+            </div>
+          `;
+        }
+
+        const initial = finalName.charAt(0).toUpperCase();
+        const price = item.unitPrice ? `₦${Number(item.unitPrice).toLocaleString('en-NG')}` : 'TBC';
+        
+        let visualHtml = `<div style="width:38px; height:38px; background:var(--navy); color:white; border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:serif; font-style:italic; font-size:18px;">${initial}</div>`;
+        if (coverImage) {
+          const imgSrc = coverImage.startsWith('http') ? coverImage : `http://localhost:5000${coverImage}`;
+          visualHtml = `<a href="${imgSrc}" target="_blank"><img src="${imgSrc}" style="width:38px; height:38px; border-radius:6px; object-fit:cover; border:1px solid var(--border-2);"/></a>`;
+        }
+
+        // 👇 THE FIX: Clean button that just passes IDs. No broken HTML!
+        const promoteBtn = isCustom && rawImageString ? 
+          `<button class="btn btn--outline btn--sm" style="font-size:10px; padding:4px 8px; margin-top:6px; border-color:var(--mint); color:var(--navy);" onclick="triggerPromote('${orderId}', ${i})">🌟 Save to Designs</button>` 
+          : '';
+        
+        tempHtml += `
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:12px; margin-bottom:12px; border-bottom:1px dashed var(--border-2);">
+            <div style="display:flex; gap:12px; align-items:flex-start;">
+              ${visualHtml}
+              <div>
+                <div style="font-weight:600; color:var(--navy); font-size:13px; margin-bottom:3px;">
+                  ${finalName} ${isCustom ? '<span style="font-size:9px; padding:2px 4px; margin-left:4px; background:var(--mint); color:var(--navy); border-radius:3px;">Bespoke</span>' : ''}
+                </div>
+                <div style="font-size:11px; color:var(--text-muted);">Qty: ${item.qty || 1}</div>
+                ${promoteBtn}
+                ${galleryHtml}
+              </div>
+            </div>
+            <div style="font-weight:600; font-size:13px; color:var(--navy); margin-top:2px;">
+              ${price}
+            </div>
+          </div>
+        `;
+      }
+      itemsListHtml = tempHtml;
+    }
+
+    document.getElementById('drawerBody').innerHTML = `
+      <div class="drawer-status-row">
+        ${statusBadge(o.status)}
+        ${statusSelectHTML(o.id, o.status)}
+      </div>
+      <div class="detail-section">
+        <div class="detail-section__label">Customer</div>
+        <div class="detail-row"><div class="detail-key">Name</div><div class="detail-val">${o.customer}</div></div>
+        <div class="detail-row"><div class="detail-key">Phone</div><div class="detail-val">${o.phone || '—'}</div></div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section__label">Items Ordered</div>
+        <div style="padding-top: 5px;">${itemsListHtml}</div>
+        <div style="text-align: center; padding-top: 10px;">
+          <a href="invoice-editor.html?id=${o.id}" style="font-size:11px; color:var(--blue); font-weight:600; text-decoration:none;">📝 Edit Prices & Measurements →</a>
+        </div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section__label">Delivery & Timeline</div>
+        <div class="detail-row"><div class="detail-key">Delivery Mode</div><div class="detail-val">${o.deliveryMode || 'pickup'}</div></div>
+        <div class="detail-row"><div class="detail-key">Placed On</div><div class="detail-val">${TBF.Utils.formatDate(o.createdAt)}</div></div>
+      </div>
+      ${o.notes ? `
+      <div class="detail-section">
+        <div class="detail-section__label">Notes</div>
+        <div style="font-size:13px;color:var(--navy);line-height:1.7;">${o.notes}</div>
+      </div>` : ''}
+      <div class="drawer-actions">
+        <button class="btn btn--wa btn--full" onclick="openWaLink('${o.id}')">💬 Message Customer</button>
+      </div>
+    `;
+    }
+
+  function closeDrawer() {
+    document.getElementById('orderDrawer').classList.remove('open');
+    document.getElementById('drawerOverlay').classList.remove('open');
+  }
+
+  /* ============================================================
+     MEDIA TAB
+     FIX: data-id / data-url attributes instead of interpolating
+     URLs directly into onclick strings (caused $%7Bm.url%7D 404)
+     ============================================================ */
+  function dragOver(e) { e.preventDefault(); document.getElementById('uploadZone').classList.add('drag-over'); }
+  function dragLeave()  { document.getElementById('uploadZone').classList.remove('drag-over'); }
+  function handleDrop(e) { e.preventDefault(); dragLeave(); handleFileSelect(e.dataTransfer.files); }
+
+  // Populates the base design dropdown inside the Media tab
+  function populateMediaDesignDropdown() {
+    const select = document.getElementById('mediaDesignSelect');
+    if (!select) return;
+    select.innerHTML = '<option value="">Select Base Design Blueprint...</option>' + 
+      allDesigns.map(d => `<option value="${d.num || d.number}">${d.name} (${d.num || d.number})</option>`).join('');
+  }
+
+ // UPDATED: Captures the 3 inputs + assigns the Batch ID
+  async function handleFileSelect(files) {
+    if (!files.length) return;
+    
+    const title = document.getElementById('mediaJobTitle').value.trim();
+    const designNum = document.getElementById('mediaDesignSelect').value;
+    const category = document.getElementById('mediaCatSelect').value;
+
+    // Title is now optional! We only require the Blueprint.
+    if (!designNum) {
+      TBF.Utils.showToast('Please select a Base Design Blueprint', 'error');
+      return;
+    }
+
+    const progress = document.getElementById('uploadProgress');
+    const bar      = document.getElementById('progressBar');
+    const label    = document.getElementById('progressLabel');
+    progress.style.display = 'block';
+    bar.style.width = '20%';
+    label.textContent = `Uploading batch of ${files.length} photo${files.length > 1 ? 's' : ''}...`;
+
+    // The glue tying these specific photos together as 1 product instance
+    const batchId = 'batch_' + Date.now();
+
+    const metadataObj = {
+      title,
+      designNum,
+      category,
+      batchId,
+      isPrimaryBatchCover: true // The API can use this to know which image to show first
+    };
+
+    try {
+      // Passes full object to your service
+      const response = await TBF.MediaService.upload(Array.from(files), metadataObj);
+      const uploaded = response.data || response; // Adjust based on your API response structure
+
+      bar.style.width = '100%';
+      label.textContent = `✓ ${response.length} photo${response.length > 1 ? 's' : ''} logged`;
+      
+      allMedia = [...uploaded, ...allMedia];
+      renderMediaGrid();
+      
+      // Reset form
+      document.getElementById('mediaJobTitle').value = '';
+      setTimeout(() => { progress.style.display = 'none'; bar.style.width = '0%'; }, 2000);
+      TBF.Utils.showToast(`Job logged successfully`);
+    } catch (err) {
+      progress.style.display = 'none';
+      TBF.Utils.showToast('Upload failed: ' + err.message, 'error');
+    }
+  }
+
+  async function deleteImageCard(btn) {
+    if (!confirm('Delete this image?')) return;
+    const card = btn.closest('.img-card');
+    const id   = parseInt(card.dataset.id, 10);
+    
+    // Call the Service layer
+    await TBF.MediaService.delete(id);
+    
+    allMedia = allMedia.filter(m => m.id !== id);
+    renderMediaGrid();
+    TBF.Utils.showToast('Image deleted');
+  }
+
+
+ function renderMediaGrid() {
+    const q   = (document.getElementById('mediaSearch')?.value || '').toLowerCase();
+    const cat = document.getElementById('mediaCatFilter')?.value || 'all';
+    
+    const filtered = allMedia.filter(m => {
+      const matchCat = cat === 'all' || (m.category || '').toLowerCase() === cat;
+      const matchQ   = !q || (m.title || m.name || '').toLowerCase().includes(q);
+      return matchCat && matchQ;
+    });
+
+    document.getElementById('mediaCount').textContent = `${filtered.length} photo${filtered.length !== 1 ? 's' : ''}`;
+
+    document.getElementById('mediaGrid').innerHTML = filtered.length
+      ? filtered.map(m => `
+        <div class="img-card" data-url="${encodeURIComponent(m.url || '')}" data-id="${m.id}">
+          <div class="img-card__visual">
+            <img src="${m.url ? 'http://localhost:5000' + m.url : ''}" alt="${m.title || 'Job Photo'}" loading="lazy"/>
+          </div>
+          <div class="img-card__overlay">
+            <button class="btn btn--ghost btn--sm" onclick="viewImageCard(this)">👁 View</button>
+            <button class="btn btn--danger btn--sm" onclick="deleteImageCard(this)">🗑 Delete</button>
+          </div>
+          <div class="img-card__meta">
+            <div class="img-card__name">${m.title || m.designNum || 'Untilted'}</div>
+            <div class="img-card__cat">${m.category || 'General'} · Ref: ${m.designNum || 'N/A'}</div>
+          </div>
+        </div>
+      `).join('')
+      : '<div class="empty-state" style="grid-column:1/-1"><div class="empty-state__icon">🖼️</div>No finished job photos logged yet</div>';
+  }
+
+  // Reads from data attributes — no raw URL in onclick
+  function viewImageCard(btn) {
+    const card = btn.closest('.img-card');
+    const url  = decodeURIComponent(card.dataset.url || '');
+    const name = card.dataset.name || '';
+    if (!url) return TBF.Utils.showToast('No preview available', 'error');
+    window.open(url, '_blank');
+  }
+
+  async function deleteImageCard(btn) {
+    if (!confirm('Delete this image?')) return;
+    const card = btn.closest('.img-card');
+    const id   = parseInt(card.dataset.id, 10);
+    await window.TBF_API.Media.delete(id);
+    allMedia = allMedia.filter(m => m.id !== id);
+    renderMediaGrid();
+    TBF.Utils.showToast('Image deleted');
+  }
+
+  /* ============================================================
+     DESIGNS TABLE
+     ============================================================ */
+  function renderDesignsTable() {
+    document.getElementById('designsTbody').innerHTML = allDesigns.length
+      ? allDesigns.map((design, index) => {
+          // Parses Object Categories to Text
+          let catName = design.catLabel || design.category || design.cat || '—';
+          if (typeof catName === 'object' && catName !== null) {
+              catName = catName.name || catName.title || catName.slug || '—';
+          } else if (typeof catName === 'string') {
+              catName = catName.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+          }
+
+          // Grabs cover thumbnail
+          let rawImg = design.imageUrl || design.image || '';
+          let imgArray = rawImg.split(',').filter(url => url.trim() !== '');
+          let finalImg = imgArray.length > 0 ? imgArray[0] : '';
+
+          let imgHtml = `<div style="width:36px; height:36px; background:var(--bg-lighter); border-radius:6px; display:flex; align-items:center; justify-content:center; color:var(--text-muted);">—</div>`;
+          if (finalImg) {
+              const imgSrc = finalImg.startsWith('http') ? finalImg : `http://localhost:5000${finalImg}`;
+              imgHtml = `<img src="${imgSrc}" style="width:36px; height:36px; border-radius:6px; object-fit:cover; border:1px solid var(--border-2);" alt="Design"/>`;
+          }
+
+          return `
+          <tr>
+            <td style="color:var(--text-muted);font-size:11px;">${index + 1}</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:12px;">
+                ${imgHtml}
+                <span style="font-weight:500;">${design.name}</span>
+              </div>
+            </td>
+            <td>${catName}</td>
+            <td><code style="font-size:11px;color:var(--blue);">${design.num || design.number}</code></td>
+            <td>${design.badge ? `<span class="badge badge--${design.badge === 'new' ? 'new' : 'pop'}">${design.badge}</span>` : '—'}</td>
+            <td>
+              <div class="tbl-actions">
+                <button class="btn btn--ghost btn--sm" onclick="openEditDesign(${design.id})">Edit</button>
+                <button class="btn btn--danger btn--sm" onclick="deleteDesign(${design.id})">Delete</button>
+              </div>
+            </td>
+          </tr>`;
+        }).join('')
+      : '<tr><td colspan="6"><div class="empty-state"><div class="empty-state__icon">🎨</div>No designs yet</div></td></tr>';
+  }  
+
+  async function deleteDesign(id) {
+    if (!confirm('Delete this design?')) return;
+    
+    // Call the newly added Service method
+    await TBF.DesignService.delete(id); 
+    
+    allDesigns = allDesigns.filter(d => d.id !== id);
+    renderDesignsTable();
+    TBF.Utils.showToast('Design deleted');
+  }
+
+  function promoteToDesign(name, imageUrl) {
+  closeDrawer(); // Slide the order drawer away
+  // Open the Design Modal but pass it the customer's data!
+  openDesignModal({ id: null, name: name, imageUrl: imageUrl });
+}
+
+  function openAddDesign() {
+  openDesignModal(null);
+}
+
+  function openEditDesign(id) {
+    const design = allDesigns.find(d => d.id === id);
+    if (!design) return;
+    openDesignModal(design);
+  }
+
+ function openDesignModal(design) {
+  const isEdit = design && design.id != null; 
+  
+  // Connects the Bespoke ID directly!
+  const designNumber = (design && design.number) ? design.number : ('TBF-' + Math.floor(1000 + Math.random() * 9000));
+  const prefillName = design ? (design.name || '') : '';
+  
+  let rawCat = design ? (design.category || design.cat) : 'native-monogram';
+  if (typeof rawCat === 'object' && rawCat !== null) rawCat = rawCat.slug || rawCat.name || rawCat.id || 'native-monogram';
+  const prefillCat = typeof rawCat === 'string' ? rawCat.toLowerCase().replace(/\s+/g, '-') : 'native-monogram';
+
+  const rawPrefillImage = design ? (design.imageUrl || design.image || '') : '';
+  const imageArray = rawPrefillImage.split(',').filter(url => url.trim() !== '');
+  
+  // Renders the preview thumbnails safely
+  const prefillPreviewHtml = imageArray.map(url => {
+    const cleanUrl = url.startsWith('http') ? url : `http://localhost:5000${url}`;
+    return `<img src="${cleanUrl}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid var(--border-2);" alt="Preview"/>`;
+  }).join('');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'designModalOverlay';
+  overlay.innerHTML = `
+    <div class="modal-box">
+      <div class="modal__header">
+        <div class="modal__title">${isEdit ? 'Edit Design' : 'Add Design'}</div>
+        <button class="modal__close" onclick="closeDesignModal()">✕</button>
+      </div>
+      <div class="modal__body">
+        <input type="hidden" id="prefillImageUrl" value="${rawPrefillImage}" />
+        <div class="field">
+          <label class="field__label">Design Name *</label>
+          <input class="field__input" id="modalDesignName" type="text" value="${prefillName}"/>
+        </div>
+        <div class="field">
+          <label class="field__label">Design Number *</label>
+          <input type="text" id="modalDesignNumber" class="field__input" style="background: var(--bg); cursor: not-allowed;" readonly value="${designNumber}" />
+        </div> 
+        <div class="field">
+          <label class="field__label">Category *</label>
+          <select class="field__select" id="modalDesignCat">
+            <option value="native-monogram" ${prefillCat.includes('native-monogram') ? 'selected' : ''}>Native Monogram</option>
+            <option value="native-normal"   ${prefillCat.includes('native-normal') ? 'selected' : ''}>Native Normal</option>
+            <option value="agbada"          ${prefillCat.includes('agbada') ? 'selected' : ''}>Agbada</option>
+            <option value="english"         ${prefillCat.includes('english') ? 'selected' : ''}>English Wear</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field__label">Badge</label>
+          <select class="field__select" id="modalDesignBadge">
+            <option value="">None</option>
+            <option value="new" ${(isEdit && design.badge === 'new') ? 'selected' : ''}>New</option>
+            <option value="popular" ${(isEdit && design.badge === 'popular') ? 'selected' : ''}>Popular</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field__label">Design Images (Upload Multiple)</label>
+          <div class="upload-box" onclick="document.getElementById('modalDesignImage').click()">
+            <div class="upload-box__icon">🖼️</div>
+            <div class="upload-box__text"><strong>Click to upload</strong> new photos<br>Leave blank to keep the current/customer photo.</div>
+          </div>
+          <input type="file" id="modalDesignImage" accept="image/*" multiple style="display:none" onchange="previewDesignImages(this)"/>
+          <div id="modalDesignPreview" style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+            ${prefillPreviewHtml}
+          </div>
+        </div>
+      <div class="modal__footer">
+        <button class="btn btn--ghost" onclick="closeDesignModal()">Cancel</button>
+        <button class="btn btn--dark" onclick="saveDesign(${isEdit ? design.id : 'null'})">
+          ${isEdit ? 'Save Changes' : 'Publish Design'}
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  }
+
+  async function saveDesign(id) {
+    const name = document.getElementById('modalDesignName').value.trim();
+    const number = document.getElementById('modalDesignNumber').value.trim();
+    const cat = document.getElementById('modalDesignCat').value;
+    const badge = document.getElementById('modalDesignBadge').value;
+
+    if (!name || !number) return TBF.Utils.showToast('Name and design number are required', 'error');
+
+    const btn = document.querySelector('.modal__footer .btn--dark');
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+
+    let finalImageString = document.getElementById('prefillImageUrl').value;
+    if (finalImageString === 'undefined' || finalImageString === 'null') finalImageString = '';
+
+    const imageInput = document.getElementById('modalDesignImage');
+    if (imageInput.files.length > 0) {
+      try {
+        const response = await TBF.MediaService.upload(Array.from(imageInput.files), { category: 'designs', title: name, designNum: number });
+        const uploaded = response.data || response;
+        // 👇 FIXED: If you upload NEW files in the modal, join all of them together!
+        if (uploaded && uploaded.length > 0) {
+          finalImageString = uploaded.map(u => u.url).join(','); 
+        }
+      } catch (e) {
+        TBF.Utils.showToast('Image upload failed', 'error');
+        btn.textContent = id ? 'Save Changes' : 'Publish Design';
+        btn.disabled = false;
+        return;
+      }
+    }
+
+    // We send BOTH keys to guarantee your backend catches it regardless of how the schema is named!
+    const payload = { name, number, category: cat, badge };
+    if (finalImageString) {
+      payload.imageUrl = finalImageString; 
+      payload.image = finalImageString;
+    }
+
+    try {
+      if (id) {
+        await TBF.DesignService.update(id, payload);
+        TBF.Utils.showToast('Design updated successfully');
+      } else {
+        await TBF.DesignService.create(payload);
+        TBF.Utils.showToast('Design added successfully');
+      }
+      closeDesignModal();
+      setTimeout(() => window.location.reload(), 1000); 
+    } catch (e) {
+      TBF.Utils.showToast('Failed to save design record.', 'error');
+      btn.textContent = id ? 'Save Changes' : 'Publish Design';
+      btn.disabled = false;
+    }
+  }
+
+  function previewDesignImages(input) {
+    const preview = document.getElementById('modalDesignPreview');
+    preview.innerHTML = '';
+    if (!input.files.length) return;
+    
+    // Loop through all selected files and create a tiny thumbnail for each
+    Array.from(input.files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        preview.innerHTML += `<img src="${e.target.result}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid var(--border-2);"/>`;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function closeDesignModal() {
+    const overlay = document.getElementById('designModalOverlay');
+    if (overlay) overlay.remove();
+  }
+
+  async function saveDesign(id) {
+    const name = document.getElementById('modalDesignName').value.trim();
+    const number = document.getElementById('modalDesignNumber').value.trim();
+    const cat = document.getElementById('modalDesignCat').value;
+    const badge = document.getElementById('modalDesignBadge').value;
+
+    if (!name || !number) return TBF.Utils.showToast('Name and design number are required', 'error');
+
+    const btn = document.querySelector('.modal__footer .btn--dark');
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+
+    let finalImageString = document.getElementById('prefillImageUrl').value;
+    if (finalImageString === 'undefined' || finalImageString === 'null') finalImageString = '';
+
+    const imageInput = document.getElementById('modalDesignImage');
+    if (imageInput.files.length > 0) {
+      try {
+        const response = await TBF.MediaService.upload(Array.from(imageInput.files), { category: 'designs', title: name, designNum: number });
+        const uploaded = response.data || response;
+        if (uploaded && uploaded.length > 0) finalImageString = uploaded[0].url; 
+      } catch (e) {
+        TBF.Utils.showToast('Image upload failed', 'error');
+        btn.textContent = id ? 'Save Changes' : 'Publish Design';
+        btn.disabled = false;
+        return;
+      }
+    }
+
+    // Slice string to ONLY the first valid URL
+    let firstValidUrl = '';
+    if (finalImageString) {
+      firstValidUrl = finalImageString.split(',').filter(url => url.trim() !== '')[0] || '';
+    }
+
+    // We send BOTH image keys to guarantee the backend saves it
+    const payload = { 
+      name, 
+      number, 
+      category: cat, 
+      badge,
+      image: firstValidUrl,
+      imageUrl: firstValidUrl
+    };
+
+    try {
+      if (id) {
+        await TBF.DesignService.update(id, payload);
+        TBF.Utils.showToast('Design updated successfully');
+      } else {
+        await TBF.DesignService.create(payload);
+        TBF.Utils.showToast('Design added successfully');
+      }
+      closeDesignModal();
+      // 👇 RELOADS page automatically so the UI pulls fresh, valid DB data immediately!
+      setTimeout(() => window.location.reload(), 800); 
+    } catch (e) {
+      TBF.Utils.showToast('Failed to save design record.', 'error');
+      btn.textContent = id ? 'Save Changes' : 'Publish Design';
+      btn.disabled = false;
+    }
+  }
+
+  /* ============================================================
+     CUSTOMERS TABLE
+     ============================================================ */
+ function renderCustomersTable() {
+  const map = {};
+  
+  // 1. Build the customer list from all orders
+  allOrders.forEach(o => {
+    const key = o.phone || o.customer;
+    if (!map[key]) map[key] = { name: o.customer, phone: o.phone, whatsapp: o.whatsapp, orders: 0, lastOrder: o.createdAt };
+    map[key].orders++;
+    if (new Date(o.createdAt) > new Date(map[key].lastOrder)) map[key].lastOrder = o.createdAt;
+  });
+  
+  const customers = Object.values(map);
+  
+  // 2. Render the table
+  document.getElementById('customersTbody').innerHTML = customers.length
+    ? customers.map(c => {
+        
+        // 👉 MOVED INSIDE THE LOOP: Safely format the phone number for 'c'
+        const phoneStr = c.whatsapp || c.phone || '';
+        const phoneClean = phoneStr.replace(/\D/g, ''); // Removes spaces and + symbols
+        
+        // 👉 Conditionally build the button: if no number exists, show a gray dash
+        const waButton = phoneClean 
+          ? `<a href="https://wa.me/${phoneClean}" target="_blank" class="btn btn--mint" style="padding: 6px 12px; display: inline-block; text-decoration: none;">💬</a>` 
+          : `<span style="color: var(--text-muted);">—</span>`;
+
+          //the key to find this exact customer's orders
+          const customerKey = c.phone || c.name;
+
+        return `
+        <tr>
+          <td style="font-weight:500;">${c.name}</td>
+          <td>${c.phone || '—'}</td>
+          <td>${c.whatsapp || '—'}</td>
+          <td style="text-align:center;">${c.orders}</td>
+          <td>${TBF.Utils.formatDate(c.lastOrder)}</td>
+          <td>
+            ${waButton}
+            <button class="btn btn--ghost btn--sm" onclick="viewCustomerHistory('${customerKey}')">📋 History</button>
+          </td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="6"><div class="empty-state"><div class="empty-state__icon">👥</div>No customers yet</div></td></tr>';
+}
+
+/* ============================================================
+     CUSTOMER HISTORY DRAWER
+     ============================================================ */
+  function viewCustomerHistory(customerKey) {
+    // 1. Find all orders belonging to this customer
+    const customerOrders = allOrders.filter(o => (o.phone || o.customer) === customerKey);
+
+    // 2. Sort them so the newest orders are at the top
+    customerOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    // 3. Set the drawer title
+    const cName = customerOrders[0]?.customer || 'Customer';
+    document.getElementById('customerDrawerTitle').textContent = `${cName}'s Order History`;
+
+    // 4. Generate the clickable history cards
+    let html = '';
+    customerOrders.forEach(o => {
+      html += `
+        <div class="detail-section" style="cursor: pointer; border: 1px solid var(--border-2); transition: all 0.2s; margin-bottom: 12px;" 
+             onmouseover="this.style.borderColor='var(--blue)'; this.style.transform='translateY(-2px)'" 
+             onmouseout="this.style.borderColor='var(--border-2)'; this.style.transform='translateY(0)'" 
+             onclick="openSpecificOrderFromHistory('${o.id}')">
+          
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+            <strong style="color: var(--navy); font-size: 14px;">${o.id}</strong>
+            ${statusBadge(o.status)}
+          </div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">
+            Placed: ${TBF.Utils.formatDate(o.createdAt)}
+          </div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">
+            Items: ${o.qty || 1}
+          </div>
+          <div style="font-size: 13px; color: var(--navy); font-weight: 600; margin-top: 8px; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 8px;">
+            Total: ₦${(o.grandTotal || 0).toLocaleString('en-NG')}
+          </div>
+        </div>
+      `;
+    });
+
+    document.getElementById('customerDrawerBody').innerHTML = html;
+
+    // 5. Open the drawer
+    document.getElementById('customerDrawer').classList.add('open');
+    document.getElementById('drawerOverlay').classList.add('open');
+    document.getElementById('drawerOverlay').setAttribute('onclick', 'closeCustomerDrawer()');
+  }
+
+  function closeCustomerDrawer() {
+    document.getElementById('customerDrawer').classList.remove('open');
+    document.getElementById('drawerOverlay').classList.remove('open');
+    // Reset overlay back to default order drawer closer
+    document.getElementById('drawerOverlay').setAttribute('onclick', 'closeDrawer()');
+  }
+
+  // Smoothly transitions from the History Drawer to the specific Order Details drawer
+  function openSpecificOrderFromHistory(orderId) {
+    closeCustomerDrawer();
+    setTimeout(() => {
+      openDrawer(orderId);
+    }, 300); // Wait for the first drawer to slide away
+  }
+  /* ============================================================
+     STATS
+     ============================================================ */
+  function updateStats() {
+    const total      = allOrders.length;
+    const pending    = allOrders.filter(o => o.status === 'pending').length;
+    const production = allOrders.filter(o => o.status === 'production').length;
+    const delivered  = allOrders.filter(o => o.status === 'delivered').length;
+
+    document.getElementById('statTotal').textContent      = total;
+    document.getElementById('statPending').textContent    = pending;
+    document.getElementById('statProduction').textContent = production;
+    document.getElementById('statDelivered').textContent  = delivered;
+    document.getElementById('pendingBadge').textContent   = `${pending} pending`;
+
+    document.getElementById('recentOrdersTbody').innerHTML =
+      allOrders.slice(0, 5).map(o => renderOrderRow(o, true)).join('') ||
+      '<tr><td colspan="6"><div class="empty-state"><div class="empty-state__icon">📭</div>No orders yet</div></td></tr>';
+  }
+
+  // Build invoices from orders — one invoice per order
+  function renderInvoicesTable() {
+    // Build invoices from orders
+    const invoiceRows = allOrders.map(o => ({
+      ref:          'INV-' + o.id,
+      orderId:      o.id,
+      customer:     o.customer,
+      deliveryMode: o.deliveryMode || 'pickup',
+      grandTotal:   o.grandTotal || 0,
+      status:       o.status || 'pending',
+    }));
+
+    document.getElementById('invoicesCount').textContent =
+      invoiceRows.length + ' invoice' + (invoiceRows.length !== 1 ? 's' : '');
+
+    document.getElementById('invoicesTbody').innerHTML = invoiceRows.length
+      ? invoiceRows.map(inv => `
+        <tr>
+          <td><code style="font-size:11px;">${inv.ref}</code></td>
+          <td><code style="font-size:11px;">${inv.orderId}</code></td>
+          <td style="font-weight:500;">${inv.customer}</td>
+          <td>
+            <span class="badge ${inv.deliveryMode === 'dispatch' ? 'badge--production' : 'badge--confirmed'}">
+              ${inv.deliveryMode}
+            </span>
+          </td>
+          <td style="font-weight:700; color:var(--navy);">
+            ₦${inv.grandTotal.toLocaleString('en-NG')}
+          </td>
+          <td>
+            ${statusBadge(inv.status)}
+          </td>
+          <td>
+            <div class="tbl-actions">
+              <a href="invoice-editor.html?id=${inv.orderId}" class="btn btn--ghost btn--sm" style="text-decoration:none;">✏️ Edit</a>
+              <button class="btn btn--dark btn--sm" onclick="sendInvoiceWhatsApp('${inv.orderId}')">💬 Send</button>
+            </div>
+          </td>
+        </tr>`).join('')
+      : '<tr><td colspan="7"><div class="empty-state"><div class="empty-state__icon">🧾</div>No invoices yet</div></td></tr>';
+  }
+
+function setInvoiceStatus(orderId, status) {
+  const order = allOrders.find(o => o.id === orderId);
+  if (order) order.invoiceStatus = status;
+  TBF.Utils.showToast('Invoice status updated to ' + status);
+}
+
+function sendInvoiceWhatsApp(orderId) {
+  const o = allOrders.find(o => o.id === orderId);
+  if (!o) return;
+  if (!o.invoiceTotal) {
+    TBF.Utils.showToast('Please set the total amount first', 'error');
+    return;
+  }
+  const phone = (o.whatsapp || o.phone || '').replace(/\D/g, '');
+  const msg = `Hello ${o.customer}!
+  Your order #${o.id} is confirmed.
+
+  Order Summary:
+  - Invoice: ${o.id}
+  - Design: ${o.design}
+  - Delivery: ${o.deliveryMode}
+  - Total: ${o.invoiceTotal ? '₦' + Number(o.invoiceTotal).toLocaleString('en-NG') : 'TBC'}
+
+  Kindly make payment to proceed. Thank you!
+
+  — TreshBlinkybill Fits`;
+  window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(msg), '_blank');
+  setInvoiceStatus(orderId, 'sent');
+  renderInvoicesTable();
+}
+
+function printInvoice(orderId) {
+  const o = allOrders.find(o => o.id === orderId);
+  if (!o) return;
+  const printWindow = window.open('', '_blank', 'width=620,height=800');
+  printWindow.document.write('<!DOCTYPE html><html><head><title>Invoice INV-' + o.id + '</title><style>' +
+    '* { box-sizing:border-box; margin:0; padding:0; }' +
+    'body { font-family:-apple-system,BlinkMacSystemFont,sans-serif; padding:40px; color:#0a1f44; }' +
+    '.header { display:flex; justify-content:space-between; margin-bottom:28px; padding-bottom:16px; border-bottom:2px solid #0a1f44; }' +
+    '.brand-name { font-size:20px; font-weight:700; }' +
+    '.brand-sub { font-size:11px; color:#888; margin-top:3px; }' +
+    '.inv-ref { font-size:13px; color:#888; }' +
+    '.inv-date { font-size:12px; color:#aaa; margin-top:3px; }' +
+    '.section { margin-top:22px; }' +
+    '.section-title { font-size:10px; font-weight:700; color:#aaa; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }' +
+    '.row { display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid #f0f0f0; font-size:13px; }' +
+    '.row:last-child { border-bottom:none; }' +
+    '.key { color:#666; }' +
+    '.val { font-weight:600; }' +
+    '.total-row { display:flex; justify-content:space-between; padding:14px 0 0; margin-top:10px; border-top:2px solid #0a1f44; font-size:16px; font-weight:700; }' +
+    '.footer { margin-top:36px; text-align:center; font-size:10px; color:#bbb; }' +
+    '@media print { body { padding:24px; } }' +
+    '</style></head><body>' +
+    '<div class="header">' +
+      '<div><div class="brand-name">TreshBlinkybill Fits</div><div class="brand-sub">Premium Tailoring · Lagos</div></div>' +
+      '<div style="text-align:right"><div class="inv-ref">INV-' + o.id + '</div><div class="inv-date">' + new Date().toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'}) + '</div></div>' +
+    '</div>' +
+    '<div class="section"><div class="section-title">Bill To</div>' +
+      '<div class="row"><span class="key">Name</span><span class="val">' + o.customer + '</span></div>' +
+      '<div class="row"><span class="key">Phone</span><span class="val">' + (o.phone || '—') + '</span></div>' +
+      '<div class="row"><span class="key">Address</span><span class="val">' + (o.address || '—') + '</span></div>' +
+    '</div>' +
+    '<div class="section"><div class="section-title">Order Details</div>' +
+      '<div class="row"><span class="key">Order ID</span><span class="val">' + o.id + '</span></div>' +
+      '<div class="row"><span class="key">Design</span><span class="val">' + (o.design || '—') + '</span></div>' +
+      '<div class="row"><span class="key">Event</span><span class="val">' + (o.event || '—') + '</span></div>' +
+      '<div class="row"><span class="key">Quantity</span><span class="val">' + (o.qty || 1) + '</span></div>' +
+      '<div class="row"><span class="key">Delivery Mode</span><span class="val">' + (o.deliveryMode || 'pickup') + '</span></div>' +
+    '</div>' +
+    '<div class="section"><div class="section-title">Payment</div>' +
+      '<div class="row"><span class="key">Subtotal</span><span class="val">₦' + Number(o.total || 0).toLocaleString('en-NG') + '</span></div>' +
+      '<div class="row"><span class="key">Delivery Fee</span><span class="val">' + (o.deliveryMode === 'dispatch' ? 'TBC' : '—') + '</span></div>' +
+      '<div class="total-row"><span>Total</span><span>₦' + Number(o.total || 0).toLocaleString('en-NG') + '</span></div>' +
+    '</div>' +
+    '<div class="footer">Thank you for choosing TreshBlinkybill Fits 🙏</div>' +
+    '</' + 'body></html>');
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
+  printWindow.close();
+ }
+/* ============================================================
+     INIT
+     ============================================================ */
+  async function init() {
+  try {
+    const [orders, media, designs] = await Promise.all([
+      TBF.OrderService.getAll(),
+      TBF.MediaService.getAll(),
+      TBF.DesignService.getAll(),
+    ]);
+    
+    // 👉 SANITIZE: Pull directly from the root of the object (o.total)
+    // 👉 SANITIZE: Pull grandTotal from the new schema
+    allOrders = orders.map(o => ({
+      ...o,
+      grandTotal:  o.grandTotal ? parseFloat(o.grandTotal) : 0,
+      deliveryFee: o.deliveryFee ? parseFloat(o.deliveryFee) : 0,
+      // If the backend returns an array of items, count them up
+      qty: o.items ? o.items.reduce((sum, item) => sum + (item.qty || 1), 0) : 1
+    }));
+
+    allMedia = media.filter(item => item.category !== 'designs' && item.category !== 'bespoke'); // Exclude designs and orders from the media grid
+    allDesigns = designs;
+    
+    populateMediaDesignDropdown();
+    updateStats();
+    
+    renderOrdersTable(); 
+    renderInvoicesTable(); // <-- Make sure this is also called so the UI updates!
+
+  } catch (error) {
+    console.error("Failed to load initial data:", error);
+    TBF.Utils.showToast("Failed to load dashboard data", "error");
+  }
+}
+
+  /* ============================================================
+     AUTH — Updated to use TBF_API
+     ============================================================ */
+  async function checkAuth() {
+    try {
+      // Using your API layer instead of raw fetch
+      const data = await window.TBF_API.Auth.getMe();
+      
+      // If your backend returns { success: false } instead of a standard HTTP error
+      if (!data.success) {
+        window.location.replace('./login.html');
+        return false;
+      }
+
+      const nameEl = document.getElementById('admin-name');
+      if (nameEl && data.data) nameEl.textContent = data.data.name;
+      return true;
+
+    } catch (err) {
+      // The api.js 'http' helper automatically throws on non-200 responses
+      console.warn('Auth check failed:', err.message);
+      window.location.replace('./login.html'); 
+      return false;
+    }
+  }
+
+  async function logout() {
+    try {
+      await window.TBF_API.Auth.logout();
+    } catch (err) {
+      console.error('Logout error:', err.message);
+    } finally {
+      // Always redirect to login, even if the server logout request fails
+      window.location.replace('./login.html');
+    }
+  }
+
+  // Auth runs first — init only loads if authenticated
+  checkAuth().then(authenticated => {
+    if (authenticated) init();
+  });
+</script>
+</body>
+</html>
