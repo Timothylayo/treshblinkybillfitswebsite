@@ -1,21 +1,13 @@
 // ================================================================
 // src/middleware/upload.middleware.js
-// Multer config — uploads images directly to Cloudinary
+// Multer config — receives files in memory, then handed to ImageKit
 // ================================================================
 
 import multer from 'multer';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import cloudinary from '../config/cloudinary.js';
 import { config } from '../config/app.config.js';
 
-// ---- Storage: upload straight to Cloudinary instead of local disk ----
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: 'tbf-uploads',            // groups files in Cloudinary's dashboard
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-  },
-});
+// ---- Storage: memory buffer (not disk, not Cloudinary-specific storage) ----
+const storage = multer.memoryStorage();
 
 // ---- File filter: images only (same as before) ----
 function fileFilter(req, file, cb) {

@@ -2,7 +2,7 @@ import { prisma } from '../config/db.js';
 import fs         from 'fs';
 import path       from 'path';
 import { config } from '../config/app.config.js';
-import cloudinary from '../config/cloudinary.js';
+import imagekit from '../config/imagekit.js';
 
 export const MediaService = {
 
@@ -37,40 +37,43 @@ export const MediaService = {
 
     return { data, total: data.length };
   },
-  async saveMany(files, metadataPayload = {}) {
-    // Frontend FormData sends metadata as a JSON string. We parse it safely here.
-    let meta = metadataPayload;
-    if (typeof metadataPayload === 'string') {
-      try { 
-        meta = JSON.parse(metadataPayload); 
-      } catch (e) { 
-        meta = {}; 
-      }
-    }
 
-    const created = await Promise.all(
-      files.map((file, index) =>
-        prisma.media.create({
-          data: {
-            filename:     file.filename,
-            url:          file.path, // This is the Cloudinary URL returned by multer-storage-cloudinary
-            mimetype:     file.mimetype,
-            size:         file.size,
-            originalName: file.originalname,
-            
-            // New Portfolio / Collection Data
-            category:     meta.category || 'general',
-            title:        meta.title || null,
-            designNum:    meta.designNum || null,
-            batchId:      meta.batchId || null,
-            
-            // ONLY the very first file in the upload batch gets marked as the primary cover
-            isPrimary:    index === 0 ? (meta.isPrimaryBatchCover === true || meta.isPrimaryBatchCover === 'true') : false,
-          },
-        })
-      )
-    );
-    return created;
+  async saveMany(files, metadataPayload = {}) {
+  let meta = metadataPayload;
+  if (typeof metadataPayload === 'string') {
+    try { meta = JSON.parse(metadataPayload); } catch (e) { meta = {}; }
+  }
+
+  const created = await Promise.all(
+    files.map(async (file, index) => {
+      // Upload the in-memory buffer to ImageKit
+      const uploadResult = await imagekit.upload({
+        file: file.buffer.toString('base64'), // ImageKit accepts base64 or a stream/URL
+        fileName: file.originalname,
+        folder: '/tbf-uploads',
+      });
+
+      return prisma.media.create({
+        data: {
+          filename:     uploadResult.fileId,   // ImageKit's fileId — needed for deletion later
+          url:          uploadResult.url,      // ImageKit's full delivery URL
+          mimetype:     file.mimetype,
+          size:         file.size,
+          originalName: file.originalname,
+
+          category:     meta.category || 'general',
+          title:        meta.title || null,
+          designNum:    meta.designNum || null,
+          batchId:      meta.batchId || null,
+
+          isPrimary: index === 0
+            ? (meta.isPrimaryBatchCover === true || meta.isPrimaryBatchCover === 'true')
+            : false,
+        },
+      });
+    })
+  );
+  return created;
   },
 
   async update(id, data) {
@@ -89,12 +92,11 @@ export const MediaService = {
   const media = await prisma.media.findUnique({ where: { id: Number(id) } });
   if (!media) return null;
 
-  // Delete file from Cloudinary using the stored public_id
+  // Delete file from ImageKit using the stored fileId
   if (media.filename) {
-    await cloudinary.uploader.destroy(media.filename);
+    await imagekit.deleteFile(media.filename);
   }
 
-  // Delete DB record
   return prisma.media.delete({ where: { id: Number(id) } });
 },
 
