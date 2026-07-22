@@ -80,7 +80,7 @@ export async function logout(req, res, next) {
     res.clearCookie('tbf_token', {
       httpOnly: true,
       secure:   config.nodeEnv === 'production',
-      sameSite: config.nodeEnv === 'production' ? 'strict' : 'lax',
+      sameSite: config.nodeEnv === 'production' ? 'none' : 'lax',
     });
     return res.success({ message: 'Logged out successfully' });
   } catch (err) {
