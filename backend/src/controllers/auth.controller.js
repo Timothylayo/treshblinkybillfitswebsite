@@ -37,7 +37,7 @@ export async function login(req, res, next) {
     res.cookie('tbf_token', token, {
       httpOnly: true,   // blocks JavaScript access completely
       secure:   config.nodeEnv === 'production', // HTTPS only in production
-      sameSite: config.nodeEnv === 'production' ? 'strict' : 'lax', // blocks cross-site requests
+      sameSite: config.nodeEnv === 'production' ? 'none' : 'lax', // blocks cross-site requests
       maxAge:   1 * 24 * 60 * 60 * 1000, // 1 day in milliseconds
     });
 

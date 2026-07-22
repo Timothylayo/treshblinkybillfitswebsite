@@ -294,6 +294,7 @@
 
   <script src="../api/api.js"></script>
   <script src="../services/services.js"></script>
+  <script src="../config.js"></script>
  <script>
     let currentOrder = null;
 
@@ -364,7 +365,7 @@
         let visualHtml = `<div style="width:40px; height:40px; background:var(--navy); color:white; border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:serif; font-style:italic; font-size:18px;">${initial}</div>`;
         
         if (finalImage) {
-          const imgSrc = finalImage.startsWith('http') ? finalImage : `http://localhost:5000${finalImage}`;
+          const imgSrc = finalImage.startsWith('http') ? finalImage : `${BACKEND_URL}${finalImage}`;
           visualHtml = `<img src="${imgSrc}" style="width:40px; height:40px; border-radius:6px; object-fit:cover; border:1px solid var(--border-2);" alt="Item"/>`;
         }
         const initialPrice = item.unitPrice || 0;

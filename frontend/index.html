@@ -182,8 +182,7 @@
   <!-- FOOTER SLOT -->
   <div id="footer-slot"></div>
 
-  <script src="api/api.js"></script>
-  <script src="services/services.js"></script>
+  <script src="config.js"></script>
   <script src="api/api.js"></script>
   <script src="services/services.js"></script>
   <script>
@@ -361,7 +360,7 @@
         if(checkoutBtn) checkoutBtn.disabled = false;
       }
     }
-    
+
     async function init() {
       await TBF.ComponentLoader.loadNav('home');
       await TBF.ComponentLoader.loadFooter();
@@ -391,7 +390,7 @@
         return `
         <div class="mono-card ${d.grad || 'grad-1'}" style="background:var(--navy); text-decoration:none;">
           ${imgUrl 
-            ? `<img src="http://localhost:5000${imgUrl}" class="mono-card__img" alt="${safeName}"/>` 
+            ? `<img src="${imgUrl.startsWith('http') ? imgUrl : BACKEND_URL + imgUrl}" class="mono-card__img" alt="${safeName}"/>` 
             : `<div class="mono-card__deco"><span class="mono-deco">${(d.name || 'D').charAt(0)}</span></div>`
           }
           ${d.badge ? `<div class="mono-card__badge"><span class="badge badge--${d.badge === 'new' ? 'new' : 'pop'}">${d.badge}</span></div>` : ''}
@@ -414,7 +413,7 @@
         return `
         <div class="native-card" style="background:var(--navy);">
           ${p.url 
-            ? `<img src="http://localhost:5000${p.url}" class="mono-card__img" alt="${safeTitle}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"/>` 
+            ? `<img src="${p.url.startsWith('http') ? p.url : `${BACKEND_URL}${p.url}`}" class="mono-card__img" alt="${safeTitle}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"/>` 
             : `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><span class="mono-deco">📸</span></div>`
           }
           <div class="native-card__info" style="display:flex; flex-direction:column; gap:8px;">

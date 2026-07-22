@@ -99,6 +99,9 @@
     </button>
   </div>
 
+  <script src="../api/api.js" onerror="console.error('api.js failed to load — check for syntax errors in that file')"></script>
+  <script src="../services/services.js" onerror="console.error('services.js failed to load — check for syntax errors in that file')"></script>
+  <script src="../config.js"></script>
   <script>
     async function submitLogin() {
   const email    = document.getElementById('emailInput').value.trim();
@@ -118,7 +121,7 @@
   btn.disabled    = true;
 
   try {
-    const res = await fetch('http://localhost:5000/api/auth/login', {
+    const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
       method:      'POST',
       headers:     { 'Content-Type': 'application/json' },
       credentials: 'include', // sends and receives cookies

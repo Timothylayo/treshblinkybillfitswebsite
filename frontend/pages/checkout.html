@@ -99,6 +99,7 @@
 
   <script src="../api/api.js"></script>
   <script src="../services/services.js"></script>
+  <script src="../config.js"></script>
   <script>
     // Sync Phone and WhatsApp Fields
     document.addEventListener('DOMContentLoaded', () => {
@@ -145,7 +146,7 @@
           } else if (item.image.startsWith('http')) {
             imgSrc = item.image; // Absolute URL
           } else {
-            imgSrc = `http://localhost:5000${item.image}`; // Relative server URL
+            imgSrc = `${BACKEND_URL}${item.image}`; // Relative server URL
           }
         }
         

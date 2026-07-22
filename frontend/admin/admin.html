@@ -351,6 +351,7 @@
      ============================================================ -->
 <script src="../api/api.js" onerror="console.error('api.js failed to load — check for syntax errors in that file')"></script>
 <script src="../services/services.js" onerror="console.error('services.js failed to load — check for syntax errors in that file')"></script>
+<script src="../config.js"></script>
 
 <script>
   /* ============================================================
@@ -624,7 +625,7 @@
             <div style="margin-top:10px; font-size:10px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Additional Angles:</div>
             <div style="display:flex; gap:6px; margin-top:4px; flex-wrap:wrap;">
               ${extraImages.map(imgUrl => {
-                const cleanUrl = imgUrl.startsWith('http') ? imgUrl : `http://localhost:5000${imgUrl}`;
+                const cleanUrl = imgUrl.startsWith('http') ? imgUrl : `${BACKEND_URL}${imgUrl}`;
                 return `<a href="${cleanUrl}" target="_blank"><img src="${cleanUrl}" style="width:36px; height:36px; object-fit:cover; border-radius:4px; border:1px solid var(--border-2);"/></a>`;
               }).join('')}
             </div>
@@ -636,7 +637,7 @@
         
         let visualHtml = `<div style="width:38px; height:38px; background:var(--navy); color:white; border-radius:6px; display:flex; align-items:center; justify-content:center; font-family:serif; font-style:italic; font-size:18px;">${initial}</div>`;
         if (coverImage) {
-          const imgSrc = coverImage.startsWith('http') ? coverImage : `http://localhost:5000${coverImage}`;
+          const imgSrc = coverImage.startsWith('http') ? coverImage : `${BACKEND_URL}${coverImage}`;
           visualHtml = `<a href="${imgSrc}" target="_blank"><img src="${imgSrc}" style="width:38px; height:38px; border-radius:6px; object-fit:cover; border:1px solid var(--border-2);"/></a>`;
         }
 
@@ -805,7 +806,7 @@
       ? filtered.map(m => `
         <div class="img-card" data-url="${encodeURIComponent(m.url || '')}" data-id="${m.id}">
           <div class="img-card__visual">
-            <img src="${m.url ? 'http://localhost:5000' + m.url : ''}" alt="${m.title || 'Job Photo'}" loading="lazy"/>
+            <img src="${m.url ? (m.url.startsWith('http') ? m.url : `${BACKEND_URL}${m.url}`) : ''}" alt="${m.title || 'Job Photo'}" loading="lazy"/>
           </div>
           <div class="img-card__overlay">
             <button class="btn btn--ghost btn--sm" onclick="viewImageCard(this)">👁 View</button>
@@ -860,7 +861,7 @@
 
           let imgHtml = `<div style="width:36px; height:36px; background:var(--bg-lighter); border-radius:6px; display:flex; align-items:center; justify-content:center; color:var(--text-muted);">—</div>`;
           if (finalImg) {
-              const imgSrc = finalImg.startsWith('http') ? finalImg : `http://localhost:5000${finalImg}`;
+              const imgSrc = finalImg.startsWith('http') ? finalImg : `${BACKEND_URL}${finalImg}`;
               imgHtml = `<img src="${imgSrc}" style="width:36px; height:36px; border-radius:6px; object-fit:cover; border:1px solid var(--border-2);" alt="Design"/>`;
           }
 
@@ -930,7 +931,7 @@
   
   // Renders the preview thumbnails safely
   const prefillPreviewHtml = imageArray.map(url => {
-    const cleanUrl = url.startsWith('http') ? url : `http://localhost:5000${url}`;
+    const cleanUrl = url.startsWith('http') ? url : `${BACKEND_URL}${url}`;
     return `<img src="${cleanUrl}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid var(--border-2);" alt="Preview"/>`;
   }).join('');
 

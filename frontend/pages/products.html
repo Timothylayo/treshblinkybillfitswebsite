@@ -87,6 +87,7 @@
 
   <script src="../api/api.js"></script>
   <script src="../services/services.js"></script>
+  <script src="../config.js"></script>
   <script>
     const heroData = {
       natives: { grad:'grad-1', tag:'Native Collection', title:'Rooted in <em>Tradition</em>', sub:'Premium native wear — Ankara, Aso-Oke & more', ft:'Custom Native Fit' },
@@ -138,7 +139,7 @@
         return `
         <div class="card card--hover">
           <div class="p-img" style="background:var(--navy);">
-            <img src="${p.url ? 'http://localhost:5000' + p.url : ''}" style="width:100%; height:100%; object-fit:cover;" alt="${safeTitle}" loading="lazy"/>
+            <img src="${p.url ? (p.url.startsWith('http') ? p.url : `${BACKEND_URL}${p.url}`) : ''}" style="width:100%; height:100%; object-fit:cover;" alt="${safeTitle}" loading="lazy"/>
             <div class="p-badge-pos"><span class="badge badge--production">${p.designNum || 'Bespoke'}</span></div>
             <button class="p-fav" onclick="TBF.Utils.showToast('Saved to wishlist')">🤍</button>
           </div>
@@ -209,7 +210,7 @@
         gridEl.style.gap = '16px'; 
         gridEl.innerHTML = angles.map(a => `
           <div style="border-radius:8px; overflow:hidden; border:1px solid var(--border); background:var(--bg); display:flex; justify-content:center;">
-            <img src="http://localhost:5000${a.url}" style="width:100%; max-height:400px; object-fit:contain; border-radius:8px;" alt="Outfit Angle"/>
+            <img src="${a.url.startsWith('http') ? a.url : `${BACKEND_URL}${a.url}`}" style="width:100%; max-height:400px; object-fit:contain; border-radius:8px;" alt="Outfit Angle"/>
           </div>
         `).join('');
       } catch (err) {

@@ -4,7 +4,7 @@
    Services call this layer. Pages call services.
    ================================================================ */
 
-const BASE_URL = 'http://localhost:5000'; // Replace with your backend URL
+const BASE_URL = 'https://treshblinkybillfitswebsite.vercel.app'; // Replace with your backend URL
 
 /* ---- ROBUST HTTP HELPERS ---- */
 // Added an 'isPublic' flag so we don't send admin cookies on customer-facing routes
