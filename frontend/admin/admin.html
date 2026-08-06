@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin — TreshBlinkybill Fits</title>
+  <title>TreshBlinkybillfits | Admin Portal</title>
   <link rel="stylesheet" href="../../styles/main.css"/>
+  <link rel="icon" type="image/png" href="../assets/fitslogo.png"/>
   <style>
     body { background: #f4f7fb; }
 
@@ -130,7 +131,7 @@
     </a>
     <div class="admin-sidebar__section-label" style="margin-top:auto;">Site</div>
     <a class="admin-sidebar__link" href="../index.html" target="_blank">
-      <span class="admin-sidebar__icon">🌐</span> View Website
+      <span class="admin-sidebar__icon" href="../assets/fitslogo.png"></span> View Website
     </a>
   </aside>
 
@@ -352,7 +353,7 @@
 <script src="../api.js" onerror="console.error('api.js failed to load — check for syntax errors in that file')"></script>
 <script src="../services/services.js" onerror="console.error('services.js failed to load — check for syntax errors in that file')"></script>
 <script src="../config.js"></script>
-
+<script src="../utils.js"></script>
 <script>
   /* ============================================================
      STATE
@@ -384,6 +385,12 @@
   function showTab(tab, el) {
     closeSidebar();
     activeTab = tab;
+
+    // 👇 SAVE THE MEMORY HERE
+    if (window.TBF && window.TBF.Utils) {
+        window.TBF.Utils.saveState('admin_active_tab', tab);
+    }
+
     document.querySelectorAll('[id^="tab-"]').forEach(t => t.style.display = 'none');
     document.getElementById('tab-' + tab).style.display = 'block';
     document.querySelectorAll('.admin-sidebar__link').forEach(l => l.classList.remove('admin-sidebar__link--active'));
@@ -740,11 +747,13 @@
     const progress = document.getElementById('uploadProgress');
     const bar      = document.getElementById('progressBar');
     const label    = document.getElementById('progressLabel');
+    
     progress.style.display = 'block';
-    bar.style.width = '20%';
-    label.textContent = `Uploading batch of ${files.length} photo${files.length > 1 ? 's' : ''}...`;
+    
+    // 👇 Update UI for Compression Phase
+    bar.style.width = '10%';
+    label.textContent = `Compressing ${files.length} photo${files.length > 1 ? 's' : ''}...`;
 
-    // The glue tying these specific photos together as 1 product instance
     const batchId = 'batch_' + Date.now();
 
     const metadataObj = {
@@ -756,12 +765,28 @@
     };
 
     try {
-      // Passes full object to your service
-      const response = await TBF.MediaService.upload(Array.from(files), metadataObj);
-      const uploaded = response.data || response; // Adjust based on your API response structure
+      // 👇 THE FIX: Loop through and compress the files before uploading
+      const filesToUpload = [];
+      for (let i = 0; i < files.length; i++) {
+          const originalFile = files[i];
+          // Settings: Max Width 800px, 60% quality (~150KB - 250KB per file)
+          const compressedFile = await TBF.Utils.compressImage(originalFile, 800, 0.6);
+          filesToUpload.push(compressedFile);
+      }
+
+      // 👇 Update UI for Upload Phase
+      bar.style.width = '50%';
+      label.textContent = `Uploading batch of ${filesToUpload.length} photo${filesToUpload.length > 1 ? 's' : ''}...`;
+
+      // Pass the lightweight, compressed array to your service
+      const response = await TBF.MediaService.upload(filesToUpload, metadataObj);
+      const uploaded = response.data || response; 
 
       bar.style.width = '100%';
-      label.textContent = `✓ ${response.length} photo${response.length > 1 ? 's' : ''} logged`;
+      
+      // Safety check to ensure we get the correct count whether it's an array or object
+      const uploadedCount = Array.isArray(uploaded) ? uploaded.length : filesToUpload.length;
+      label.textContent = `✓ ${uploadedCount} photo${uploadedCount > 1 ? 's' : ''} logged`;
       
       allMedia = [...uploaded, ...allMedia];
       renderMediaGrid();
@@ -774,7 +799,7 @@
       progress.style.display = 'none';
       TBF.Utils.showToast('Upload failed: ' + err.message, 'error');
     }
-  }
+}
 
   async function deleteImageCard(btn) {
     if (!confirm('Delete this image?')) return;
@@ -1002,52 +1027,86 @@
     if (!name || !number) return TBF.Utils.showToast('Name and design number are required', 'error');
 
     const btn = document.querySelector('.modal__footer .btn--dark');
-    btn.textContent = 'Saving...';
+    const originalBtnText = btn.textContent; // Store original text ('Save Changes' or 'Publish Design')
+    
     btn.disabled = true;
 
     let finalImageString = document.getElementById('prefillImageUrl').value;
     if (finalImageString === 'undefined' || finalImageString === 'null') finalImageString = '';
 
     const imageInput = document.getElementById('modalDesignImage');
+    
+    // --- BLOCK 1: IMAGE COMPRESSION & UPLOAD ---
     if (imageInput.files.length > 0) {
-      try {
-        const response = await TBF.MediaService.upload(Array.from(imageInput.files), { category: 'designs', title: name, designNum: number });
-        const uploaded = response.data || response;
-        // 👇 FIXED: If you upload NEW files in the modal, join all of them together!
-        if (uploaded && uploaded.length > 0) {
-          finalImageString = uploaded.map(u => u.url).join(','); 
+        try {
+            btn.textContent = 'Compressing...';
+            const filesToUpload = [];
+
+            for (let i = 0; i < imageInput.files.length; i++) {
+                const originalFile = imageInput.files[i];
+                // Compressing to 800px width, 60% quality
+                const compressedFile = await TBF.Utils.compressImage(originalFile, 800, 0.6);
+                filesToUpload.push(compressedFile);
+            }
+
+            btn.textContent = 'Uploading...';
+            const response = await TBF.MediaService.upload(filesToUpload, { category: 'designs', title: name, designNum: number });
+            const uploaded = response.data || response;
+            
+            if (uploaded && uploaded.length > 0) {
+                finalImageString = uploaded.map(u => u.url).join(','); 
+            }
+        } catch (e) {
+            TBF.Utils.showToast('Image processing failed', 'error');
+            btn.textContent = originalBtnText; 
+            btn.disabled = false;
+            return;
         }
-      } catch (e) {
-        TBF.Utils.showToast('Image upload failed', 'error');
-        btn.textContent = id ? 'Save Changes' : 'Publish Design';
-        btn.disabled = false;
-        return;
-      }
     }
+    
+    btn.textContent = 'Saving Database...';
 
-    // We send BOTH keys to guarantee your backend catches it regardless of how the schema is named!
-    const payload = { name, number, category: cat, badge };
-    if (finalImageString) {
-      payload.imageUrl = finalImageString; 
-      payload.image = finalImageString;
-    }
+    const payload = { 
+        name, 
+        number, 
+        category: cat, 
+        badge,
+        image: finalImageString, 
+        imageUrl: finalImageString 
+    };
 
+    // --- BLOCK 2: SAVING TO DB & SOFT RELOAD ---
     try {
-      if (id) {
-        await TBF.DesignService.update(id, payload);
-        TBF.Utils.showToast('Design updated successfully');
-      } else {
-        await TBF.DesignService.create(payload);
-        TBF.Utils.showToast('Design added successfully');
-      }
-      closeDesignModal();
-      setTimeout(() => window.location.reload(), 1000); 
+        if (id) {
+            await TBF.DesignService.update(id, payload);
+            TBF.Utils.showToast('Design updated successfully');
+        } else {
+            await TBF.DesignService.create(payload);
+            TBF.Utils.showToast('Design added successfully');
+        }
+        
+        // 1. Close the modal
+        closeDesignModal();
+
+        // 2. Fetch the fresh list of designs directly from the database
+        const freshDesigns = await window.TBF.DesignService.getAll();
+        
+        // 3. Update the memory variable
+        allDesigns = Array.isArray(freshDesigns) ? freshDesigns : (freshDesigns.data || []);
+        
+        // 4. Instantly redraw the table (No page refresh needed!)
+        renderDesignsTable(); 
+        
     } catch (e) {
-      TBF.Utils.showToast('Failed to save design record.', 'error');
-      btn.textContent = id ? 'Save Changes' : 'Publish Design';
-      btn.disabled = false;
+        TBF.Utils.showToast('Failed to save design.', 'error');
+    } finally {
+        // Always reset the button just in case
+        if (btn) {
+            btn.textContent = originalBtnText;
+            btn.disabled = false;
+        }
     }
-  }
+}
 
   function previewDesignImages(input) {
     const preview = document.getElementById('modalDesignPreview');
@@ -1067,69 +1126,6 @@
   function closeDesignModal() {
     const overlay = document.getElementById('designModalOverlay');
     if (overlay) overlay.remove();
-  }
-
-  async function saveDesign(id) {
-    const name = document.getElementById('modalDesignName').value.trim();
-    const number = document.getElementById('modalDesignNumber').value.trim();
-    const cat = document.getElementById('modalDesignCat').value;
-    const badge = document.getElementById('modalDesignBadge').value;
-
-    if (!name || !number) return TBF.Utils.showToast('Name and design number are required', 'error');
-
-    const btn = document.querySelector('.modal__footer .btn--dark');
-    btn.textContent = 'Saving...';
-    btn.disabled = true;
-
-    let finalImageString = document.getElementById('prefillImageUrl').value;
-    if (finalImageString === 'undefined' || finalImageString === 'null') finalImageString = '';
-
-    const imageInput = document.getElementById('modalDesignImage');
-    if (imageInput.files.length > 0) {
-      try {
-        const response = await TBF.MediaService.upload(Array.from(imageInput.files), { category: 'designs', title: name, designNum: number });
-        const uploaded = response.data || response;
-        if (uploaded && uploaded.length > 0) finalImageString = uploaded[0].url; 
-      } catch (e) {
-        TBF.Utils.showToast('Image upload failed', 'error');
-        btn.textContent = id ? 'Save Changes' : 'Publish Design';
-        btn.disabled = false;
-        return;
-      }
-    }
-
-    // Slice string to ONLY the first valid URL
-    let firstValidUrl = '';
-    if (finalImageString) {
-      firstValidUrl = finalImageString.split(',').filter(url => url.trim() !== '')[0] || '';
-    }
-
-    // We send BOTH image keys to guarantee the backend saves it
-    const payload = { 
-      name, 
-      number, 
-      category: cat, 
-      badge,
-      image: firstValidUrl,
-      imageUrl: firstValidUrl
-    };
-
-    try {
-      if (id) {
-        await TBF.DesignService.update(id, payload);
-        TBF.Utils.showToast('Design updated successfully');
-      } else {
-        await TBF.DesignService.create(payload);
-        TBF.Utils.showToast('Design added successfully');
-      }
-      closeDesignModal();
-      // 👇 RELOADS page automatically so the UI pulls fresh, valid DB data immediately!
-      setTimeout(() => window.location.reload(), 800); 
-    } catch (e) {
-      TBF.Utils.showToast('Failed to save design record.', 'error');
-      btn.textContent = id ? 'Save Changes' : 'Publish Design';
-      btn.disabled = false;
-    }
   }
 
   /* ============================================================
@@ -1412,8 +1408,18 @@ function printInvoice(orderId) {
     populateMediaDesignDropdown();
     updateStats();
     
-    renderOrdersTable(); 
-    renderInvoicesTable(); // <-- Make sure this is also called so the UI updates!
+    // 👇 THE FIX: Read the memory directly, NO event listener wrapper!
+    const savedTab = window.TBF.Utils.getState('admin_active_tab');
+    
+    if (savedTab) {
+        // Find the specific sidebar link for the saved tab so it gets highlighted
+        const el = document.querySelector(`.admin-sidebar__link[onclick*="${savedTab}"]`);
+        showTab(savedTab, el); 
+    } else {
+        // Default fallback if it's their very first time opening the panel
+        const el = document.querySelector(`.admin-sidebar__link[onclick*="overview"]`);
+        showTab('overview', el); 
+    }
 
   } catch (error) {
     console.error("Failed to load initial data:", error);

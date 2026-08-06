@@ -3,15 +3,26 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TreshBlinkybill Fits — Premium Tailoring, Lagos</title>
+  <title>TreshBlinkybillfits | Tailor your Premium Outfits</title>
   <link rel="stylesheet" href="styles/main.css"/>
+  <link rel="stylesheet" href="styles/animations.css"/> <!-- NEW: Animation system -->
+  <link rel="icon" type="image/png" href="../assets/fitslogo.png"/>
+  
   <style>
     /* INDEX-SPECIFIC STYLES */
     .hero {
-      background: linear-gradient(155deg, var(--navy) 0%, var(--navy-mid) 55%, var(--navy-light) 100%);
+      background-image: linear-gradient(rgba(10, 31, 68, 0.5), rgba(10, 31, 68, 0.7)), 
+        url('../assets/bagimg1.jpg');
       padding: 44px var(--space-md) 36px;
       position: relative;
       overflow: hidden;
+      background-size: cover; 
+    
+      /* Centers the most important part of the image */
+      background-position: center; 
+      
+      /* Prevents the image from repeating like a tile */
+      background-repeat: no-repeat;
     }
     .hero::before,.hero::after {
       content:''; position:absolute; border-radius:50%; pointer-events:none;
@@ -124,13 +135,13 @@
     </div>
     <div class="hero__tag">Est. Lagos · Premium Tailoring</div>
     <h1 class="hero__title">Dressed to<br><em>Define</em> You.</h1>
-    <p class="hero__sub">Native wear, English fits & monogram designs — crafted with precision for every occasion.</p>
+    <p class="hero__sub">Native wear, English fits & monogram designs crafted with precision for every occasion.</p>
     <div class="hero__btns">
       <button onclick="openCustomOrderModal()" class="btn btn--mint btn--lg">Place an Order</button>
     </div>
   </section>
 
- <div class="section">
+ <div class="section" data-animation="animate-fade-in">
     <div class="section-hdr">
       <h2 class="section-hdr__title">Designs</h2>
       <a href="pages/designs.html" class="section-hdr__link">See all →</a>
@@ -138,7 +149,7 @@
     <div class="carousel" id="designsCarousel"></div>
   </div>
 
-  <div class="section" style="padding-top:0;">
+  <div class="section" data-animation="animate-fade-in" style="padding-top:0;">
     <div class="section-hdr">
       <h2 class="section-hdr__title">Collections</h2>
       <a href="pages/products.html" class="section-hdr__link">See all →</a>
@@ -147,14 +158,14 @@
   </div>
 
   <!-- CTA -->
-  <div class="cta-band">
+  <div class="cta-band" data-animation="animate-fade-in">
     <div class="cta-band__title">Ready for your<br>perfect fit?</div>
     <p class="cta-band__sub">Tell us your style, measurements & event —<br>we'll handle the rest.</p>
     <button onclick="openCustomOrderModal()" class="btn btn--mint btn--lg">Place an Order</button>
   </div>
 
   <!-- SOCIAL LINKS -->
-  <div class="social-box">
+  <div class="social-box" data-animation="animate-fade-in">
     <div class="social-box__title">Find us on social media</div>
     <div class="social-grid">
       <a class="social-item" href="https://wa.link/s4la7a" target="_blank">
@@ -185,6 +196,8 @@
   <script src="config.js"></script>
   <script src="api.js"></script>
   <script src="services/services.js"></script>
+  <script src="utils.js"></script>
+  <script src="animations.js"></script> <!-- NEW: Animation controller -->
   <script>
     // Override component paths for index (one level up)
     ComponentLoader.loadNav = async function(active) {
@@ -305,61 +318,97 @@
       }
     }
 
-    // Helper Function
-    function dataURLtoFile(dataurl, filename) {
-      let arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
-          bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
-      while(n--){ u8arr[n] = bstr.charCodeAt(n); }
-      return new File([u8arr], filename, {type:mime});
-    }
-
     // 👇 FIXED: Accepts a boolean to decide whether to redirect or reset the form
     async function processCustomOrder(redirectToCheckout = true) {
-      let name = document.getElementById('customStyleName').value.trim();
-      if (customImageArray.length === 0) return TBF.Utils.showToast('Please upload at least one inspiration picture', 'error');
+    let name = document.getElementById('customStyleName').value.trim();
+    if (customImageArray.length === 0) return TBF.Utils.showToast('Please upload at least one inspiration picture', 'error');
 
-      const addBtn = document.getElementById('customAddBtn');
-      const checkoutBtn = document.getElementById('customCheckoutBtn');
-      if(addBtn) addBtn.disabled = true;
-      if(checkoutBtn) checkoutBtn.disabled = true;
+    const addBtn = document.getElementById('customAddBtn');
+    const checkoutBtn = document.getElementById('customCheckoutBtn');
+    if(addBtn) addBtn.disabled = true;
+    if(checkoutBtn) checkoutBtn.disabled = true;
 
-      try {
-        const bespokeId = 'Bespoke-' + Math.floor(1000 + Math.random() * 9000);
-        if (!name) name = 'Custom Design (' + bespokeId + ')';
+    // Temporary UI indicator
+    const originalAddText = addBtn ? addBtn.textContent : '';
+    if(addBtn) addBtn.textContent = 'Processing Images...';
 
-        let files = customImageArray.map((base64, idx) => dataURLtoFile(base64, `custom_upload_${idx}.jpg`));
-        
-        const apiService = window.TBF ? window.TBF.MediaService : TBF.MediaService;
-        let response = await apiService.upload(files, { title: name, category: 'bespoke' });
-        let uploaded = response.data || response;
-        
-        // Extract all URLs
-        let allUrls = uploaded.map(u => u.url);
+    try {
+      const bespokeId = 'Bespoke-' + Math.floor(1000 + Math.random() * 9000);
+      if (!name) name = 'Custom Design (' + bespokeId + ')';
 
-        // SECURE ARCHITECTURE: Join all URLs into a single comma-separated string
-        // so it saves cleanly into the single `image` column in your database!
-        const cartService = window.TBF ? window.TBF.CartService : TBF.CartService;
-        cartService.addItem({
-          designId: bespokeId,
-          name: name,
-          image: allUrls.join(','), 
-          qty: 1,
-          isCustom: true
-        });
+      const filesToUpload = [];
+      
+      // 👇 THE FIX: Compress the Base64 strings directly, completely bypassing dataURLtoFile!
+      for (let i = 0; i < customImageArray.length; i++) {
+          let base64Data = customImageArray[i];
+          
+          let shrunkFile = await new Promise((resolve, reject) => {
+              const img = new Image();
+              img.onload = () => {
+                  const canvas = document.createElement('canvas');
+                  let width = img.width;
+                  let height = img.height;
+                  const maxW = 1200; // Shrinks massive images down to 1200px width
+                  
+                  if (width > maxW) {
+                      height = Math.round((height * maxW) / width);
+                      width = maxW;
+                  }
+                  
+                  canvas.width = width; 
+                  canvas.height = height;
+                  const ctx = canvas.getContext('2d');
+                  ctx.drawImage(img, 0, 0, width, height);
+                  
+                  // Converts directly to a perfectly formatted JPEG File
+                  canvas.toBlob((blob) => {
+                      if (!blob) return reject('Compression failed');
+                      resolve(new File([blob], `custom_upload_${i}.jpg`, { type: 'image/jpeg' }));
+                  }, 'image/jpeg', 0.7);
+              };
+              img.onerror = () => reject('Image load failed');
+              
+              // Secures the Data URI prefix so the Image object can read it flawlessly
+              img.src = base64Data.startsWith('data:') ? base64Data : 'data:image/jpeg;base64,' + base64Data;
+          });
 
-        if (redirectToCheckout) {
-          window.location.href = window.location.pathname.includes('index.html') || window.location.pathname === '/' ? 'pages/checkout.html' : 'checkout.html';
-        } else {
-          TBF.Utils.showToast('Style added to your bag!', 'success');
-          document.getElementById('customOrderModal').remove();
-          cartService.updateWidget();
-        }
-      } catch (err) {
-        TBF.Utils.showToast('Upload failed.', 'error');
-        if(addBtn) addBtn.disabled = false;
-        if(checkoutBtn) checkoutBtn.disabled = false;
+          filesToUpload.push(shrunkFile);
       }
+
+      if(addBtn) addBtn.textContent = 'Uploading...';
+      
+      const apiService = window.TBF ? window.TBF.MediaService : TBF.MediaService;
+      let response = await apiService.upload(filesToUpload, { title: name, category: 'bespoke' });
+      let uploaded = response.data || response;
+      
+      let allUrls = uploaded.map(u => u.url);
+
+      const cartService = window.TBF ? window.TBF.CartService : TBF.CartService;
+      cartService.addItem({
+        designId: bespokeId,
+        name: name,
+        image: allUrls.join(','), 
+        qty: 1,
+        isCustom: true
+      });
+
+      if (redirectToCheckout) {
+        window.location.href = window.location.pathname.includes('index.html') || window.location.pathname === '/' ? 'pages/checkout.html' : 'checkout.html';
+      } else {
+        if(addBtn) { addBtn.disabled = false; addBtn.textContent = originalAddText; }
+        if(checkoutBtn) checkoutBtn.disabled = false;
+
+        TBF.Utils.showToast('Style added to your bag!', 'success');
+        document.getElementById('customOrderModal').remove();
+        cartService.updateWidget();
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+      TBF.Utils.showToast('Upload failed. Please try again.', 'error');
+      if(addBtn) { addBtn.disabled = false; addBtn.textContent = originalAddText; }
+      if(checkoutBtn) checkoutBtn.disabled = false;
     }
+}
 
     async function init() {
       await TBF.ComponentLoader.loadNav('home');

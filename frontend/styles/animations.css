@@ -1,0 +1,689 @@
+/* ================================================================
+   TRESHBLINKYBILL FITS — Animation System
+   Keyframes, utilities, and scroll-triggered animation classes
+   Order: Accessibility → Keyframes → Utilities → States
+   ================================================================ */
+
+/* ================================================================
+   1. ACCESSIBILITY: Respect user motion preferences
+   ================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+
+/* ================================================================
+   2. KEYFRAME ANIMATIONS
+   ================================================================ */
+
+/* --- FADE ANIMATIONS --- */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInLeft {
+  from { opacity: 0; transform: translateX(-24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeInRight {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* --- SCALE ANIMATIONS --- */
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes scaleInSmall {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* --- SLIDE ANIMATIONS --- */
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-100%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(100%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(100%); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --- WORD/LINE REVEAL --- */
+@keyframes lineReveal {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* --- UNDERLINE ANIMATION --- */
+@keyframes underlineGrow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* --- BOUNCE/PLAYFUL ANIMATIONS --- */
+@keyframes bounceIn {
+  0%   { opacity: 0; transform: scale(0.3); }
+  50%  { opacity: 1; }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideUpBounce {
+  0%   { opacity: 0; transform: translateY(30px); }
+  60%  { opacity: 1; transform: translateY(-5px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* --- HOVER LIFT ANIMATIONS --- */
+@keyframes liftShadow {
+  from { 
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(10,31,68,0.08);
+  }
+  to   { 
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(10,31,68,0.18);
+  }
+}
+
+/* --- PULSE/GLOW ANIMATIONS --- */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.7; }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(91,159,255,0.4); }
+  50%      { box-shadow: 0 0 0 8px rgba(91,159,255,0); }
+}
+
+@keyframes pulseBadge {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.15); }
+}
+
+/* --- SHIMMER/SHINE ANIMATIONS --- */
+@keyframes shimmer {
+  0%   { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+/* --- ROTATE/SPIN ANIMATIONS --- */
+@keyframes rotateSmall {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(2deg); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* --- PARALLAX ANIMATION --- */
+@keyframes parallaxSlow {
+  0%   { transform: translateY(0px); }
+  100% { transform: translateY(20px); }
+}
+
+/* --- SKELETON/LOADING ANIMATIONS --- */
+@keyframes skeletonLoad {
+  0%   { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+
+/* ================================================================
+   3. ANIMATION UTILITY CLASSES (Applied by JS or inline)
+   ================================================================ */
+
+/* --- FADE IN UTILITIES --- */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease forwards;
+}
+
+.animate-fade-in-down {
+  animation: fadeInDown 0.4s ease forwards;
+}
+
+.animate-fade-in-left {
+  animation: fadeInLeft 0.4s ease forwards;
+}
+
+.animate-fade-in-right {
+  animation: fadeInRight 0.4s ease forwards;
+}
+
+/* --- SCALE IN UTILITIES --- */
+.animate-scale-in {
+  animation: scaleIn 0.3s ease forwards;
+}
+
+.animate-scale-in-small {
+  animation: scaleInSmall 0.3s ease forwards;
+}
+
+/* --- SLIDE UTILITIES --- */
+.animate-slide-in-left {
+  animation: slideInLeft 0.4s ease forwards;
+}
+
+.animate-slide-in-up {
+  animation: slideInUp 0.4s ease forwards;
+}
+
+/* --- BOUNCE UTILITIES --- */
+.animate-bounce-in {
+  animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+.animate-slide-up-bounce {
+  animation: slideUpBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+/* --- PULSE UTILITIES --- */
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.animate-pulse-badge {
+  animation: pulseBadge 0.4s ease-out;
+}
+
+/* --- UNDERLINE ANIMATION --- */
+.animate-underline-grow {
+  animation: underlineGrow 0.4s ease forwards;
+  transform-origin: left center;
+}
+
+/* --- PARALLAX UTILITY --- */
+.animate-parallax-slow {
+  animation: parallaxSlow 0.6s ease forwards;
+}
+
+
+/* ================================================================
+   4. STAGGER DELAYS (for sequential animations)
+   ================================================================ */
+.animate-delay-100  { animation-delay: 0.1s; }
+.animate-delay-150  { animation-delay: 0.15s; }
+.animate-delay-200  { animation-delay: 0.2s; }
+.animate-delay-250  { animation-delay: 0.25s; }
+.animate-delay-300  { animation-delay: 0.3s; }
+.animate-delay-350  { animation-delay: 0.35s; }
+.animate-delay-400  { animation-delay: 0.4s; }
+.animate-delay-500  { animation-delay: 0.5s; }
+.animate-delay-600  { animation-delay: 0.6s; }
+
+/* Generate delay classes for carousel stagger (60ms increments up to 8 items) */
+.carousel-item-0 { animation-delay: 0ms; }
+.carousel-item-1 { animation-delay: 60ms; }
+.carousel-item-2 { animation-delay: 120ms; }
+.carousel-item-3 { animation-delay: 180ms; }
+.carousel-item-4 { animation-delay: 240ms; }
+.carousel-item-5 { animation-delay: 300ms; }
+.carousel-item-6 { animation-delay: 360ms; }
+.carousel-item-7 { animation-delay: 420ms; }
+.carousel-item-8 { animation-delay: 480ms; }
+
+/* Social stagger (80ms increments) */
+.social-item-0 { animation-delay: 0ms; }
+.social-item-1 { animation-delay: 80ms; }
+.social-item-2 { animation-delay: 160ms; }
+.social-item-3 { animation-delay: 240ms; }
+
+
+/* ================================================================
+   5. INTERACTION & HOVER STATES
+   ================================================================ */
+
+/* Card hover lift effect */
+.card-hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(10,31,68,0.18);
+}
+
+/* Button hover glow */
+.btn-hover-glow {
+  transition: box-shadow 0.2s ease;
+}
+
+.btn-hover-glow:hover {
+  box-shadow: 0 0 0 3px rgba(91,159,255,0.3);
+}
+
+/* Link hover underline */
+.link-underline {
+  position: relative;
+  overflow: hidden;
+}
+
+.link-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--mint);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s ease;
+}
+
+.link-underline:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Social item bounce */
+.social-item-hover {
+  transition: transform 0.15s ease;
+}
+
+.social-item-hover:hover {
+  transform: translateY(-3px) rotate(2deg);
+}
+
+/* Button scale on click */
+.btn-click-scale {
+  transition: transform 0.1s ease;
+}
+
+.btn-click-scale:active {
+  transform: scale(0.97);
+}
+
+
+/* ================================================================
+   6. HERO SECTION ANIMATIONS
+   ================================================================ */
+
+.hero-logo {
+  animation: fadeIn 0.4s ease forwards;
+  opacity: 0;
+}
+
+.hero-brand-name {
+  animation: fadeInLeft 0.5s ease forwards;
+  opacity: 0;
+  animation-delay: 0.1s;
+}
+
+.hero-brand-sub {
+  animation: fadeInLeft 0.5s ease forwards;
+  opacity: 0;
+  animation-delay: 0.2s;
+}
+
+.hero-tag {
+  animation: fadeIn 0.4s ease forwards;
+  opacity: 0;
+  animation-delay: 0.3s;
+}
+
+.hero-title {
+  animation: fadeInUp 0.6s ease forwards;
+  opacity: 0;
+  animation-delay: 0.4s;
+}
+
+.hero-subtitle {
+  animation: fadeInUp 0.5s ease forwards;
+  opacity: 0;
+  animation-delay: 0.5s;
+}
+
+.hero-button {
+  animation: slideUpBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  opacity: 0;
+  animation-delay: 0.6s;
+}
+
+/* Parallax background motion on scroll */
+.hero-parallax {
+  position: relative;
+}
+
+.hero-parallax::before,
+.hero-parallax::after {
+  animation: parallaxSlow 0.6s ease forwards;
+}
+
+
+/* ================================================================
+   7. SECTION ANIMATIONS
+   ================================================================ */
+
+.section-fade-in {
+  animation: fadeIn 0.4s ease forwards;
+  opacity: 0;
+}
+
+.section-slide-up {
+  animation: slideInUp 0.5s ease forwards;
+  opacity: 0;
+}
+
+/* Section header */
+.section-hdr {
+  animation: fadeIn 0.3s ease forwards;
+  opacity: 0;
+}
+
+.section-hdr--animate {
+  animation-delay: 0.1s;
+}
+
+
+/* ================================================================
+   8. CAROUSEL CARD ANIMATIONS
+   ================================================================ */
+
+.carousel-card {
+  animation: scaleInSmall 0.4s ease forwards;
+  opacity: 0;
+}
+
+.carousel-card:hover {
+  animation-play-state: paused;
+}
+
+/* Individual card hover effects */
+.mono-card, .native-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mono-card:hover, .native-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(10,31,68,0.15);
+}
+
+.mono-card .btn, .native-card .btn {
+  transition: all 0.2s ease;
+}
+
+.mono-card:hover .btn, .native-card:hover .btn {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(178,237,228,0.4);
+}
+
+
+/* ================================================================
+   9. CTA BAND ANIMATIONS
+   ================================================================ */
+
+.cta-band {
+  animation: slideInUp 0.6s ease forwards;
+  opacity: 0;
+}
+
+.cta-band__title {
+  animation: fadeInUp 0.4s ease forwards;
+  opacity: 0;
+  animation-delay: 0.1s;
+}
+
+.cta-band__sub {
+  animation: fadeInUp 0.4s ease forwards;
+  opacity: 0;
+  animation-delay: 0.2s;
+}
+
+.cta-band .btn {
+  animation: fadeIn 0.4s ease forwards;
+  opacity: 0;
+  animation-delay: 0.3s;
+}
+
+/* Idle pulsing effect on CTA band */
+.cta-band-idle {
+  animation: pulse 3s ease-in-out infinite;
+}
+
+
+/* ================================================================
+   10. SOCIAL BOX ANIMATIONS
+   ================================================================ */
+
+.social-box {
+  animation: fadeIn 0.4s ease forwards;
+  opacity: 0;
+}
+
+.social-box__title {
+  animation: fadeIn 0.3s ease forwards;
+  opacity: 0;
+  animation-delay: 0.1s;
+}
+
+.social-item {
+  animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  opacity: 0;
+}
+
+/* Staggered social items already have .social-item-0/1/2/3 delays via JS */
+
+
+/* ================================================================
+   11. FLOATING CART ANIMATIONS
+   ================================================================ */
+
+.floating-cart {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.floating-cart:hover {
+  transform: scale(1.08);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.25);
+}
+
+.floating-cart:active {
+  transform: scale(1.04);
+}
+
+/* Cart badge pulse on update */
+.cart-badge-update {
+  animation: pulseBadge 0.4s ease-out;
+}
+
+
+/* ================================================================
+   12. BUTTON ANIMATIONS
+   ================================================================ */
+
+.btn {
+  transition: all 0.18s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Mint button special hover */
+.btn--mint {
+  transition: all 0.2s ease;
+}
+
+.btn--mint:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(178,237,228,0.3);
+}
+
+/* Ghost button hover */
+.btn--ghost:hover {
+  background: rgba(240,246,255,0.6);
+  transform: translateY(-1px);
+}
+
+
+/* ================================================================
+   13. MODAL ANIMATIONS
+   ================================================================ */
+
+@keyframes modalSlideIn {
+  from { 
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes backdropFadeIn {
+  from { backdrop-filter: blur(0px); }
+  to   { backdrop-filter: blur(2px); }
+}
+
+.modal-overlay {
+  animation: backdropFadeIn 0.3s ease;
+}
+
+.modal-box {
+  animation: modalSlideIn 0.3s ease;
+}
+
+
+/* ================================================================
+   14. LOADING STATE ANIMATIONS
+   ================================================================ */
+
+.skeleton-load {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.1) 25%,
+    rgba(255,255,255,0.2) 50%,
+    rgba(255,255,255,0.1) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeletonLoad 2s infinite;
+}
+
+.skeleton-card {
+  height: 200px;
+  border-radius: var(--radius-md);
+  animation: fadeIn 0.3s ease forwards;
+}
+
+
+/* ================================================================
+   15. TOAST ANIMATIONS (Enhanced from main.css)
+   ================================================================ */
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.toast {
+  animation: toastSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+
+/* ================================================================
+   16. RESPONSIVE ANIMATION ADJUSTMENTS
+   ================================================================ */
+
+@media (max-width: 768px) {
+  /* Reduce animation durations for mobile for snappier feel */
+  .animate-fade-in-up,
+  .animate-slide-in-up,
+  .carousel-card {
+    animation-duration: 0.3s;
+  }
+
+  .hero-title {
+    animation-duration: 0.5s;
+  }
+
+  /* Reduce stagger delays on mobile for faster reveal */
+  .carousel-item-1 { animation-delay: 40ms; }
+  .carousel-item-2 { animation-delay: 80ms; }
+  .carousel-item-3 { animation-delay: 120ms; }
+  .carousel-item-4 { animation-delay: 160ms; }
+
+  .social-item-1 { animation-delay: 60ms; }
+  .social-item-2 { animation-delay: 120ms; }
+  .social-item-3 { animation-delay: 180ms; }
+}
+
+@media (max-width: 480px) {
+  /* Even faster on small phones */
+  .hero-logo {
+    animation-duration: 0.3s;
+  }
+
+  .hero-brand-name,
+  .hero-brand-sub {
+    animation-duration: 0.3s;
+  }
+
+  .hero-title {
+    animation-duration: 0.4s;
+  }
+
+  .hero-button {
+    animation-duration: 0.4s;
+  }
+
+  /* Remove stagger delays on very small screens for instant feel */
+  .carousel-item-0,
+  .carousel-item-1,
+  .carousel-item-2,
+  .carousel-item-3,
+  .carousel-item-4,
+  .carousel-item-5,
+  .carousel-item-6,
+  .carousel-item-7,
+  .carousel-item-8 {
+    animation-delay: 0ms !important;
+  }
+}

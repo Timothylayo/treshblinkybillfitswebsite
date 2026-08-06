@@ -4,7 +4,9 @@
    Services call this layer. Pages call services.
    ================================================================ */
 
-const BASE_URL = ''; // Replace with your backend URL
+const BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:5000'   // local dev — talk directly to local backend
+  : '';; // Replace with your backend URL
 
 /* ---- ROBUST HTTP HELPERS ---- */
 // Added an 'isPublic' flag so we don't send admin cookies on customer-facing routes

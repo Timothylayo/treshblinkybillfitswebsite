@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Collections — TreshBlinkybill Fits</title>
+  <title>Fits we have Tailored</title>
   <link rel="stylesheet" href="../styles/main.css"/>
+  <link rel="icon" type="image/png" href="../assets/fitslogo.png"/>
   <style>
     .tab-bar { background:var(--white); border-bottom:1px solid var(--border-2); display:flex; }
     .tab { flex:1; padding:14px 8px; font-size:12px; font-weight:500; text-align:center; cursor:pointer; color:var(--text-muted); border:none; border-bottom:2.5px solid transparent; background:none; transition:all 0.18s; }
@@ -115,6 +116,13 @@
     };
 
     function switchTab(tab, el) {
+      // 👇 Bulletproof Save (Falls back to native memory if util is cached)
+      if (window.TBF && window.TBF.Utils && typeof window.TBF.Utils.saveState === 'function') {
+        window.TBF.Utils.saveState('storefront_product_tab', tab);
+      } else {
+        localStorage.setItem('storefront_product_tab', tab);
+      }
+
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       el.classList.add('active');
       const h = heroData[tab];
@@ -124,7 +132,7 @@
       document.getElementById('heroSub').textContent  = h.sub;
       document.getElementById('featuredTitle').textContent = h.ft;
       renderProducts(tab);
-    } 
+    }
 
     // Render dynamic outfits filtered by category tab
     function renderProducts(tab) {
@@ -222,7 +230,6 @@
       await TBF.ComponentLoader.init('products');
       
       try { 
-        // Safely fetch collections and handle data wrapping
         const res = await window.TBF_API.Media.getAll({ isPrimary: true });
         liveCollections = Array.isArray(res) ? res : (res.data || []);
       } 
@@ -231,16 +238,22 @@
         liveCollections = [];
       }
 
-      const tabParam = new URLSearchParams(location.search).get('tab');
-      const activeTab = tabParam && heroData[tabParam] ? tabParam : 'natives';
-      const tabButton = document.querySelector(`[data-tab="${activeTab}"]`);
+      // 👇 Bulletproof Read
+      const urlParam = new URLSearchParams(location.search).get('tab');
+      const savedTab = (window.TBF && window.TBF.Utils && typeof window.TBF.Utils.getState === 'function') 
+        ? window.TBF.Utils.getState('storefront_product_tab') 
+        : localStorage.getItem('storefront_product_tab');
       
+      let activeTab = urlParam || savedTab || 'natives';
+      if (!heroData[activeTab]) activeTab = 'natives'; 
+
+      const tabButton = document.querySelector(`[data-tab="${activeTab}"]`);
       if (tabButton) switchTab(activeTab, tabButton);
       
       if (typeof window.TBF !== 'undefined' && window.TBF.CartService) {
         window.TBF.CartService.updateWidget();
       }
-    } 
+    }
 
     init();
   </script>

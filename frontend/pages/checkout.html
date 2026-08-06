@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Complete Your Request - TBF</title>
+  <title>Complete Your Request</title>
   <link rel="stylesheet" href="../styles/main.css"> <!-- Adjust path if needed -->
+  <link rel="icon" type="image/png" href="../assets/fitslogo.png"/>
   <style>
     body { background: var(--bg); font-family: var(--font-body); color: var(--text); }
     .checkout-wrap { max-width: 1000px; margin: 40px auto; padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
@@ -141,12 +142,13 @@
         // 👉 FIXED: Safely render standard URLs OR our temporary Base64 custom image previews
         let imgSrc = '';
         if (item.image) {
-          if (item.image.startsWith('data:image')) {
-            imgSrc = item.image; // It's the custom Base64 preview!
-          } else if (item.image.startsWith('http')) {
-            imgSrc = item.image; // Absolute URL
+          let firstImage = item.image.split(',')[0].trim();
+          if (firstImage.startsWith('data:image')) {
+            imgSrc = firstImage; // It's the custom Base64 preview!
+          } else if (firstImage.startsWith('http')) {
+            imgSrc = firstImage; // Absolute URL
           } else {
-            imgSrc = `${BACKEND_URL}${item.image}`; // Relative server URL
+            imgSrc = `${BACKEND_URL}${firstImage}`; // Relative server URL
           }
         }
         

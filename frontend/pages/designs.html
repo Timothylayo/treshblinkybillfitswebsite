@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Designs — TreshBlinkybill Fits</title>
+  <title>Designs you can choose from</title>
   <link rel="stylesheet" href="../styles/main.css"/>
+  <link rel="icon" type="image/png" href="../assets/fitslogo.png"/>
   <style>
     .design-grid {
       display: grid;
@@ -75,6 +76,13 @@
     };
 
     function setFilter(cat, el) {
+      // 👇 Bulletproof Save
+      if (window.TBF && window.TBF.Utils && typeof window.TBF.Utils.saveState === 'function') {
+        window.TBF.Utils.saveState('storefront_design_filter', cat);
+      } else {
+        localStorage.setItem('storefront_design_filter', cat);
+      }
+
       activeFilter = cat;
       document.querySelectorAll('#filterPills .pill').forEach(p => { 
         p.classList.remove('pill--active');
@@ -236,25 +244,25 @@
     async function init() {
       await TBF.ComponentLoader.init('designs');
       
-      const catParam = new URLSearchParams(location.search).get('cat');
-      if (catParam) {
-        const pill = document.querySelector(`[data-filter="${catParam}"]`);
-        if (pill) {
-          activeFilter = catParam;
-          document.querySelectorAll('#filterPills .pill').forEach(p => { 
-            p.classList.remove('pill--active');
-            p.classList.add('pill--inactive');
-          });
-          pill.classList.remove('pill--inactive');
-          pill.classList.add('pill--active');
-        }
+      // 👇 Bulletproof Read
+      const urlParam = new URLSearchParams(location.search).get('cat');
+      const savedFilter = (window.TBF && window.TBF.Utils && typeof window.TBF.Utils.getState === 'function') 
+        ? window.TBF.Utils.getState('storefront_design_filter') 
+        : localStorage.getItem('storefront_design_filter');
+      
+      const filterToApply = urlParam || savedFilter || 'all';
+      const pill = document.querySelector(`[data-filter="${filterToApply}"]`);
+      
+      if (pill) {
+        setFilter(filterToApply, pill);
+      } else {
+        const allPill = document.querySelector(`[data-filter="all"]`);
+        if (allPill) setFilter('all', allPill);
       }
       
       if (typeof window.TBF !== 'undefined' && window.TBF.CartService) {
         window.TBF.CartService.updateWidget();
       }
-      
-      fetchAndRenderDesigns();
     }
     
     init();

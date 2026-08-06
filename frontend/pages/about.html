@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>About — TreshBlinkybill Fits</title>
+  <title>What is TreshBlinkybillfits </title>
   <link rel="stylesheet" href="../styles/main.css"/>
+  <link rel="icon" type="image/png" href="../assets/fitslogo.png"/>
   <style>
     .about-hero { background:linear-gradient(155deg,var(--navy),var(--navy-mid),var(--navy-light)); padding:40px var(--space-md) 32px; text-align:center; position:relative; overflow:hidden; }
     .about-hero::before { content:''; position:absolute; top:-50px; right:-60px; width:200px; height:200px; border-radius:50%; border:1px solid rgba(178,237,228,0.12); pointer-events:none; }
@@ -122,6 +123,7 @@
   <script src="../api.js"></script>
   <script src="../services/services.js"></script>
   <script src="../config.js"></script>
+  <script src="../utils.js"></script>
   <script>TBF.ComponentLoader.init('about');
     /* ============================================================
        BESPOKE CUSTOM UPLOAD MODAL (Multiple Images + Optional Name)
@@ -218,26 +220,39 @@
       if(addBtn) addBtn.disabled = true;
       if(checkoutBtn) checkoutBtn.disabled = true;
 
+      // Temporary UI indicator
+      const originalAddText = addBtn ? addBtn.textContent : '';
+      if(addBtn) addBtn.textContent = 'Processing Images...';
+
       try {
         const bespokeId = 'Bespoke-' + Math.floor(1000 + Math.random() * 9000);
         if (!name) name = 'Custom Design (' + bespokeId + ')';
 
-        let files = customImageArray.map((base64, idx) => dataURLtoFile(base64, `custom_upload_${idx}.jpg`));
+        // 1. Converts Base64 to heavy File objects
+        let heavyFiles = customImageArray.map((base64, idx) => dataURLtoFile(base64, `custom_upload_${idx}.jpg`));
+        
+        // 👇 THE FIX: Compress the converted heavyFiles
+        const filesToUpload = [];
+        for(const heavyFile of heavyFiles) {
+            // Apply compression settings
+            const shrunkFile = await compressImage(heavyFile, 1200, 0.7);
+            filesToUpload.push(shrunkFile);
+        }
+
+        if(addBtn) addBtn.textContent = 'Uploading...';
         
         const apiService = window.TBF ? window.TBF.MediaService : TBF.MediaService;
-        let response = await apiService.upload(files, { title: name, category: 'bespoke' });
+        // We pass the new, lightweight filesToUpload array
+        let response = await apiService.upload(filesToUpload, { title: name, category: 'bespoke' });
         let uploaded = response.data || response;
         
-        // Extract all URLs
         let allUrls = uploaded.map(u => u.url);
 
-        // SECURE ARCHITECTURE: Join all URLs into a single comma-separated string
-        // so it saves cleanly into the single `image` column in your database!
         const cartService = window.TBF ? window.TBF.CartService : TBF.CartService;
         cartService.addItem({
           designId: bespokeId,
           name: name,
-          image: allUrls.join(','), 
+          image: allUrls.join(','), // Saves full comma-separated list
           qty: 1,
           isCustom: true
         });
@@ -245,13 +260,18 @@
         if (redirectToCheckout) {
           window.location.href = window.location.pathname.includes('index.html') || window.location.pathname === '/' ? 'pages/checkout.html' : 'checkout.html';
         } else {
+          // Restore button UI
+          if(addBtn) { addBtn.disabled = false; addBtn.textContent = originalAddText; }
+          if(checkoutBtn) checkoutBtn.disabled = false;
+
           TBF.Utils.showToast('Style added to your bag!', 'success');
           document.getElementById('customOrderModal').remove();
           cartService.updateWidget();
         }
       } catch (err) {
         TBF.Utils.showToast('Upload failed.', 'error');
-        if(addBtn) addBtn.disabled = false;
+        // Restore button UI on error
+        if(addBtn) { addBtn.disabled = false; addBtn.textContent = originalAddText; }
         if(checkoutBtn) checkoutBtn.disabled = false;
       }
     }

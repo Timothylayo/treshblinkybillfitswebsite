@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Edit Invoice - Admin TBF</title>
+  <title> Treshblinkybillfits | Edit invoice</title>
+  <link rel="icon" type="image/png" href="../assets/fitslogo.png"/>
   <style>
     :root {
       --navy: #0b1c3c;
@@ -135,16 +136,54 @@
         text-align: right;
       }
 
+      .admin-input {
+        field-sizing: content !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        text-align: right !important;
+      }
+
+      .price-input-group {
+        gap: 4px !important;
+      }
+      
       /* Force background colors to print (for the headers and totals) */
       * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
+
+      .price-input-group {
+        gap: 2px !important;
+      }
+
+       @page {
+        margin: 10mm;
+      }
+
+      /* Tighten vertical padding across all sections so everything fits on page 1 */
+      .invoice-header { padding: 16px 24px !important; }
+      .customer-grid { padding: 16px 24px !important; gap: 16px !important; }
+      .items-section { padding: 16px 24px !important; }
+      .totals-box { padding: 16px 24px !important; }
+      .delivery-card { padding: 16px 24px !important; }
+
+      .item-row {
+        padding-bottom: 10px !important;
+        margin-bottom: 10px !important;
+      }
+
+      .total-row { margin-bottom: 8px !important; }
+      .total-row.grand { margin-top: 8px !important; padding-top: 8px !important; }
+
+      .delivery-row { padding: 8px 0 !important; }
+
     }
     /* ================================================================
        MOBILE RESPONSIVE PATCH FOR INVOICE EDITOR
        ================================================================ */
-    @media (max-width: 767px) {
+    @media screen and (max-width: 767px) {
       body { padding: 20px 10px; }
 
       /* 1. Stack the Top Buttons */
@@ -326,6 +365,7 @@
     function renderOrderData() {
       // Header & Customer
       document.getElementById('displayOrderId').textContent = '#' + currentOrder.id;
+      document.title = `Invoice ${currentOrder.id} `;
       document.getElementById('displayDate').textContent = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
       
       document.getElementById('cName').textContent = currentOrder.user?.name || 'Unknown';
@@ -440,8 +480,8 @@
       const grandTotal = subtotal + deliveryFee;
 
       // Update DOM
-      document.getElementById('displaySubtotal').textContent = `₦ ${subtotal.toLocaleString('en-NG')}`;
-      document.getElementById('displayGrandTotal').textContent = `₦ ${grandTotal.toLocaleString('en-NG')}`;
+      document.getElementById('displaySubtotal').textContent = `₦${subtotal.toLocaleString('en-NG')}`;
+      document.getElementById('displayGrandTotal').textContent = `₦${grandTotal.toLocaleString('en-NG')}`;
 
       // Pass everything to the WhatsApp generator
       updateWhatsAppLink(grandTotal, deliveryFee, itemizedText);
