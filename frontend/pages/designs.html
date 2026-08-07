@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Designs you can choose from</title>
+  <meta name="description" content="Browse our catalog of premium Agbada, Senator, and English wear blueprints. Select your style, and let us tailor your perfect fit." />
   <link rel="stylesheet" href="../styles/main.css"/>
   <link rel="icon" type="image/png" href="../assets/fitslogo.png"/>
   <style>
@@ -104,41 +105,44 @@
     }
 
     function renderDesignCards() {
-      document.getElementById('countLabel').textContent = `${allLoadedDesigns.length} design${allLoadedDesigns.length !== 1 ? 's' : ''}`;
-      const grid = document.getElementById('designGrid');
-      
-      if (!allLoadedDesigns.length) {
-        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;text-align:center;padding:40px;"><div class="empty-state__icon">🎨</div>No designs found for this category</div>';
-        return;
-      }
+  document.getElementById('countLabel').textContent = `${allLoadedDesigns.length} design${allLoadedDesigns.length !== 1 ? 's' : ''}`;
+  const grid = document.getElementById('designGrid');
+  
+  if (!allLoadedDesigns.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;text-align:center;padding:40px;"><div class="empty-state__icon">🎨</div>No designs found for this category</div>';
+    return;
+  }
 
-      grid.innerHTML = allLoadedDesigns.map(d => {
-        const designNum = d.num || d.number || '';
-        // Securely escape quotes so the buttons don't break
-        const safeName = (d.name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        const imgUrl = d.imageUrl || d.image || '';
+  grid.innerHTML = allLoadedDesigns.map(d => {
+    const designNum = d.num || d.number || '';
+    // Securely escape quotes so the buttons don't break
+    const safeName = (d.name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    
+    // 👇 THE FIX: Split the string and extract ONLY the first image URL!
+    let rawImg = d.imageUrl || d.image || '';
+    let firstImgUrl = rawImg.split(',')[0].trim(); 
+    
+    return `
+    <div class="card card--hover">
+      <div style="aspect-ratio:3/4; overflow:hidden; position:relative; background:var(--navy); display:flex; align-items:center; justify-content:center;">
+        ${firstImgUrl ? `<img src="${firstImgUrl.startsWith('http') ? firstImgUrl : `${BACKEND_URL}${firstImgUrl}`}" style="width:100%;height:100%;object-fit:cover;object-position: top; border-radius: 8px 8px 0 0;" alt="${safeName}" loading="lazy"/>` : `<span style="font-size:40px; color:rgba(255,255,255,0.3); font-style:italic; font-family:var(--font-display);">${d.name.charAt(0)}</span>`}
+        ${d.badge ? `<div style="position:absolute;top:10px;right:10px;"><span class="badge badge--${d.badge==='new'?'new':'pop'}">${d.badge}</span></div>` : ''}
+      </div>
+      <div style="padding:14px;">
+        <div style="font-size:14px; font-weight:600; color:var(--navy); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${d.name}</div>
+        <div style="font-size:11px; color:var(--blue); margin-top:2px; font-weight:500;">Ref: ${designNum}</div>
         
-        return `
-        <div class="card card--hover">
-          <div style="aspect-ratio:3/4; overflow:hidden; position:relative; background:var(--navy); display:flex; align-items:center; justify-content:center;">
-            ${imgUrl ? `<img src="${imgUrl.startsWith('http') ? imgUrl : `${BACKEND_URL}${imgUrl}`}" style="width:100%;height:100%;object-fit:cover;object-position: top; border-radius: 8px 8px 0 0;" alt="${safeName}" loading="lazy"/>` : `<span style="font-size:40px; color:rgba(255,255,255,0.3); font-style:italic; font-family:var(--font-display);">${d.name.charAt(0)}</span>`}
-            ${d.badge ? `<div style="position:absolute;top:10px;right:10px;"><span class="badge badge--${d.badge==='new'?'new':'pop'}">${d.badge}</span></div>` : ''}
-          </div>
-          <div style="padding:14px;">
-            <div style="font-size:14px; font-weight:600; color:var(--navy); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${d.name}</div>
-            <div style="font-size:11px; color:var(--blue); margin-top:2px; font-weight:500;">Ref: ${designNum}</div>
-            
-            <div style="display:flex; flex-direction:column; gap:8px; margin-top:14px; width:100%;">
-              <button class="btn btn--mint" style="width:100%; padding:8px 0; font-size:12px; font-weight:600; border-radius:6px; border:none; cursor:pointer; text-align:center; box-shadow:0 2px 4px rgba(0,0,0,0.1);" 
-                    onclick="window.addToStyleBag(event, '${d.id}', '${safeName}', '${imgUrl}')">Tailor This Design →</button>
-              <button class="btn btn--ghost btn--sm" style="width:100%;" 
-                    onclick="openDesignDetails('${d.id}', '${designNum}', '${safeName}', '${imgUrl}')">View Details</button>
-            </div>
-            
-          </div>
-        </div>`;
-      }).join('');
-    }
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:14px; width:100%;">
+          <button class="btn btn--mint" style="width:100%; padding:8px 0; font-size:12px; font-weight:600; border-radius:6px; border:none; cursor:pointer; text-align:center; box-shadow:0 2px 4px rgba(0,0,0,0.1);" 
+                onclick="window.addToStyleBag(event, '${d.id}', '${safeName}', '${firstImgUrl}')">Tailor This Design →</button>
+          <button class="btn btn--ghost btn--sm" style="width:100%;" 
+                onclick="openDesignDetails('${d.id}', '${designNum}', '${safeName}', '${firstImgUrl}')">View Details</button>
+        </div>
+        
+      </div>
+    </div>`;
+  }).join('');
+}
 
     async function openDesignDetails(designId, designNum, title, imgUrl) {
       const modalId = 'designModalOverlay';

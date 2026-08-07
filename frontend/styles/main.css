@@ -177,11 +177,21 @@ input, select, textarea { font-family: var(--font-body); }
    5. PAGE HEADER COMPONENT
    ================================================================ */
 .page-hdr {
-  background: var(--navy);
+  background-image: linear-gradient(rgba(10, 31, 68, 0.5), rgba(10, 31, 68, 0.7)), 
+        url('../assets/bagimg5.jpg');
+      padding: 44px var(--space-md) 36px;
+      position: relative;
+      overflow: hidden;
+      background-size: cover; 
   padding: 28px var(--space-md) 22px;
 }
 .page-hdr--gradient {
-  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+  background-image: linear-gradient(rgba(10, 31, 68, 0.5), rgba(10, 31, 68, 0.7)), 
+        url('../assets/bagimg5.jpg');
+      padding: 44px var(--space-md) 36px;
+      position: relative;
+      overflow: hidden;
+      background-size: cover; 
 }
 .page-hdr__tag {
   font-size: 9px;
