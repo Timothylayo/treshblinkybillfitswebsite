@@ -300,6 +300,30 @@ input, select, textarea { font-family: var(--font-body); }
 .btn--sm          { font-size: 11px; padding: 7px 14px; }
 .btn--lg          { font-size: 15px; padding: 14px 28px; }
 .btn--full        { width: 100%; }
+/* Unified Dark Overlay for Image Backgrounds */
+.bg-overlay-dark {
+  background-image: linear-gradient(rgba(10, 31, 68, 0.6), rgba(10, 31, 68, 0.85));
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  overflow: hidden;
+}
+/* NEW: Icon badges in buttons */
+    .btn-with-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-with-icon .bi {
+      transition: transform 0.3s ease;
+      font-size: 16px;
+    }
+
+    .btn:hover .bi {
+      transform: translateX(4px);
+    }
 
 
 /* ================================================================
@@ -782,6 +806,8 @@ input, select, textarea { font-family: var(--font-body); }
   }
   .nav__link { font-size: 12px; padding: 6px 8px; }
 
+  .brand-circle { display: none; }
+
   /* Modals dock to the bottom of the screen like a sheet */
   .modal-box     { max-height: 100vh; border-radius: var(--radius-lg) var(--radius-lg) 0 0; align-self: flex-end; }
   .modal-overlay { align-items: flex-end; padding: 0; }
@@ -792,10 +818,23 @@ input, select, textarea { font-family: var(--font-body); }
   .footer__top    { flex-direction: column; align-items: flex-start; gap: var(--space-md); }
   .footer__bottom { flex-direction: column; align-items: flex-start; gap: 10px; }
 
-  /* Fixed floating elements shrink so they don't collide on small screens */
-  .fab-wa         { width: 46px; height: 46px; font-size: 20px; bottom: 16px; right: 14px; }
-  .floating-cart  { padding: 12px 18px; font-size: 13px; bottom: 16px; right: 16px; }
-  .toast          { bottom: 76px; padding: 8px 18px; font-size: 12px; max-width: 90vw; white-space: normal; text-align: center; }
+  /* Fixed floating elements shrink and stack so they don't collide */
+  .fab-wa { 
+    width: 46px; height: 46px; font-size: 20px; 
+    bottom: 16px; right: 16px; 
+    z-index: 505; 
+  }
+  .floating-cart { 
+    padding: 12px 18px; font-size: 13px; 
+    bottom: 74px; /* Pushed up above the WhatsApp button */
+    right: 16px; 
+    z-index: 500; 
+  }
+  .toast { 
+    bottom: 130px; /* Pushed up so toast messages don't cover the buttons */
+    padding: 8px 18px; font-size: 12px; max-width: 90vw; 
+    white-space: normal; text-align: center; 
+  }
 }
 
 /* ---- Small phones: tighten further ---- */

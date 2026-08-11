@@ -4,27 +4,56 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TreshBlinkybillfits | Tailor your Premium Outfits</title>
-  <meta name="description" content="Elevate your wardrobe with custom native wear, English fits, and monogram designs. Expertly tailored bespoke clothing delivered right to you." />
   <link rel="stylesheet" href="styles/main.css"/>
-  <link rel="stylesheet" href="styles/animations.css"/> <!-- NEW: Animation system -->
-  <link rel="icon" type="image/png" href="../assets/fitslogo.png"/>
-  <meta name="google-site-verification" content="U2VO-ZOiqY2AXjMWGENpvEH2BBrljQUGvR3YQPe22iE" />
+  <link rel="stylesheet" href="styles/animations.css"/>
+  <link rel="icon" type="image/png" href="assets/fitslogo.png"/>
   <style>
+    /* =========================================
+       SWEET MODAL ANIMATIONS
+       ========================================= */
+    @keyframes smoothEntrance {
+      0% { opacity: 0; transform: scale(0.95) translateY(30px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    @keyframes smoothExit {
+      0% { opacity: 1; transform: scale(1) translateY(0); }
+      100% { opacity: 0; transform: scale(0.95) translateY(20px); }
+    }
+    @keyframes blurFadeIn {
+      0% { opacity: 0; backdrop-filter: blur(0px); }
+      100% { opacity: 1; backdrop-filter: blur(4px); }
+    }
+    @keyframes blurFadeOut {
+      0% { opacity: 1; backdrop-filter: blur(4px); }
+      100% { opacity: 0; backdrop-filter: blur(0px); }
+    }
+
+    .modal-overlay {
+      animation: blurFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .modal-box {
+      animation: smoothEntrance 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .modal-overlay.closing {
+      animation: blurFadeOut 0.3s ease-in forwards;
+    }
+    .modal-overlay.closing .modal-box {
+      animation: smoothExit 0.3s ease-in forwards;
+    }
+
     /* INDEX-SPECIFIC STYLES */
     .hero {
-      background-image: linear-gradient(rgba(10, 31, 68, 0.5), rgba(10, 31, 68, 0.7)), 
-        url('../assets/bagimg1.jpg');
-      padding: 44px var(--space-md) 36px;
+      background-image: linear-gradient(rgba(10, 31, 68, 0.7), rgba(10, 31, 68, 0.85)), 
+                        url('assets/bagimg1.jpg');
+      background-size: cover;       
+      background-position: center;    
+      background-repeat: no-repeat;
+      padding: 60px 0 80px; 
       position: relative;
       overflow: hidden;
-      background-size: cover; 
-    
-      /* Centers the most important part of the image */
-      background-position: center; 
-      
-      /* Prevents the image from repeating like a tile */
-      background-repeat: no-repeat;
+      text-align: left; /* FIXED: Strictly ensures left alignment for mobile text */
     }
+
     .hero::before,.hero::after {
       content:''; position:absolute; border-radius:50%; pointer-events:none;
       border: 1px solid rgba(178,237,228,0.12);
@@ -33,7 +62,8 @@
     .hero::after  { bottom:-40px; left:-50px; width:200px; height:200px; }
 
     .hero__logo-row {
-      display:flex; align-items:center; gap:16px; margin-bottom:28px;
+      display: flex; align-items: center; gap: 16px; margin-bottom: 28px;
+      justify-content: flex-start; /* FIXED: Keeps logo row pinned left */
     }
     .hero__logo-circle {
       width:72px; height:72px; border-radius:50%;
@@ -54,40 +84,89 @@
     .hero__title { font-family:var(--font-display); font-size:42px; font-weight:700; color:#fff; line-height:1.1; margin-bottom:12px; }
     .hero__title em { font-style:italic; color:var(--blue-light); }
     .hero__sub  { font-size:13px; color:var(--text-soft); line-height:1.7; margin-bottom:28px; max-width:320px; }
-    .hero__btns { display:flex; gap:12px; flex-wrap:wrap; }
-
-    .cat-strip { background:var(--white); padding:14px var(--space-md); border-bottom:1px solid var(--border-2); }
-
-    .mono-card {
-      min-width:152px; height:208px; border-radius:var(--radius-md);
-      position:relative; overflow:hidden; cursor:pointer; flex-shrink:0;
-      transition:transform 0.2s;
+    .hero__btns { display:flex; gap:12px; flex-wrap:wrap; justify-content: flex-start; }
+    
+    .hero__container {
+      width: 100%;
+      padding: 0 var(--space-md); 
     }
-    .mono-card:hover { transform:scale(1.03); }
-    .mono-card__badge { position:absolute; top:10px; right:10px; }
-    .mono-card__img   { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
-    .mono-card__deco  { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
-    .mono-card__info  { position:absolute; bottom:0; left:0; right:0; padding:14px; background:linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%); }
-    .mono-card__name  { font-size:12px; font-weight:500; color:#fff; }
-    .mono-card__cat   { font-size:10px; color:var(--mint); margin-top:2px; }
-
-    .native-card {
-      min-width:168px; height:224px; border-radius:var(--radius-md);
-      position:relative; overflow:hidden; cursor:pointer; flex-shrink:0;
-      transition:transform 0.2s; text-decoration:none; display:block;
+    @media(min-width: 640px) {
+      .hero { padding: 60px 0 80px; }
+      .hero__container { padding: 0 50px; }
+      .hero__title { font-size:52px; }
+      .social-grid  { grid-template-columns:repeat(4,1fr); }
     }
-    .native-card:hover { transform:scale(1.03); }
-    .native-card__info { position:absolute; bottom:0; left:0; right:0; padding:14px; background:linear-gradient(to top, rgba(10,31,68,0.85) 0%, transparent 100%); }
-    .native-card__name  { font-size:13px; font-weight:500; color:#fff; }
-    .native-card__price { font-size:11px; color:var(--mint); margin-top:3px; }
+    @media(max-width:767px) {
+      .brand-circle { display: none; }
+    }
 
-    .cta-band { margin:0 var(--space-md) var(--space-lg); 
-      background-image: linear-gradient(rgba(10, 31, 68, 0.5), rgba(10, 31, 68, 0.7)), 
-        url('../assets/bagimg2.jpg');
-      padding: 44px var(--space-md) 36px;
-      position: relative;
+    /* =========================================
+       ELEVATED CARDS (Matches Products/Designs)
+       ========================================= */
+    /* Smooth horizontal carousel with gap control */
+    .carousel { 
+      display: flex; 
+      gap: 16px; 
+      overflow-x: auto; 
+      scrollbar-width: none; 
+      padding: 4px var(--space-md) 16px; 
+      scroll-behavior: smooth;
+    }
+    .carousel::-webkit-scrollbar { display: none; }
+
+    /* Compact, uniform card proportions */
+    .card {
+      background: var(--white);
+      border: 2px solid var(--blue-pale);
+      border-radius: 16px;
       overflow: hidden;
-      background-size: cover;  border-radius:var(--radius-xl); padding:30px 22px; text-align:center; position:relative; overflow:hidden; }
+      box-shadow: 0 4px 12px rgba(10, 31, 68, 0.04);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      width: 180px; 
+    }
+    @media(min-width: 640px) {
+      .card { width: 210px; }
+    }
+    
+    /* Uniform image container that handles any photo aspect ratio gracefully */
+    .p-img { 
+      aspect-ratio: 4/5; 
+      position: relative; 
+      overflow: hidden;
+      background: var(--bg); 
+      border-bottom: 2px solid var(--white); 
+    }
+    .p-img img { 
+      width: 100%; 
+      height: 100%; 
+      object-fit: cover; /* FIXED: Automatically fills frame without awkward gaps */
+      object-position: center top;
+      mix-blend-mode: multiply; 
+    }
+    
+    .p-badge-pos { position:absolute; top:8px; left:8px; z-index: 2; }
+    
+    .p-body { 
+      padding: 12px; 
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .p-name  { font-size: 13px; font-weight: 600; color: var(--navy); }
+    .p-sub   { font-size: 10px; font-weight: 500; color: var(--text-soft); margin-top: 2px; }
+
+    /* Layout utilities */
+    .cta-band { 
+      margin: 0 var(--space-md) 40px var(--space-md); /* Added bottom margin */
+      background: var(--navy); 
+      border-radius: var(--radius-xl); 
+      padding: 30px 22px; 
+      text-align: center; 
+      position: relative; 
+      overflow: hidden; 
+    }
     .cta-band::before { content:''; position:absolute; top:-30px; right:-30px; width:130px; height:130px; border-radius:50%; background:rgba(91,159,255,0.07); pointer-events:none; }
     .cta-band__title { font-family:var(--font-display); font-size:26px; font-weight:600; font-style:italic; color:#fff; margin-bottom:10px; line-height:1.2; }
     .cta-band__sub   { font-size:12px; color:var(--text-soft); margin-bottom:22px; line-height:1.6; }
@@ -100,38 +179,94 @@
     .social-item__icon { width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
     .social-item__label { font-size:11px; font-weight:500; color:var(--navy); }
 
+    .features-section {
+      background: var(--white);
+      padding: var(--space-lg);
+      border-radius: var(--radius-lg);
+      margin: 0 var(--space-md) var(--space-lg);
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: var(--space-md);
+    }
+    .feature-card {
+      text-align: center;
+      padding: var(--space-md);
+      border-radius: var(--radius-md);
+      background: var(--bg);
+      border: 1px solid var(--border-2);
+      transition: all 0.2s ease;
+    }
+    .feature-card:hover {
+      border-color: var(--blue);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    .feature-card .bi {
+      font-size: 32px;
+      color: var(--mint);
+      margin-bottom: 8px;
+    }
+    .feature-card p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
 
     .floating-cart {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    background: #000;
-    color: #fff;
-    padding: 15px 25px;
-    border-radius: 50px;
-    text-decoration: none;
-    font-weight: bold;
-    font-family: sans-serif;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    z-index: 9999;
-    transition: transform 0.2s;
-  }
-  .floating-cart:hover {
-    transform: scale(1.05);
-  }
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #000;
+      color: #fff;
+      padding: 15px 25px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: bold;
+      font-family: sans-serif;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      z-index: 9999;
+      transition: transform 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .floating-cart:hover { transform: scale(1.05); }
+    .floating-cart .bi { font-size: 18px; }
 
-  @media(min-width:640px) {
-    .hero__title { font-size:52px; }
-    .social-grid  { grid-template-columns:repeat(4,1fr); }
-  }
+    .spinner-border {
+      display: inline-block;
+      width: 2rem;
+      height: 2rem;
+      vertical-align: -0.125em;
+      border: 0.25em solid currentColor;
+      border-right-color: transparent;
+      border-radius: 50%;
+      animation: spinner-border .75s linear infinite;
+    }
+    @keyframes spinner-border {
+      to { transform: rotate(360deg); }
+    }
+    .loading-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      min-height: 200px;
+      color: var(--navy); 
+      font-size: 14px;
+      gap: 12px;
+    }
   </style>
 </head>
 <body>
   <!-- NAV SLOT — loaded by ComponentLoader -->
   <div id="nav-slot"></div>
+
   <!-- HERO -->
   <section class="hero">
-    <div class="hero__logo-row">
+    <div class="hero__container">
+      <div class="hero__logo-row">
       <div class="hero__logo-circle">
         <img src="assets/logo.png" alt="TreshBlinkybill Fits"/>
       </div>
@@ -140,63 +275,99 @@
         <div class="hero__brand-sub">Premium Tailoring · Lagos</div>
       </div>
     </div>
-    <div class="hero__tag">Est. Lagos · Premium Tailoring</div>
+    <div class="hero__tag"><i class="bi bi-star-fill" style="margin-right: 6px;"></i>Est. Lagos · Premium Tailoring</div>
     <h1 class="hero__title">Dressed to<br><em>Define</em> You.</h1>
-    <p class="hero__sub">Native wear, English fits & monogram designs crafted with precision for every occasion.</p>
+    <p class="hero__sub">Native wear, English fits & monogram designs — crafted with precision for every occasion.</p>
     <div class="hero__btns">
-      <button onclick="openCustomOrderModal()" class="btn btn--mint btn--lg">Place an Order</button>
+      <button onclick="openCustomOrderModal()" class="btn btn--mint btn--lg btn-with-icon">
+        <i class="bi bi-pencil-square"></i>
+        Place an Order
+      </button>
+    </div>
     </div>
   </section>
 
- <div class="section" data-animation="animate-fade-in">
+  <!-- FEATURES SECTION -->
+  <div class="features-section" data-animation="animate-fade-in">
+    <div class="features-grid">
+      <div class="feature-card">
+        <i class="bi bi-scissors"></i>
+        <p><strong>Expert Tailoring</strong></p>
+        <p style="font-size: 10px; margin-top: 4px;">Precision cuts & perfect fit</p>
+      </div>
+      <div class="feature-card">
+        <i class="bi bi-palette"></i>
+        <p><strong>Custom Designs</strong></p>
+        <p style="font-size: 10px; margin-top: 4px;">Your style, your vision</p>
+      </div>
+      <div class="feature-card">
+        <i class="bi bi-truck"></i>
+        <p><strong>Fast Delivery</strong></p>
+        <p style="font-size: 10px; margin-top: 4px;">Quick turnaround time</p>
+      </div>
+      <div class="feature-card">
+        <i class="bi bi-check-circle"></i>
+        <p><strong>Quality Assured</strong></p>
+        <p style="font-size: 10px; margin-top: 4px;">100% satisfaction</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" data-animation="animate-fade-in">
     <div class="section-hdr">
-      <h2 class="section-hdr__title">Designs</h2>
-      <a href="pages/designs.html" class="section-hdr__link">See all →</a>
+      <h2 class="section-hdr__title"><i class="bi bi-collection" style="margin-right: 8px;"></i>Designs</h2>
+      <a href="pages/designs.html" class="section-hdr__link">See all <i class="bi bi-arrow-right"></i></a>
     </div>
     <div class="carousel" id="designsCarousel"></div>
   </div>
 
   <div class="section" data-animation="animate-fade-in" style="padding-top:0;">
     <div class="section-hdr">
-      <h2 class="section-hdr__title">Collections</h2>
-      <a href="pages/products.html" class="section-hdr__link">See all →</a>
+      <h2 class="section-hdr__title"><i class="bi bi-images" style="margin-right: 8px;"></i>Collections</h2>
+      <a href="pages/products.html" class="section-hdr__link">See all <i class="bi bi-arrow-right"></i></a>
     </div>
     <div class="carousel" id="collectionsCarousel"></div>
   </div>
 
   <!-- CTA -->
   <div class="cta-band" data-animation="animate-fade-in">
+    <i class="bi bi-star" style="font-size: 28px; color: var(--mint); margin-bottom: 12px;"></i>
     <div class="cta-band__title">Ready for your<br>perfect fit?</div>
     <p class="cta-band__sub">Tell us your style, measurements & event —<br>we'll handle the rest.</p>
-    <button onclick="openCustomOrderModal()" class="btn btn--mint btn--lg">Place an Order</button>
+    <button onclick="openCustomOrderModal()" class="btn btn--mint btn--lg btn-with-icon">
+      <i class="bi bi-hand-index"></i>
+      Place an Order
+    </button>
   </div>
 
   <!-- SOCIAL LINKS -->
   <div class="social-box" data-animation="animate-fade-in">
-    <div class="social-box__title">Find us on social media</div>
+    <div class="social-box__title"><i class="bi bi-share" style="margin-right: 8px;"></i>Find us on social media</div>
     <div class="social-grid">
       <a class="social-item" href="https://wa.link/s4la7a" target="_blank">
-        <div class="social-item__icon" style="background:#e8f5e9;">💬</div>
+        <div class="social-item__icon" style="background:#e8f5e9;"><i class="bi bi-whatsapp"></i></div>
         <div class="social-item__label">WhatsApp</div>
       </a>
       <a class="social-item" href="https://www.instagram.com/treshblinkybill" target="_blank">
-        <div class="social-item__icon" style="background:#fce4ec;">📸</div>
+        <div class="social-item__icon" style="background:#fce4ec;"><i class="bi bi-instagram"></i></div>
         <div class="social-item__label">Instagram</div>
       </a>
       <a class="social-item" href="https://www.tiktok.com/@treshblinkyfits" target="_blank">
-        <div class="social-item__icon" style="background:#e3f2fd;">🎵</div>
+        <div class="social-item__icon" style="background:#e3f2fd;"><i class="bi bi-tiktok"></i></div>
         <div class="social-item__label">TikTok</div>
       </a>
       <a class="social-item" href="https://snapchat.com/add/treasure_trust" target="_blank">
-        <div class="social-item__icon" style="background:#fff8e1;">👻</div>
+        <div class="social-item__icon" style="background:#fff8e1;"><i class="bi bi-snap"></i></div>
         <div class="social-item__label">Snapchat</div>
       </a>
     </div>
   </div>
 
   <a href="pages/checkout.html" id="floatingCart" class="floating-cart" style="display: none;">
-  🛒 View Cart (<span id="cartItemCount">0</span>)
-</a>
+    <i class="bi bi-bag"></i>
+    View Cart (<span id="cartItemCount">0</span>)
+  </a>
+
   <!-- FOOTER SLOT -->
   <div id="footer-slot"></div>
 
@@ -204,21 +375,32 @@
   <script src="api.js"></script>
   <script src="services/services.js"></script>
   <script src="utils.js"></script>
-  <script src="animations.js"></script> <!-- NEW: Animation controller -->
+  <script src="animations.js"></script>
+
   <script>
-    // Override component paths for index (one level up)
+    // Global Modal Closer with Animation Delay
+    window.closeModal = function(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.add('closing');
+        setTimeout(() => {
+          modal.remove();
+        }, 300);
+      }
+    };
+
     ComponentLoader.loadNav = async function(active) {
       const el = document.querySelector('#nav-slot');
       if (!el) return;
       try {
         const res = await fetch('components/nav.html');
         el.innerHTML = await res.text();
-        // Fix paths for root index
         el.querySelectorAll('[href*="../"]').forEach(a => { a.href = a.href.replace('../', ''); });
         el.querySelectorAll('[src*="../"]').forEach(i => { i.src = i.src.replace('../', ''); });
         el.querySelectorAll('.nav__link').forEach(l => l.classList.toggle('nav__link--active', l.dataset.page === active));
       } catch {}
     };
+
     ComponentLoader.loadFooter = async function() {
       const el = document.querySelector('#footer-slot');
       if (!el) return;
@@ -234,25 +416,28 @@
     window.addToStyleBag = function(event, designId, name, image) {
       event.preventDefault(); 
       
-      if (!designId || designId === 'null' || designId === 'undefined') {
-         TBF.Utils.showToast('Please contact us directly for this bespoke item.', 'error');
-         return;
+      let finalId = designId;
+      if (!finalId || finalId === 'null' || finalId === 'undefined') {
+         finalId = 'Bespoke-' + Math.floor(1000 + Math.random() * 9000);
       }
       
       TBF.CartService.addItem({
-        designId: designId,
+        designId: finalId,
         name: name,
         image: image,
         qty: 1
       });
+
+      if (window.TBF && TBF.Utils && typeof TBF.Utils.showToast === 'function') {
+        TBF.Utils.showToast('✨ Style added to your bag!', 'success');
+      }
+      
+      if (window.TBF && TBF.CartService && typeof TBF.CartService.updateWidget === 'function') {
+        TBF.CartService.updateWidget();
+      }
     };
 
-    /* ============================================================
-       BESPOKE CUSTOM UPLOAD MODAL (Multiple Images + Optional Name)
-       ============================================================ */
-    /* ============================================================
-       BESPOKE CUSTOM UPLOAD MODAL (Multiple Styles Support)
-       ============================================================ */
+    // Enhanced custom order modal
     function openCustomOrderModal() {
       const modalId = 'customOrderModal';
       document.getElementById(modalId)?.remove();
@@ -262,25 +447,26 @@
       const modal = document.createElement('div');
       modal.className = 'modal-overlay';
       modal.id = modalId;
-      modal.style.alignItems = 'center'; 
+      modal.setAttribute('onclick', `if(event.target.id === '${modalId}') closeModal('${modalId}')`);
+      
       modal.innerHTML = `
-        <div class="modal-box" style="align-self: center; max-height: 90vh; border-radius: var(--radius-lg);">
+        <div class="modal-box" style="align-self: center; max-height: 90vh; border-radius: var(--radius-lg);" onclick="event.stopPropagation()">
           <div class="modal__header">
-            <div class="modal__title">Bespoke Order</div>
-            <button class="modal__close" onclick="document.getElementById('${modalId}').remove()">✕</button>
+            <div class="modal__title"><i class="bi bi-star-fill" style="margin-right: 8px; color: var(--mint);"></i>Bespoke Order</div>
+            <button class="modal__close" onclick="closeModal('${modalId}')"><i class="bi bi-x-lg"></i></button>
           </div>
           <div class="modal__body">
             <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">Have your own style? Upload your inspiration pictures and we'll tailor it to perfection.</p>
             
             <div class="field">
-              <label class="field__label">Style Description <span style="color:var(--text-soft); text-transform:none;">(Optional)</span></label>
+              <label class="field__label"><i class="bi bi-type" style="margin-right: 4px;"></i>Style Description <span style="color:var(--text-soft); text-transform:none;">(Optional)</span></label>
               <input type="text" id="customStyleName" class="field__input" placeholder="e.g. Chief's Blue Agbada" />
             </div>
 
             <div class="field">
-              <label class="field__label">Inspiration Pictures *</label>
+              <label class="field__label"><i class="bi bi-images" style="margin-right: 4px;"></i>Inspiration Pictures *</label>
               <div class="upload-box" onclick="document.getElementById('customStyleImage').click()">
-                <div class="upload-box__icon">📸</div>
+                <div class="upload-box__icon"><i class="bi bi-camera" style="color: var(--navy);"></i></div>
                 <div class="upload-box__text"><strong>Click to upload</strong> one or more design photos<br>JPEG, PNG, HEIC.</div>
               </div>
               <input type="file" id="customStyleImage" accept="image/*" multiple style="display:none" onchange="previewCustomImages(this)"/>
@@ -290,11 +476,10 @@
             </div>
           </div>
           
-          <!-- 👇 FIXED: Two buttons for flexible shopping -->
           <div class="modal__footer" style="padding: 16px 20px; gap: 8px;">
-            <button class="btn btn--ghost" onclick="document.getElementById('${modalId}').remove()">Cancel</button>
-            <button class="btn btn--outline" id="customAddBtn" style="border-color: var(--navy); color: var(--navy);" onclick="processCustomOrder(false)">+ Add & Keep Browsing</button>
-            <button class="btn btn--mint" id="customCheckoutBtn" onclick="processCustomOrder(true)">Add & Checkout →</button>
+            <button class="btn btn--ghost btn-with-icon icon-left" onclick="closeModal('${modalId}')"><i class="bi bi-x"></i> Cancel</button>
+            <button class="btn btn--outline btn-with-icon" id="customAddBtn" style="border-color: var(--navy); color: var(--navy);" onclick="processCustomOrder(false)"><i class="bi bi-plus-lg"></i> Keep Browsing</button>
+            <button class="btn btn--mint btn-with-icon" id="customCheckoutBtn" onclick="processCustomOrder(true)"><i class="bi bi-cart-check"></i> Add & Checkout</button>
           </div>
         </div>
       `;
@@ -305,16 +490,13 @@
 
     function previewCustomImages(input) {
       const previewContainer = document.getElementById('customImagePreview');
-      
       if (input.files && input.files.length > 0) {
         previewContainer.style.display = 'flex';
-        
         Array.from(input.files).forEach(file => {
           const reader = new FileReader();
           reader.onload = function(e) {
             const base64Data = e.target.result;
             customImageArray.push(base64Data);
-            
             const img = document.createElement('img');
             img.src = base64Data;
             img.style.cssText = 'width:60px; height:60px; object-fit:cover; border-radius:6px; border:1px solid var(--border-2); box-shadow: var(--shadow-sm);';
@@ -325,172 +507,203 @@
       }
     }
 
-    // 👇 FIXED: Accepts a boolean to decide whether to redirect or reset the form
     async function processCustomOrder(redirectToCheckout = true) {
-    let name = document.getElementById('customStyleName').value.trim();
-    if (customImageArray.length === 0) return TBF.Utils.showToast('Please upload at least one inspiration picture', 'error');
+      let name = document.getElementById('customStyleName').value.trim();
+      if (customImageArray.length === 0) return TBF.Utils.showToast('Please upload at least one inspiration picture', 'error');
 
-    const addBtn = document.getElementById('customAddBtn');
-    const checkoutBtn = document.getElementById('customCheckoutBtn');
-    if(addBtn) addBtn.disabled = true;
-    if(checkoutBtn) checkoutBtn.disabled = true;
+      const addBtn = document.getElementById('customAddBtn');
+      const checkoutBtn = document.getElementById('customCheckoutBtn');
+      if(addBtn) addBtn.disabled = true;
+      if(checkoutBtn) checkoutBtn.disabled = true;
 
-    // Temporary UI indicator
-    const originalAddText = addBtn ? addBtn.textContent : '';
-    if(addBtn) addBtn.textContent = 'Processing Images...';
+      AnimationController.showLoadingDots('Processing images...');
+      const originalAddText = addBtn ? addBtn.textContent : '';
+      if(addBtn) addBtn.textContent = 'Processing...';
 
-    try {
-      const bespokeId = 'Bespoke-' + Math.floor(1000 + Math.random() * 9000);
-      if (!name) name = 'Custom Design (' + bespokeId + ')';
+      try {
+        const bespokeId = 'Bespoke-' + Math.floor(1000 + Math.random() * 9000);
+        if (!name) name = 'Custom Design (' + bespokeId + ')';
 
-      const filesToUpload = [];
-      
-      // 👇 THE FIX: Compress the Base64 strings directly, completely bypassing dataURLtoFile!
-      for (let i = 0; i < customImageArray.length; i++) {
+        const filesToUpload = [];
+        for (let i = 0; i < customImageArray.length; i++) {
           let base64Data = customImageArray[i];
-          
           let shrunkFile = await new Promise((resolve, reject) => {
-              const img = new Image();
-              img.onload = () => {
-                  const canvas = document.createElement('canvas');
-                  let width = img.width;
-                  let height = img.height;
-                  const maxW = 1200; // Shrinks massive images down to 1200px width
-                  
-                  if (width > maxW) {
-                      height = Math.round((height * maxW) / width);
-                      width = maxW;
-                  }
-                  
-                  canvas.width = width; 
-                  canvas.height = height;
-                  const ctx = canvas.getContext('2d');
-                  ctx.drawImage(img, 0, 0, width, height);
-                  
-                  // Converts directly to a perfectly formatted JPEG File
-                  canvas.toBlob((blob) => {
-                      if (!blob) return reject('Compression failed');
-                      resolve(new File([blob], `custom_upload_${i}.jpg`, { type: 'image/jpeg' }));
-                  }, 'image/jpeg', 0.7);
-              };
-              img.onerror = () => reject('Image load failed');
-              
-              // Secures the Data URI prefix so the Image object can read it flawlessly
-              img.src = base64Data.startsWith('data:') ? base64Data : 'data:image/jpeg;base64,' + base64Data;
+            const img = new Image();
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              let width = img.width; let height = img.height; const maxW = 1200;
+              if (width > maxW) { height = Math.round((height * maxW) / width); width = maxW; }
+              canvas.width = width; canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+              canvas.toBlob((blob) => {
+                if (!blob) return reject('Compression failed');
+                resolve(new File([blob], `custom_upload_${i}.jpg`, { type: 'image/jpeg' }));
+              }, 'image/jpeg', 0.7);
+            };
+            img.onerror = () => reject('Image load failed');
+            img.src = base64Data.startsWith('data:') ? base64Data : 'data:image/jpeg;base64,' + base64Data;
           });
-
           filesToUpload.push(shrunkFile);
-      }
+        }
+        
+        const apiService = window.TBF ? window.TBF.MediaService : TBF.MediaService;
+        let response = await apiService.upload(filesToUpload, { title: name, category: 'bespoke' });
+        let uploaded = response.data || response;
+        let allUrls = uploaded.map(u => u.url);
 
-      if(addBtn) addBtn.textContent = 'Uploading...';
-      
-      const apiService = window.TBF ? window.TBF.MediaService : TBF.MediaService;
-      let response = await apiService.upload(filesToUpload, { title: name, category: 'bespoke' });
-      let uploaded = response.data || response;
-      
-      let allUrls = uploaded.map(u => u.url);
+        const cartService = window.TBF ? window.TBF.CartService : TBF.CartService;
+        cartService.addItem({
+          designId: bespokeId, name: name, image: allUrls.join(','), qty: 1, isCustom: true
+        });
 
-      const cartService = window.TBF ? window.TBF.CartService : TBF.CartService;
-      cartService.addItem({
-        designId: bespokeId,
-        name: name,
-        image: allUrls.join(','), 
-        qty: 1,
-        isCustom: true
-      });
+        AnimationController.hideLoadingSpinner();
 
-      if (redirectToCheckout) {
-        window.location.href = window.location.pathname.includes('index.html') || window.location.pathname === '/' ? 'pages/checkout.html' : 'checkout.html';
-      } else {
+        if (redirectToCheckout) {
+          window.location.href = window.location.pathname.includes('index.html') || window.location.pathname === '/' ? 'pages/checkout.html' : 'checkout.html';
+        } else {
+          if(addBtn) { addBtn.disabled = false; addBtn.textContent = originalAddText; }
+          if(checkoutBtn) checkoutBtn.disabled = false;
+          TBF.Utils.showToast('✨ Style added to your bag!', 'success');
+          closeModal('customOrderModal');
+          cartService.updateWidget();
+        }
+      } catch (err) {
+        AnimationController.hideLoadingSpinner();
+        TBF.Utils.showToast('Upload failed. Please try again.', 'error');
         if(addBtn) { addBtn.disabled = false; addBtn.textContent = originalAddText; }
         if(checkoutBtn) checkoutBtn.disabled = false;
-
-        TBF.Utils.showToast('Style added to your bag!', 'success');
-        document.getElementById('customOrderModal').remove();
-        cartService.updateWidget();
       }
-    } catch (err) {
-      console.error("Upload error:", err);
-      TBF.Utils.showToast('Upload failed. Please try again.', 'error');
-      if(addBtn) { addBtn.disabled = false; addBtn.textContent = originalAddText; }
-      if(checkoutBtn) checkoutBtn.disabled = false;
     }
-}
+
+    function setupAutoScroll(containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      let scrollDirection = 1; // 1 for right, -1 for left
+      let scrollSpeed = 0.8;   // Smooth, elegant sliding speed
+      let isPaused = false;
+      let pauseTimeout = null;
+
+      let scrollInterval = setInterval(() => {
+        if (isPaused) return;
+
+        // Check max scroll boundary
+        const maxScroll = container.scrollWidth - container.clientWidth;
+        
+        // If we don't have enough items to actually scroll, exit early
+        if (maxScroll <= 0) return;
+
+        // Move the carousel
+        container.scrollLeft += scrollSpeed * scrollDirection;
+
+        // If we hit the far right end, pause briefly, then reverse direction
+        if (container.scrollLeft >= maxScroll - 2) {
+          isPaused = true;
+          scrollDirection = -1; // Switch to scrolling left
+          
+          clearTimeout(pauseTimeout);
+          pauseTimeout = setTimeout(() => { isPaused = false; }, 2000); // Pause for 2 seconds at the end
+        } 
+        // If we hit the far left start, pause briefly, then reverse direction
+        else if (container.scrollLeft <= 2) {
+          isPaused = true;
+          scrollDirection = 1; // Switch to scrolling right
+          
+          clearTimeout(pauseTimeout);
+          pauseTimeout = setTimeout(() => { isPaused = false; }, 2000); // Pause for 2 seconds at the start
+        }
+      }, 30);
+
+      // Manual interaction pause (hover or touch)
+      container.addEventListener('mouseenter', () => isPaused = true);
+      container.addEventListener('mouseleave', () => { if (scrollInterval) isPaused = false; });
+      container.addEventListener('touchstart', () => isPaused = true, {passive: true});
+      container.addEventListener('touchend', () => { 
+        clearTimeout(pauseTimeout);
+        pauseTimeout = setTimeout(() => { isPaused = false; }, 1500); 
+      }, {passive: true});
+    }
 
     async function init() {
       await TBF.ComponentLoader.loadNav('home');
       await TBF.ComponentLoader.loadFooter();
 
-      // 1. Fetch Designs (Blueprints)
+      const spinnerHTML = `
+        <div class="loading-container">
+          <div class="spinner-border" role="status"></div>
+          <span style="color: var(--text-muted);">Loading...</span>
+        </div>
+      `;
+      document.getElementById('designsCarousel').innerHTML = spinnerHTML;
+      document.getElementById('collectionsCarousel').innerHTML = spinnerHTML;
+
       let designsData = [];
       try {
         designsData = await TBF.DesignService.getAll();
       } catch(e) { console.warn("Could not load designs"); }
-      const topDesigns = designsData.slice(0, 8); // Get the latest 8
+      const topDesigns = designsData.slice(0, 8);
 
-      // 2. Fetch Collections (Finished Jobs marked as Primary)
       let collectionsData = [];
       try {
         const res = await window.TBF_API.Media.getAll();
-        // Secure array handling
         const dataArr = Array.isArray(res) ? res : (res.data || []);
         collectionsData = dataArr.filter(item => item.category !== 'designs' && item.category !== 'bespoke');
       } catch(e) { console.warn("Could not load collections"); }
       const topCollections = collectionsData.slice(0, 8);
 
-      // 3. Render Designs Carousel (Stacked Responsive Layout)
+     // Render Designs Carousel (Single Tailor Button)
       document.getElementById('designsCarousel').innerHTML = topDesigns.length ? topDesigns.map(d => {
+        const designNum = d.num || d.number || '';
         const safeName = (d.name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        
-        // 👇 THE FIX 1: Split comma-separated URLs to grab only the first image
         let rawImg = d.imageUrl || d.image || '';
         let firstImgUrl = rawImg.split(',')[0].trim();
 
         return `
-        <div class="mono-card ${d.grad || 'grad-1'}" style="background:var(--navy); text-decoration:none;">
-          ${firstImgUrl 
-            ? `<img src="${firstImgUrl.startsWith('http') ? firstImgUrl : BACKEND_URL + firstImgUrl}" class="mono-card__img" alt="${safeName}"/>` 
-            : `<div class="mono-card__deco"><span class="mono-deco">${(d.name || 'D').charAt(0)}</span></div>`
-          }
-          ${d.badge ? `<div class="mono-card__badge"><span class="badge badge--${d.badge === 'new' ? 'new' : 'pop'}">${d.badge}</span></div>` : ''}
-          
-          <div class="mono-card__info" style="display:flex; flex-direction:column; gap:8px;">
-            <div>
-              <div class="mono-card__name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${d.name}</div>
-              <div class="mono-card__cat">${d.num || d.number || 'Blueprint'}</div>
+        <div class="card">
+          <div class="p-img">
+            ${firstImgUrl ? `<img src="${firstImgUrl.startsWith('http') ? firstImgUrl : BACKEND_URL + firstImgUrl}" alt="${safeName}" loading="lazy"/>` : `<span style="display:flex;align-items:center;justify-content:center;height:100%;font-size:30px;color:var(--text-muted);">${d.name.charAt(0)}</span>`}
+            ${d.badge ? `<div class="p-badge-pos"><span class="badge badge--${d.badge==='new'?'new':'pop'}">${d.badge}</span></div>` : ''}
+          </div>
+          <div class="p-body">
+            <div class="p-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${d.name}</div>
+            <div class="p-sub" style="color:var(--blue);">Ref: ${designNum}</div>
+            
+            <div style="margin-top:auto; padding-top: 12px; width:100%;">
+              <button class="btn btn--mint btn-with-icon" style="width: 100%; padding:9px 0; font-size:12px; font-weight:600; border-radius:6px; border:none; cursor:pointer; justify-content: center; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
+                onclick="window.addToStyleBag(event, '${d.id || designNum}', '${safeName}', '${firstImgUrl}')"><i class="bi bi-scissors"></i> Tailor This</button>
             </div>
-            <button class="btn btn--mint" style="width:100%; padding:6px 0; font-size:11px; font-weight:600; border-radius:4px; border:none; cursor:pointer; text-align:center; box-shadow:0 2px 4px rgba(0,0,0,0.1);" 
-                    onclick="window.addToStyleBag(event, '${d.id}', '${safeName}', '${firstImgUrl}')">Tailor This</button>
           </div>
         </div>`;
-      }).join('') : '<div style="padding: 20px; font-size:12px; color:var(--text-muted);">No designs available yet.</div>';
+      }).join('') : '<div style="padding: 20px; font-size:12px; color:var(--text-muted);">No designs available.</div>';
 
-      // 4. Render Collections Carousel (Stacked Responsive Layout)
+      // Render Collections Carousel (Single Tailor Button)
       document.getElementById('collectionsCarousel').innerHTML = topCollections.length ? topCollections.map(p => {
         const safeTitle = (p.title || 'Custom Tailored Fit').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        
-        // Just in case a collection also has comma-separated images!
         let rawColImg = p.url || '';
         let firstColImg = rawColImg.split(',')[0].trim();
-        
+
         return `
-        <div class="native-card" style="background:var(--navy);">
-          ${firstColImg 
-            ? `<img src="${firstColImg.startsWith('http') ? firstColImg : `${BACKEND_URL}${firstColImg}`}" class="mono-card__img" alt="${safeTitle}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"/>` 
-            : `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><span class="mono-deco">📸</span></div>`
-          }
-          <div class="native-card__info" style="display:flex; flex-direction:column; gap:8px;">
-            <div>
-              <div class="native-card__name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.title || 'Custom Tailored Fit'}</div>
-              <div class="native-card__price">Ref: ${p.designNum || 'Bespoke'}</div>
+        <div class="card">
+          <div class="p-img">
+            <img src="${firstColImg.startsWith('http') ? firstColImg : `${BACKEND_URL}${firstColImg}`}" alt="${safeTitle}" loading="lazy"/>
+            <div class="p-badge-pos"><span class="badge badge--production">${p.designNum || 'Bespoke'}</span></div>
+          </div>
+          <div class="p-body">
+            <div class="p-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.title || 'Custom Tailored Fit'}</div>
+            <div class="p-sub" style="color:var(--blue);">Ref: ${p.designNum || 'Bespoke'}</div>
+            
+            <div style="margin-top:auto; padding-top: 12px; width:100%;">
+              <button class="btn btn--mint btn-with-icon" style="width: 100%; padding:9px 0; font-size:12px; font-weight:600; border-radius:6px; border:none; cursor:pointer; justify-content: center; box-shadow:0 2px 4px rgba(0,0,0,0.1);" 
+                    onclick="window.addToStyleBag(event, '${p.designId || p.designNum}', '${safeTitle}', '${firstColImg}')"><i class="bi bi-scissors"></i> Tailor This</button>
             </div>
-            <!-- 👇 THE FIX 2: Swapped p.designId for p.designNum so the cart accepts it! -->
-            <button class="btn btn--mint" style="width:100%; padding:6px 0; font-size:11px; font-weight:600; border-radius:4px; border:none; cursor:pointer; text-align:center; box-shadow:0 2px 4px rgba(0,0,0,0.1);" 
-                    onclick="window.addToStyleBag(event, '${p.designNum}', '${safeTitle}', '${firstColImg}')">Tailor This</button>
           </div>
         </div>`;
-      }).join('') : '<div style="padding: 20px; font-size:12px; color:var(--text-muted);">No finished jobs available yet.</div>';
+      }).join('') : '<div style="padding: 20px; font-size:12px; color:var(--text-muted);">No collections available.</div>';
 
+      // 3. AUTO-SCROLLING CAROUSEL SCRIPT
+      setupAutoScroll('designsCarousel');
+      setupAutoScroll('collectionsCarousel'); 
       if (typeof window.TBF !== 'undefined' && window.TBF.CartService) {
         window.TBF.CartService.updateWidget();
       }
@@ -498,6 +711,5 @@
 
     init();
   </script>
-  <!-- The Floating Cart Widget -->
 </body>
 </html>

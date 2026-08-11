@@ -6,16 +6,101 @@
   <title>Designs you can choose from</title>
   <meta name="description" content="Browse our catalog of premium Agbada, Senator, and English wear blueprints. Select your style, and let us tailor your perfect fit." />
   <link rel="stylesheet" href="../styles/main.css"/>
+  <link rel="stylesheet" href="../styles/animations.css"/>
   <link rel="icon" type="image/png" href="../assets/fitslogo.png"/>
   <style>
-    .design-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap: 12px;
-      padding: 16px var(--space-md) var(--space-lg);
+    /* =========================================
+       SWEET MODAL ANIMATIONS
+       ========================================= */
+    @keyframes smoothEntrance {
+      0% { opacity: 0; transform: scale(0.95) translateY(30px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
     }
-    @media(min-width:640px)  { .design-grid { grid-template-columns: repeat(3,1fr); padding: 16px var(--space-xl); } }
-    @media(min-width:1024px) { .design-grid { grid-template-columns: repeat(4,1fr); } }
+    @keyframes smoothExit {
+      0% { opacity: 1; transform: scale(1) translateY(0); }
+      100% { opacity: 0; transform: scale(0.95) translateY(20px); }
+    }
+    @keyframes blurFadeIn {
+      0% { opacity: 0; backdrop-filter: blur(0px); }
+      100% { opacity: 1; backdrop-filter: blur(4px); }
+    }
+    @keyframes blurFadeOut {
+      0% { opacity: 1; backdrop-filter: blur(4px); }
+      100% { opacity: 0; backdrop-filter: blur(0px); }
+    }
+
+    .modal-overlay {
+      animation: blurFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .modal-box {
+      animation: smoothEntrance 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .modal-overlay.closing {
+      animation: blurFadeOut 0.3s ease-in forwards;
+    }
+    .modal-overlay.closing .modal-box {
+      animation: smoothExit 0.3s ease-in forwards;
+    }
+
+    /* =========================================
+       SMART GRID & CARDS
+       ========================================= */
+    .design-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+      gap: 16px; 
+      padding: 20px var(--space-md) 32px; 
+    }
+    @media(min-width: 640px) { 
+      .design-grid { 
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+        padding: 24px var(--space-xl) 40px; 
+      } 
+    }
+
+    /* Elevated Bootstrap-Style Cards with Brand Framing */
+    .card {
+      background: var(--white);
+      border: 2px solid var(--blue-pale);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(10, 31, 68, 0.04);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: var(--blue);
+      box-shadow: 0 16px 32px rgba(10, 31, 68, 0.12);
+    }
+    
+    /* Image Container - Clean Full-Cover Framing */
+    .p-img { 
+      aspect-ratio: 4/5; 
+      position: relative; 
+      overflow: hidden;
+      background: var(--bg); 
+      border-bottom: 1px solid var(--border-2); 
+    }
+    .p-img img { 
+      width: 100%; 
+      height: 100%; 
+      object-fit: cover; /* FIXED: Completely fills the container frame evenly without awkward cutouts */
+      object-position: center top;
+    }
+    
+    .p-badge-pos { position:absolute; top:12px; left:12px; z-index: 2; }
+    
+    /* Cleaner Body Formatting */
+    .p-body { 
+      padding: 16px; 
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .p-name  { font-size: 14px; font-weight: 600; color: var(--navy); }
+    .p-sub   { font-size: 11px; font-weight: 500; color: var(--text-soft); margin-top: 4px; }
   </style>
 </head>
 <body>
@@ -48,6 +133,7 @@
   <a href="checkout.html" id="floatingCart" class="floating-cart" style="display: none;">
     🛒 View Cart (<span id="cartItemCount">0</span>)
   </a>
+  
   <div class="design-grid" id="designGrid"></div>
 
   <div id="footer-slot"></div>
@@ -55,29 +141,49 @@
   <script src="../api.js"></script>
   <script src="../services/services.js"></script>
   <script src="../config.js"></script>
+  <script src="../utils.js"></script>
+  <script src="../animations.js"></script>
   <script>
     let activeFilter = 'all';
     let allLoadedDesigns = [];
+
+    // Global Modal Closer with Animation Delay
+    window.closeModal = function(modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.add('closing');
+        setTimeout(() => {
+          modal.remove();
+        }, 300);
+      }
+    };
 
     // Global Style Bag Handler
     window.addToStyleBag = function(event, designId, name, image) {
       event.preventDefault(); 
       
-      if (!designId || designId === 'null' || designId === 'undefined') {
-         TBF.Utils.showToast('Please contact us directly for this bespoke item.', 'error');
-         return;
+      let finalId = designId;
+      if (!finalId || finalId === 'null' || finalId === 'undefined') {
+         finalId = 'Bespoke-' + Math.floor(1000 + Math.random() * 9000);
       }
       
       TBF.CartService.addItem({
-        designId: designId,
+        designId: finalId,
         name: name,
         image: image,
         qty: 1
       });
+
+      if (window.TBF && TBF.Utils && typeof TBF.Utils.showToast === 'function') {
+        TBF.Utils.showToast('✨ Style added to your bag!', 'success');
+      }
+      
+      if (window.TBF && TBF.CartService && typeof TBF.CartService.updateWidget === 'function') {
+        TBF.CartService.updateWidget();
+      }
     };
 
     function setFilter(cat, el) {
-      // 👇 Bulletproof Save
       if (window.TBF && window.TBF.Utils && typeof window.TBF.Utils.saveState === 'function') {
         window.TBF.Utils.saveState('storefront_design_filter', cat);
       } else {
@@ -95,7 +201,13 @@
     }
 
     async function fetchAndRenderDesigns() {
-      document.getElementById('designGrid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;">Loading designs...</div>';
+      // Modern Bootstrap spinner for the main grid
+      document.getElementById('designGrid').innerHTML = `
+        <div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; gap: 16px;">
+          <div class="spinner-border" style="color: var(--navy); width: 2.5rem; height: 2.5rem;" role="status"></div>
+          <span style="font-size: 13px; font-weight: 500; color: var(--text-muted);">Loading designs...</span>
+        </div>
+      `;
       
       const params = {};
       if (activeFilter !== 'all') params.category = activeFilter;
@@ -105,44 +217,44 @@
     }
 
     function renderDesignCards() {
-  document.getElementById('countLabel').textContent = `${allLoadedDesigns.length} design${allLoadedDesigns.length !== 1 ? 's' : ''}`;
-  const grid = document.getElementById('designGrid');
-  
-  if (!allLoadedDesigns.length) {
-    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;text-align:center;padding:40px;"><div class="empty-state__icon">🎨</div>No designs found for this category</div>';
-    return;
-  }
+      document.getElementById('countLabel').textContent = `${allLoadedDesigns.length} design${allLoadedDesigns.length !== 1 ? 's' : ''}`;
+      const grid = document.getElementById('designGrid');
+      
+      if (!allLoadedDesigns.length) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;text-align:center;padding:40px;"><div class="empty-state__icon">🎨</div>No designs found for this category</div>';
+        return;
+      }
 
-  grid.innerHTML = allLoadedDesigns.map(d => {
-    const designNum = d.num || d.number || '';
-    // Securely escape quotes so the buttons don't break
-    const safeName = (d.name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-    
-    // 👇 THE FIX: Split the string and extract ONLY the first image URL!
-    let rawImg = d.imageUrl || d.image || '';
-    let firstImgUrl = rawImg.split(',')[0].trim(); 
-    
-    return `
-    <div class="card card--hover">
-      <div style="aspect-ratio:3/4; overflow:hidden; position:relative; background:var(--navy); display:flex; align-items:center; justify-content:center;">
-        ${firstImgUrl ? `<img src="${firstImgUrl.startsWith('http') ? firstImgUrl : `${BACKEND_URL}${firstImgUrl}`}" style="width:100%;height:100%;object-fit:cover;object-position: top; border-radius: 8px 8px 0 0;" alt="${safeName}" loading="lazy"/>` : `<span style="font-size:40px; color:rgba(255,255,255,0.3); font-style:italic; font-family:var(--font-display);">${d.name.charAt(0)}</span>`}
-        ${d.badge ? `<div style="position:absolute;top:10px;right:10px;"><span class="badge badge--${d.badge==='new'?'new':'pop'}">${d.badge}</span></div>` : ''}
-      </div>
-      <div style="padding:14px;">
-        <div style="font-size:14px; font-weight:600; color:var(--navy); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${d.name}</div>
-        <div style="font-size:11px; color:var(--blue); margin-top:2px; font-weight:500;">Ref: ${designNum}</div>
+      grid.innerHTML = allLoadedDesigns.map(d => {
+        const designNum = d.num || d.number || '';
+        const safeName = (d.name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         
-        <div style="display:flex; flex-direction:column; gap:8px; margin-top:14px; width:100%;">
-          <button class="btn btn--mint" style="width:100%; padding:8px 0; font-size:12px; font-weight:600; border-radius:6px; border:none; cursor:pointer; text-align:center; box-shadow:0 2px 4px rgba(0,0,0,0.1);" 
-                onclick="window.addToStyleBag(event, '${d.id}', '${safeName}', '${firstImgUrl}')">Tailor This Design →</button>
-          <button class="btn btn--ghost btn--sm" style="width:100%;" 
-                onclick="openDesignDetails('${d.id}', '${designNum}', '${safeName}', '${firstImgUrl}')">View Details</button>
-        </div>
+        let rawImg = d.imageUrl || d.image || '';
+        let firstImgUrl = rawImg.split(',')[0].trim(); 
         
-      </div>
-    </div>`;
-  }).join('');
-}
+        return `
+        <div class="card card--hover">
+          <div class="p-img">
+            ${firstImgUrl ? `<img src="${firstImgUrl.startsWith('http') ? firstImgUrl : `${BACKEND_URL}${firstImgUrl}`}" alt="${safeName}" loading="lazy"/>` : `<span style="display:flex;align-items:center;justify-content:center;height:100%;font-size:40px; color:var(--text-muted); font-style:italic; font-family:var(--font-display);">${d.name.charAt(0)}</span>`}
+            ${d.badge ? `<div class="p-badge-pos"><span class="badge badge--${d.badge==='new'?'new':'pop'}">${d.badge}</span></div>` : ''}
+          </div>
+          <div class="p-body">
+            <div class="p-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${d.name}</div>
+            <div class="p-sub" style="color:var(--blue);">Ref: ${designNum}</div>
+            
+            <!-- Modern Side-by-Side Buttons -->
+            <div style="display:flex; gap:8px; margin-top:auto; padding-top: 16px; width:100%;">
+              <button class="btn btn--mint btn-with-icon" style="flex: 1; padding:10px 0; font-size:12px; font-weight:600; border-radius:8px; border:none; cursor:pointer; justify-content: center; box-shadow:0 2px 4px rgba(0,0,0,0.1);"
+                onclick="window.addToStyleBag(event, '${d.id || designNum}', '${safeName}', '${firstImgUrl}')"><i class="bi bi-scissors"></i> Tailor</button>
+              
+              <button class="btn btn--ghost btn-with-icon" style="padding:10px 14px; border-radius:8px; display: flex; align-items: center; justify-content: center; border-color: var(--border-2);" title="View Details"
+                onclick="openDesignDetails('${d.id || designNum}', '${designNum}', '${safeName}', '${firstImgUrl}')"><i class="bi bi-eye" style="margin:0;"></i></button>
+            </div>
+            
+          </div>
+        </div>`;
+      }).join('');
+    }
 
     async function openDesignDetails(designId, designNum, title, imgUrl) {
       const modalId = 'designModalOverlay';
@@ -151,63 +263,60 @@
       const modal = document.createElement('div');
       modal.className = 'modal-overlay';
       modal.id = modalId;
+      modal.setAttribute('onclick', `if(event.target.id === '${modalId}') closeModal('${modalId}')`);
+      
       modal.innerHTML = `
-        <div class="modal-box" style="max-width:680px;">
-          <div class="modal__header">
+        <div class="modal-box" style="max-width:680px; display: flex; flex-direction: column; overflow: hidden; padding: 0;" onclick="event.stopPropagation()">
+          <div class="modal__header" style="background: var(--white); z-index: 10; padding: 16px 20px; border-bottom: 1px solid var(--border-2);">
             <div>
               <div class="modal__title">${title}</div>
               <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Blueprint Reference: ${designNum}</div>
             </div>
-            <button class="modal__close" onclick="document.getElementById('${modalId}').remove()">✕</button>
+            <button class="modal__close" onclick="closeModal('${modalId}')"><i class="bi bi-x-lg"></i></button>
           </div>
-          <div class="modal__body" id="modalAnglesGrid" style="min-height:160px; display:flex; align-items:center; justify-content:center;">
-            <span style="font-size:12px; color:var(--text-muted);">Pulling design photos...</span>
+          
+          <div class="modal__body" id="modalAnglesGrid" style="overflow-y: auto; flex: 1; padding: 20px; min-height:220px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;">
+            <div class="spinner-border" style="color: var(--navy);" role="status"></div>
+            <span style="font-size:12px; font-weight: 500; color:var(--text-muted);">Pulling design photos...</span>
           </div>
-          <div class="modal__footer" style="display:flex; justify-content:space-between; align-items:center;">
+          
+          <div class="modal__footer" style="background: var(--white); z-index: 10; padding: 16px 20px; display:flex; justify-content:space-between; align-items:center; border-top: 1px solid var(--border-2); box-shadow: 0 -4px 12px rgba(0,0,0,0.03);">
             <div style="font-size:11px; color:var(--text-muted);">Base Blueprint: <strong style="color:var(--navy);">${designNum || 'Bespoke Instance'}</strong></div>
-            <button class="btn btn--mint" style="padding: 10px 20px; font-size: 13px; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; transition: transform 0.2s;" 
+            <button class="btn btn--mint btn-with-icon" style="padding: 10px 20px; font-size: 13px; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; transition: transform 0.2s;" 
               onmouseover="this.style.transform='scale(1.05)'" 
               onmouseout="this.style.transform='scale(1)'"
-              onclick="window.addToStyleBag(event, '${designId}', '${title}', '${imgUrl}')">Tailor This Design →</button>
+              onclick="window.addToStyleBag(event, '${designId || designNum}', '${title}', '${imgUrl}')"><i class="bi bi-scissors"></i> Tailor This</button>
           </div>
         </div>
       `;
       document.body.appendChild(modal);
 
       try {
-        // 👇 THE FIX: Check both the designNum AND the title for "Bespoke"
         let isBespoke = String(designNum).includes('Bespoke') || String(title).includes('Bespoke');
         let photos = [];
 
         if (isBespoke) {
-            // 1. Extract the actual Bespoke ID from the title (e.g. pulls "Bespoke-9387" out of "Custom Design (Bespoke-9387)")
             const bespokeMatch = String(title).match(/(Bespoke-\d+)/i) || String(designNum).match(/(Bespoke-\d+)/i);
             const bespokeId = bespokeMatch ? bespokeMatch[1] : null;
 
-            // 2. Fetch the bespoke media category
             let res = await window.TBF.MediaService.getAll({ category: 'bespoke' });
             let media = Array.isArray(res) ? res : (res?.data || []);
 
-            // Fallback just in case backend ignores category filters
             if (media.length === 0) {
                 const fallbackRes = await window.TBF.MediaService.getAll();
                 media = Array.isArray(fallbackRes) ? fallbackRes : (fallbackRes?.data || []);
             }
 
-            // 3. Search the data for the extracted Bespoke ID!
             photos = media.filter(m => {
                 if (!m || !bespokeId) return false;
                 const stringifiedData = JSON.stringify(m).toLowerCase();
                 return stringifiedData.includes(bespokeId.toLowerCase());
             });
-
         } else {
-            // For normal designs (like TBF-009), do the standard strict lookup
             const res = await window.TBF.MediaService.getAll({ designNum: designNum, category: 'designs' });
             photos = Array.isArray(res) ? res : (res?.data || []);
         }
 
-        // Guarantee the Cover Photo is ALWAYS in the array and at the very front
         let finalUrls = [];
         if (imgUrl && imgUrl !== 'undefined' && imgUrl !== 'null') {
             finalUrls.push(imgUrl);
@@ -225,16 +334,20 @@
           return;
         }
 
-        gridEl.style.display = 'grid';
-        gridEl.style.gridTemplateColumns = 'repeat(auto-fit, minmax(200px, 1fr))';
-        gridEl.style.gap = '16px';
+        gridEl.style.cssText = `
+          padding: 20px;
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 16px;
+          overflow-y: auto;
+          align-content: start;
+        `;
         
-        // Render the gallery
         gridEl.innerHTML = finalUrls.map(url => {
           const cleanUrl = url.startsWith('http') ? url : `${BACKEND_URL}${url}`;
           return `
-          <div style="border-radius:8px; overflow:hidden; border:1px solid var(--border); background:var(--bg); display:flex; justify-content:center;">
-            <img src="${cleanUrl}" style="width:100%; max-height:400px; object-fit:contain; border-radius:8px;" alt="${title} view"/>
+          <div style="border-radius: 12px; border: 1.5px solid var(--blue-pale); background: var(--bg); overflow:hidden; aspect-ratio: 4/5; position: relative; box-shadow: 0 4px 12px rgba(10,31,68,0.05);">
+            <img src="${cleanUrl}" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top;" alt="${title} view"/>
           </div>
           `;
         }).join('');
@@ -248,7 +361,6 @@
     async function init() {
       await TBF.ComponentLoader.init('designs');
       
-      // 👇 Bulletproof Read
       const urlParam = new URLSearchParams(location.search).get('cat');
       const savedFilter = (window.TBF && window.TBF.Utils && typeof window.TBF.Utils.getState === 'function') 
         ? window.TBF.Utils.getState('storefront_design_filter') 

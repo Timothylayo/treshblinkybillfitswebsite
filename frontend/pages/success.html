@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Request Received</title>
-  <link rel="stylesheet" href="../styles/main.css"> <!-- Adjust path if needed -->
+  <title>Request Received | TreshBlinkybill Fits</title>
+  <link rel="stylesheet" href="../styles/main.css">
+  <link rel="stylesheet" href="../styles/animations.css"> <!-- Added for Bootstrap Icons & Animations -->
   <link rel="icon" type="image/png" href="../assets/fitslogo.png"/>
   <style>
     body { 
@@ -16,101 +17,142 @@
       min-height: 100vh;
     }
     
+    /* Responsive Container */
     .success-container {
+      width: 100%;
       max-width: 600px;
-      margin: 80px auto;
-      padding: 40px;
+      margin: 40px auto;
+      padding: 30px 20px;
       background: var(--white);
       border-radius: var(--radius-xl);
       border: 1px solid var(--border-2);
       text-align: center;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.02);
+      box-shadow: 0 10px 30px rgba(10, 31, 68, 0.05);
+      animation: smoothEntrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @media(min-width: 640px) {
+      .success-container {
+        margin: 80px auto;
+        padding: 50px 40px;
+      }
     }
     
+    /* Premium Animated Icon */
     .success-icon {
-      font-size: 60px;
+      font-size: 44px;
+      color: var(--mint);
       margin-bottom: 20px;
-      display: inline-block;
-      background: #e8f5e9;
-      width: 100px;
-      height: 100px;
-      line-height: 100px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--navy);
+      width: 90px;
+      height: 90px;
       border-radius: 50%;
+      box-shadow: 0 8px 24px rgba(10, 31, 68, 0.15);
     }
 
     .success-title {
       font-family: var(--font-display);
       font-size: 32px;
       color: var(--navy);
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
+    /* Upgraded Reference Pill */
     .order-ref {
-      font-size: 14px;
-      color: var(--text-soft);
+      font-size: 13px;
+      color: var(--navy);
       margin-bottom: 30px;
-      padding: 10px 20px;
-      background: var(--navy-light);
-      display: inline-block;
+      padding: 10px 24px;
+      background: var(--blue-pale);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       border-radius: 50px;
       border: 1px solid var(--border);
     }
-
     .order-ref span {
       font-weight: 700;
       color: var(--navy);
+      letter-spacing: 0.5px;
     }
 
+    /* Next Steps Card */
     .next-steps {
       text-align: left;
-      background: #f8fafc;
-      padding: 25px;
-      border-radius: var(--radius-md);
-      margin-bottom: 30px;
+      background: var(--bg);
+      padding: 24px;
+      border-radius: var(--radius-lg);
+      margin-bottom: 32px;
       border: 1px solid var(--border-2);
     }
-
     .next-steps h4 {
-      margin-bottom: 15px;
+      margin-bottom: 16px;
       color: var(--navy);
       font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .step-list {
       list-style: none;
       padding: 0;
       margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
     }
-
     .step-list li {
-      margin-bottom: 12px;
       font-size: 13px;
       line-height: 1.5;
-      position: relative;
-      padding-left: 28px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      color: var(--text-soft);
     }
-
-    .step-list li::before {
-      content: '✓';
-      position: absolute;
-      left: 0;
-      top: 0;
-      color: var(--mint);
-      font-weight: bold;
+    .step-icon {
+      color: var(--white);
       background: var(--navy);
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 10px;
+      font-size: 11px;
+      flex-shrink: 0;
+      margin-top: 2px;
     }
 
+    /* 👇 FIXED: Mobile-First Button Stacking */
     .action-btns {
       display: flex;
-      gap: 15px;
+      flex-direction: column; /* Stacks vertically on mobile */
+      gap: 12px;
+    }
+    .action-btns .btn {
+      width: 100%; /* Full width for easy thumb tapping */
       justify-content: center;
+      padding: 14px 0;
+    }
+    @media(min-width: 480px) {
+      .action-btns {
+        flex-direction: row; /* Side-by-side on tablets/desktops */
+        justify-content: center;
+      }
+      .action-btns .btn {
+        width: auto;
+        min-width: 180px;
+        padding: 12px 24px;
+      }
+    }
+
+    /* Modal entrance animation */
+    @keyframes smoothEntrance {
+      0% { opacity: 0; transform: scale(0.95) translateY(20px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
     }
   </style>
 </head>
@@ -119,34 +161,56 @@
   <!-- NAV SLOT -->
   <div id="nav-slot"></div>
 
-  <div class="success-container">
-    <div class="success-icon">✨</div>
-    <h1 class="success-title">Request Received!</h1>
-    
-    <div class="order-ref">
-      Your Reference Number: <span id="displayOrderId">Loading...</span>
-    </div>
+  <div style="padding: 0 var(--space-md); display: flex; justify-content: center; flex: 1;">
+    <div class="success-container">
+      <div class="success-icon"><i class="bi bi-stars"></i></div>
+      <h1 class="success-title">Request Received!</h1>
+      
+      <div class="order-ref">
+        <i class="bi bi-receipt"></i> Reference Number: <span id="displayOrderId">Loading...</span>
+      </div>
 
-    <div class="next-steps">
-      <h4>What happens next?</h4>
-      <ul class="step-list">
-        <li><strong>Consultation:</strong> We will send you a message on WhatsApp shortly to confirm your style choices.</li>
-        <li><strong>Measurements:</strong> We will guide you through taking your measurements or schedule an in-person fitting.</li>
-        <li><strong>Pricing & Invoice:</strong> Once fabrics and sizing are confirmed, we will send your official invoice.</li>
-      </ul>
-    </div>
+      <div class="next-steps">
+        <h4><i class="bi bi-info-circle-fill" style="color: var(--mint);"></i> What happens next?</h4>
+        <ul class="step-list">
+          <li>
+            <div class="step-icon"><i class="bi bi-check-lg"></i></div>
+            <div><strong style="color: var(--navy);">Consultation:</strong> We will send you a message on WhatsApp shortly to confirm your style choices.</div>
+          </li>
+          <li>
+            <div class="step-icon"><i class="bi bi-check-lg"></i></div>
+            <div><strong style="color: var(--navy);">Measurements:</strong> We will guide you through taking your measurements or schedule an in-person fitting.</div>
+          </li>
+          <li>
+            <div class="step-icon"><i class="bi bi-check-lg"></i></div>
+            <div><strong style="color: var(--navy);">Pricing & Invoice:</strong> Once fabrics and sizing are confirmed, we will send your official invoice.</div>
+          </li>
+        </ul>
+      </div>
 
-    <div class="action-btns">
-      <a href="../index.html" class="btn btn--outline">Return Home</a>
-      <a href="../pages/designs.html" class="btn btn--mint">Browse More Designs</a>
+      <!-- Upgraded Mobile-Friendly Buttons -->
+      <div class="action-btns">
+        <!-- Upgraded Mobile-Friendly Buttons with Corrected Paths -->
+      <div class="action-btns">
+        <a href="../index.html" class="btn btn--outline btn-with-icon" style="border-color: var(--navy); color: var(--navy);"><i class="bi bi-house"></i> Return Home</a>
+        <a href="designs.html" class="btn btn--mint btn-with-icon"><i class="bi bi-images"></i> Browse More Designs</a>
+      </div>
+      </div>
     </div>
   </div>
 
   <script src="../api.js"></script>
   <script src="../services/services.js"></script>
   <script src="../config.js"></script>
+  <script src="../utils.js"></script>
+  <script src="../animations.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Load Nav so the page feels complete
+      if (window.TBF && TBF.ComponentLoader) {
+        await TBF.ComponentLoader.init('success');
+      }
+
       // Extract the Order ID from the URL (e.g., ?id=TBF-2026-1234)
       const urlParams = new URLSearchParams(window.location.search);
       const orderId = urlParams.get('id');
@@ -160,6 +224,11 @@
       // Hide the floating cart icon completely on this page
       const cartIcon = document.getElementById('floatingCart');
       if(cartIcon) cartIcon.style.display = 'none';
+      
+      // Clear the cart so it's empty for their next visit!
+      if (window.TBF && TBF.CartService && typeof TBF.CartService.clearCart === 'function') {
+        TBF.CartService.clearCart();
+      }
     });
   </script>
 </body>

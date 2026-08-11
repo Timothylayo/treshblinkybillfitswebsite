@@ -17,6 +17,18 @@ class AnimationController {
   init() {
     if (this.isInitialized) return;
     
+    // Ensure DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => this.runAnimations());
+    } else {
+      this.runAnimations();
+    }
+    
+    this.isInitialized = true;
+  }
+
+  runAnimations() {
+    
     // Create Intersection Observer
     this.createObserver();
     
@@ -35,8 +47,6 @@ class AnimationController {
     // Observe all scroll-triggered sections
     this.observeScrollTriggers();
     
-    this.isInitialized = true;
-    console.log('✨ Animation system initialized');
   }
 
   /**
@@ -85,47 +95,48 @@ class AnimationController {
     const heroSub = document.querySelector('.hero__sub');
     const heroButtons = document.querySelectorAll('.hero__btns .btn');
 
+    // Set initial state BEFORE adding classes
     if (heroLogo) {
-      heroLogo.classList.add('hero-logo');
       heroLogo.style.opacity = '0';
-      // Trigger immediately
-      setTimeout(() => this.triggerAnimation(heroLogo), 50);
+      heroLogo.style.animation = 'fadeIn 0.4s ease forwards';
+      console.log('✓ Hero logo queued');
     }
 
     if (heroBrandName) {
-      heroBrandName.classList.add('hero-brand-name');
       heroBrandName.style.opacity = '0';
-      setTimeout(() => this.triggerAnimation(heroBrandName), 50);
+      heroBrandName.style.animation = 'fadeInLeft 0.5s ease 0.1s forwards';
+      console.log('✓ Hero brand name queued');
     }
 
     if (heroBrandSub) {
-      heroBrandSub.classList.add('hero-brand-sub');
       heroBrandSub.style.opacity = '0';
-      setTimeout(() => this.triggerAnimation(heroBrandSub), 50);
+      heroBrandSub.style.animation = 'fadeInLeft 0.5s ease 0.2s forwards';
+      console.log('✓ Hero brand sub queued');
     }
 
     if (heroTag) {
-      heroTag.classList.add('hero-tag');
       heroTag.style.opacity = '0';
-      setTimeout(() => this.triggerAnimation(heroTag), 50);
+      heroTag.style.animation = 'fadeIn 0.4s ease 0.3s forwards';
+      console.log('✓ Hero tag queued');
     }
 
     if (heroTitle) {
-      heroTitle.classList.add('hero-title');
       heroTitle.style.opacity = '0';
-      setTimeout(() => this.triggerAnimation(heroTitle), 50);
+      heroTitle.style.animation = 'fadeInUp 0.6s ease 0.4s forwards';
+      console.log('✓ Hero title queued');
     }
 
     if (heroSub) {
-      heroSub.classList.add('hero-subtitle');
       heroSub.style.opacity = '0';
-      setTimeout(() => this.triggerAnimation(heroSub), 50);
+      heroSub.style.animation = 'fadeInUp 0.5s ease 0.5s forwards';
+      console.log('✓ Hero subtitle queued');
     }
 
     heroButtons.forEach((btn, index) => {
-      btn.classList.add('hero-button', 'btn-click-scale');
       btn.style.opacity = '0';
-      setTimeout(() => this.triggerAnimation(btn), 50);
+      btn.style.animation = `slideUpBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.6s forwards`;
+      btn.classList.add('btn-click-scale');
+      console.log('✓ Hero button queued');
     });
   }
 
@@ -153,11 +164,14 @@ class AnimationController {
     const cards = carouselElement.querySelectorAll(`.${cardClass}`);
     
     cards.forEach((card, index) => {
-      card.classList.add('carousel-card', 'card-hover-lift', `carousel-item-${index}`);
+      card.classList.add('card-hover-lift');
       card.style.opacity = '0';
       
-      // Observe each card for scroll trigger
-      this.observer.observe(card);
+      // Direct animation with stagger
+      const delay = index * 60; // 60ms between each card
+      card.style.animation = `scaleInSmall 0.4s ease ${delay}ms forwards`;
+      
+      console.log(`✓ Carousel card ${index} queued (${delay}ms delay)`);
     });
 
     // Also setup observer for carousel section header
@@ -165,9 +179,10 @@ class AnimationController {
     if (section) {
       const header = section.querySelector('.section-hdr');
       if (header) {
-        header.classList.add('section-hdr--animate');
         header.style.opacity = '0';
+        header.style.animation = 'fadeIn 0.3s ease forwards';
         this.observer.observe(header);
+        console.log('✓ Section header queued');
       }
     }
   }
@@ -178,16 +193,19 @@ class AnimationController {
   setupCtaBandAnimations() {
     const ctaBand = document.querySelector('.cta-band');
     if (ctaBand) {
-      ctaBand.classList.add('cta-band');
       ctaBand.style.opacity = '0';
+      
+      // Observe for scroll trigger
       this.observer.observe(ctaBand);
+      console.log('✓ CTA band queued for scroll trigger');
 
-      // Add idle pulse animation
+      // Add idle pulse animation after visible
       setTimeout(() => {
-        if (ctaBand.querySelector('.cta-band__title')) {
-          ctaBand.querySelector('.cta-band__title').classList.add('cta-band-idle');
+        const title = ctaBand.querySelector('.cta-band__title');
+        if (title) {
+          title.style.animation = 'pulse 3s ease-in-out 2s infinite';
         }
-      }, 1000);
+      }, 2000);
     }
   }
 
@@ -197,22 +215,23 @@ class AnimationController {
   setupSocialBoxAnimations() {
     const socialBox = document.querySelector('.social-box');
     if (socialBox) {
-      socialBox.classList.add('social-box');
       socialBox.style.opacity = '0';
 
-      // Observe social box
+      // Observe social box for scroll trigger
       this.observer.observe(socialBox);
+      console.log('✓ Social box queued for scroll trigger');
 
       // Animate individual social items with stagger
       const socialItems = socialBox.querySelectorAll('.social-item');
       socialItems.forEach((item, index) => {
-        item.classList.add('animate-bounce-in', `social-item-${index}`, 'social-item-hover');
         item.style.opacity = '0';
+        item.classList.add('social-item-hover');
         
-        // Delay observation for staggered effect
-        setTimeout(() => {
-          this.observer.observe(item);
-        }, index * 100);
+        // Direct animation with stagger
+        const delay = index * 80; // 80ms between social items
+        item.style.animation = `bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) ${delay}ms forwards`;
+        
+        console.log(`✓ Social item ${index} queued (${delay}ms delay)`);
       });
     }
   }
@@ -331,6 +350,103 @@ class AnimationController {
       this.observer.disconnect();
     }
     this.isInitialized = false;
+  }
+
+  /**
+   * Show loading spinner overlay
+   */
+  static showLoadingSpinner(message = 'Loading...') {
+    // Remove existing spinner if any
+    const existing = document.getElementById('loadingSpinner');
+    if (existing) existing.remove();
+
+    const spinner = document.createElement('div');
+    spinner.id = 'loadingSpinner';
+    spinner.className = 'loading-overlay';
+    spinner.innerHTML = `
+      <div class="loading-content">
+        <div class="spinner-border" role="status"></div>
+        <div class="loading-text">${message}</div>
+      </div>
+    `;
+    document.body.appendChild(spinner);
+    return spinner;
+  }
+
+  /**
+   * Show loading spinner with dots
+   */
+  static showLoadingDots(message = 'Processing') {
+    // Remove existing spinner if any
+    const existing = document.getElementById('loadingSpinner');
+    if (existing) existing.remove();
+
+    const spinner = document.createElement('div');
+    spinner.id = 'loadingSpinner';
+    spinner.className = 'loading-overlay';
+    spinner.innerHTML = `
+      <div class="loading-content">
+        <div class="loading-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div class="loading-text">${message}</div>
+      </div>
+    `;
+    document.body.appendChild(spinner);
+    return spinner;
+  }
+
+  /**
+   * Hide loading spinner
+   */
+  static hideLoadingSpinner() {
+    const spinner = document.getElementById('loadingSpinner');
+    if (spinner) {
+      spinner.style.animation = 'fadeOut 0.3s ease forwards';
+      setTimeout(() => spinner.remove(), 300);
+    }
+  }
+
+  /**
+   * Animate icon
+   */
+  static animateIcon(element, animationType = 'bounce') {
+    if (!element) return;
+    
+    const iconClass = `icon-animate-${animationType}`;
+    element.classList.add(iconClass);
+    
+    // Remove class after animation completes
+    setTimeout(() => {
+      element.classList.remove(iconClass);
+    }, 1500);
+  }
+
+  /**
+   * Create animated icon element
+   */
+  static createAnimatedIcon(iconName, animationType = 'bounce', bgColor = 'mint-bg') {
+    const wrapper = document.createElement('div');
+    wrapper.className = `icon-wrapper ${bgColor} icon-animate-${animationType}`;
+    wrapper.innerHTML = `<i class="bi ${iconName}"></i>`;
+    return wrapper;
+  }
+
+  /**
+   * Add pulse badge to element
+   */
+  static addPulseBadge(element, text = '') {
+    const badge = document.createElement('span');
+    badge.className = 'badge-animated badge--info';
+    badge.innerHTML = `
+      <i class="bi bi-star-fill"></i>
+      ${text}
+      <span class="badge-pulse-ring"></span>
+    `;
+    element.appendChild(badge);
+    return badge;
   }
 }
 

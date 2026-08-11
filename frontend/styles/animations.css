@@ -1,8 +1,12 @@
 /* ================================================================
-   TRESHBLINKYBILL FITS — Animation System
+   TRESHBLINKYBILL FITS — Animation System with Bootstrap Icons
    Keyframes, utilities, and scroll-triggered animation classes
-   Order: Accessibility → Keyframes → Utilities → States
+   Order: Variables → Accessibility → Keyframes → Utilities → States
    ================================================================ */
+
+/* IMPORT BOOTSTRAP ICONS */
+@import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css');
+
 
 /* ================================================================
    1. ACCESSIBILITY: Respect user motion preferences
@@ -25,6 +29,11 @@
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
 }
 
 @keyframes fadeInUp {
@@ -629,7 +638,275 @@
 
 
 /* ================================================================
-   16. RESPONSIVE ANIMATION ADJUSTMENTS
+   17. LOADING SPINNER ANIMATIONS
+   ================================================================ */
+
+@keyframes spinnerRotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes spinnerPulse {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+@keyframes dotsBounce {
+  0%, 100% { transform: translateY(0); opacity: 1; }
+  50%      { transform: translateY(-10px); opacity: 0.6; }
+}
+
+.spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+}
+
+.spinner-border {
+  display: inline-block;
+  width: 2rem;
+  height: 2rem;
+  vertical-align: text-bottom;
+  border: 0.25em solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spinnerRotate 0.75s linear infinite;
+}
+
+.spinner-grow {
+  display: inline-block;
+  width: 2rem;
+  height: 2rem;
+  vertical-align: text-bottom;
+  border-radius: 50%;
+  animation: spinnerPulse 0.75s linear infinite;
+  background-color: currentColor;
+}
+
+.loading-dots {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.loading-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: dotsBounce 1.4s ease-in-out infinite;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* Loading overlay */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 31, 68, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease;
+}
+
+.loading-content {
+  text-align: center;
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: scaleIn 0.3s ease;
+}
+
+.loading-content .spinner-border {
+  color: var(--navy);
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 16px;
+}
+
+.loading-text {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 12px;
+}
+
+
+/* ================================================================
+   18. ICON ANIMATIONS
+   ================================================================ */
+
+@keyframes iconBounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+@keyframes iconSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes iconPulseScale {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.2); }
+}
+
+@keyframes iconGlow {
+  0%, 100% { filter: drop-shadow(0 0 0 rgba(178, 237, 228, 0)); }
+  50%      { filter: drop-shadow(0 0 8px rgba(178, 237, 228, 0.6)); }
+}
+
+.icon-animate-bounce {
+  animation: iconBounce 1s ease-in-out infinite;
+}
+
+.icon-animate-spin {
+  animation: iconSpin 2s linear infinite;
+}
+
+.icon-animate-pulse {
+  animation: iconPulseScale 1.5s ease-in-out infinite;
+}
+
+.icon-animate-glow {
+  animation: iconGlow 1.5s ease-in-out infinite;
+}
+
+.icon-hover-scale {
+  transition: transform 0.2s ease;
+}
+
+.icon-hover-scale:hover {
+  transform: scale(1.2);
+}
+
+.icon-hover-rotate {
+  transition: transform 0.3s ease;
+}
+
+.icon-hover-rotate:hover {
+  transform: rotate(12deg);
+}
+
+/* Icon containers */
+.icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.icon-wrapper:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(10, 31, 68, 0.15);
+}
+
+.icon-wrapper.mint-bg {
+  background: rgba(178, 237, 228, 0.2);
+  color: var(--mint);
+}
+
+.icon-wrapper.blue-bg {
+  background: rgba(91, 159, 255, 0.2);
+  color: var(--blue);
+}
+
+.icon-wrapper.navy-bg {
+  background: rgba(10, 31, 68, 0.1);
+  color: var(--navy);
+}
+
+
+/* ================================================================
+   19. BADGE WITH ICON ANIMATIONS
+   ================================================================ */
+
+.badge-animated {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.badge-animated .bi {
+  animation: iconBounce 1s ease-in-out infinite;
+}
+
+.badge-pulse-ring {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--danger);
+  animation: glow 2s ease-in-out infinite;
+}
+
+
+/* ================================================================
+   20. BUTTON WITH ICON ANIMATIONS
+   ================================================================ */
+
+.btn-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-with-icon .bi {
+  transition: transform 0.3s ease;
+}
+
+.btn:hover .bi {
+  transform: translateX(4px);
+}
+
+.btn-with-icon.icon-left:hover .bi {
+  transform: translateX(-4px);
+}
+
+
+/* ================================================================
+   21. TOAST WITH ICON
+   ================================================================ */
+
+.toast-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.toast-icon .bi {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.toast--success .bi {
+  animation: iconPulseScale 0.5s ease-out;
+}
+
+.toast--error .bi {
+  animation: iconSpin 0.6s ease-out;
+}
+
+
+/* ================================================================
+   22. RESPONSIVE ANIMATION ADJUSTMENTS
    ================================================================ */
 
 @media (max-width: 768px) {
@@ -685,5 +962,16 @@
   .carousel-item-7,
   .carousel-item-8 {
     animation-delay: 0ms !important;
+  }
+
+  /* Smaller spinner on mobile */
+  .spinner-border {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .icon-wrapper {
+    width: 40px;
+    height: 40px;
   }
 }
