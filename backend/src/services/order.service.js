@@ -1,4 +1,6 @@
 import { prisma } from '../config/db.js';
+import { dispatchOrderAlerts } from './notifications.js'; // Adjust relative path if located in ../utils/
+
 
 export const OrderService = {
 
@@ -51,7 +53,13 @@ async create(data) {
         user: true
       }
     });
+    
 
+    try{
+      await dispatchOrderAlerts(newOrder.id, user.name);
+    } catch(err){
+      console.error("Notification dispatch failed:", err.message);
+    }
     return newOrder;
   },
 
