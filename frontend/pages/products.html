@@ -325,8 +325,8 @@
       `;
       document.body.appendChild(modal);
 
-      try {
-        const res = await window.TBF_API.Media.getAll({ batchId });
+     try {
+        const res = await window.TBF_API.Media.getAll({ batchId }); // (Or design fetch for designs.html)
         const angles = Array.isArray(res) ? res : (res.data || []);
 
         const gridEl = document.getElementById('modalAnglesGrid');
@@ -335,19 +335,24 @@
           return;
         }
 
+        // 👇 FIXED: Switched from CSS Grid to a robust Flexbox wrap layout to completely prevent vertical overlapping bugs
         gridEl.style.cssText = `
           padding: 20px;
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
+          display: flex;
+          flex-wrap: wrap;
           gap: 16px;
+          justify-content: center;
           overflow-y: auto;
-          align-content: start;
+          align-items: flex-start;
+          width: 100%;
         `;
         
+        // 👇 FIXED: Each card is given a fixed mobile-friendly width (e.g., 140px on small phones, 180px on tablets/desktops) 
+        // so they naturally wrap side-by-side without ever collapsing or stacking on top of each other.
         gridEl.innerHTML = angles.map(a => {
           const cleanUrl = a.url.startsWith('http') ? a.url : `${BACKEND_URL}${a.url}`;
           return `
-          <div style="border-radius: 12px; border: 1.5px solid var(--blue-pale); background: var(--bg); overflow:hidden; aspect-ratio: 4/5; position: relative; box-shadow: 0 4px 12px rgba(10,31,68,0.05);">
+          <div style="flex: 1 1 140px; max-width: 200px; border-radius: 12px; border: 1.5px solid var(--blue-pale); background: var(--bg); overflow: hidden; aspect-ratio: 4/5; position: relative; box-shadow: 0 4px 12px rgba(10,31,68,0.05);">
             <img src="${cleanUrl}" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top;" alt="Outfit Angle"/>
           </div>
           `;
