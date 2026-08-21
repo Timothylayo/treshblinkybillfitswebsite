@@ -1,7 +1,7 @@
 {
   "name": "tbf-backend",
   "version": "1.0.0",
-  "description": "TreshBlinkybill Fits — Backend API",
+  "description": "TreshBlinkyfits — Backend API",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
