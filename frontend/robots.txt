@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://treshblinkybillfits.vercel.app//sitemap.xml
