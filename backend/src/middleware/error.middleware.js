@@ -38,10 +38,12 @@ export function errorMiddleware(err, req, res, next) {
     });
   }
 
+  console.error('GLOBAL ERROR:', err);
   // Default: 500 Internal Server Error
   return res.status(500).json({
-    success: false,
-    error:   config.isDev ? err.message : 'Internal server error',
+    success: false, 
+    error: err.message, 
+    stack: err.stack
   });
 }
 
