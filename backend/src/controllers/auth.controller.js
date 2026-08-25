@@ -50,14 +50,7 @@ export async function login(req, res, next) {
       },
     });
   } catch (err) {
-      console.error('--- LOGIN ERROR TRACE ---');
-    console.error(err);
-    return res.status(500).json({ 
-      success: false, 
-      error: err.message,
-        name: err.name,
-        stack: err.stack,
-  });
+    next(err);
   }
 }
 
