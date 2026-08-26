@@ -576,13 +576,13 @@
       if(addBtn) addBtn.disabled = true;
       if(checkoutBtn) checkoutBtn.disabled = true;
 
-      AnimationController.showLoadingDots('Processing images...');
+      AnimationController.showLoadingDots('Processing...');
       const originalAddText = addBtn ? addBtn.textContent : '';
       if(addBtn) addBtn.textContent = 'Processing...';
 
       try {
-        const bespokeId = 'Bespoke-' + Math.floor(1000 + Math.random() * 9000);
-        if (!name) name = 'Custom Design (' + bespokeId + ')';
+        const bespokeId = 'C' + Math.floor(1000 + Math.random() * 9000);
+        if (!name) name = 'Bespoke Design';
 
         const filesToUpload = [];
         for (let i = 0; i < customImageArray.length; i++) {

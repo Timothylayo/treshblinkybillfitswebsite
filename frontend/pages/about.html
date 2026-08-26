@@ -357,50 +357,61 @@
       if(addBtn) addBtn.disabled = true;
       if(checkoutBtn) checkoutBtn.disabled = true;
 
+      AnimationController.showLoadingDots('Processing...');
       const originalAddText = addBtn ? addBtn.textContent : '';
-      if(addBtn) addBtn.textContent = 'Processing Images...';
+      if(addBtn) addBtn.textContent = 'Processing...';
 
       try {
-        const bespokeId = 'Bespoke-' + Math.floor(1000 + Math.random() * 9000);
-        if (!name) name = 'Custom Design (' + bespokeId + ')';
+        const bespokeId = 'C' + Math.floor(1000 + Math.random() * 9000);
+        if (!name) name = 'Bespoke Design';
 
-        let heavyFiles = customImageArray.map((base64, idx) => dataURLtoFile(base64, `custom_upload_${idx}.jpg`));
-        
         const filesToUpload = [];
-        for(const heavyFile of heavyFiles) {
-            const shrunkFile = await compressImage(heavyFile, 1200, 0.7);
-            filesToUpload.push(shrunkFile);
+        for (let i = 0; i < customImageArray.length; i++) {
+          let base64Data = customImageArray[i];
+          let shrunkFile = await new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              let width = img.width; let height = img.height; const maxW = 1200;
+              if (width > maxW) { height = Math.round((height * maxW) / width); width = maxW; }
+              canvas.width = width; canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+              canvas.toBlob((blob) => {
+                if (!blob) return reject('Compression failed');
+                resolve(new File([blob], `custom_upload_${i}.jpg`, { type: 'image/jpeg' }));
+              }, 'image/jpeg', 0.7);
+            };
+            img.onerror = () => reject('Image load failed');
+            img.src = base64Data.startsWith('data:') ? base64Data : 'data:image/jpeg;base64,' + base64Data;
+          });
+          filesToUpload.push(shrunkFile);
         }
-
-        if(addBtn) addBtn.textContent = 'Uploading...';
         
         const apiService = window.TBF ? window.TBF.MediaService : TBF.MediaService;
         let response = await apiService.upload(filesToUpload, { title: name, category: 'bespoke' });
         let uploaded = response.data || response;
-        
         let allUrls = uploaded.map(u => u.url);
 
         const cartService = window.TBF ? window.TBF.CartService : TBF.CartService;
         cartService.addItem({
-          designId: bespokeId,
-          name: name,
-          image: allUrls.join(','), 
-          qty: 1,
-          isCustom: true
+          designId: bespokeId, name: name, image: allUrls.join(','), qty: 1, isCustom: true
         });
+
+        AnimationController.hideLoadingSpinner();
 
         if (redirectToCheckout) {
           window.location.href = window.location.pathname.includes('index.html') || window.location.pathname === '/' ? 'pages/checkout.html' : 'checkout.html';
         } else {
           if(addBtn) { addBtn.disabled = false; addBtn.textContent = originalAddText; }
           if(checkoutBtn) checkoutBtn.disabled = false;
-
-          TBF.Utils.showToast('Style added to your bag!', 'success');
+          TBF.Utils.showToast('✨ Style added to your bag!', 'success');
           closeModal('customOrderModal');
           cartService.updateWidget();
         }
       } catch (err) {
-        TBF.Utils.showToast('Upload failed.', 'error');
+        AnimationController.hideLoadingSpinner();
+        TBF.Utils.showToast('Upload failed. Please try again.', 'error');
         if(addBtn) { addBtn.disabled = false; addBtn.textContent = originalAddText; }
         if(checkoutBtn) checkoutBtn.disabled = false;
       }
