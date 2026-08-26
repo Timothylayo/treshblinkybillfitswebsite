@@ -742,9 +742,8 @@
       } catch(e) { console.warn("Could not load collections"); }
       const topCollections = collectionsData.slice(0, 8);
       // Render Collections Carousel (Single Tailor Button)
-      document.getElementById('collectionsCarousel').innerHTML = topCollections.length ? topCollections.map((p, index) => {
+      document.getElementById('collectionsCarousel').innerHTML = topCollections.length ? topCollections.map(p => {
         const safeTitle = (p.title || 'Custom Tailored Fit').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        const displayNumber = String(index + 1).padStart(2, '0');
         let rawColImg = p.url || '';
         let firstColImg = rawColImg.split(',')[0].trim();
 
@@ -754,12 +753,12 @@
             <img src="${firstColImg.startsWith('http') ? firstColImg : `${BACKEND_URL}${firstColImg}`}" alt="${safeTitle}" loading="lazy"/>
           </div>
           <div class="p-body">
-            <div class="p-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Bespoke ${p.category} ${displayNumber}</div>
-            <div class="p-sub" style="color:var(--blue);">Ref: 'Custom'</div>
+            <div class="p-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Bespoke ${p.category} </div>
+            <div class="p-sub" style="color:var(--blue);">Ref: ${p.title}</div>
             
             <div style="margin-top:auto; padding-top: 12px; width:100%;">
               <button class="btn btn--mint btn-with-icon" style="width: 100%; padding:9px 0; font-size:12px; font-weight:600; border-radius:6px; border:none; cursor:pointer; justify-content: center; box-shadow:0 2px 4px rgba(0,0,0,0.1);" 
-                    onclick="window.addToStyleBag(event,'${safeTitle}', 'Bespoke ${p.category} (${displayNumber})', '${p.url || ''}')"><i class="bi bi-scissors"></i> Tailor This</button>
+                    onclick="window.addToStyleBag(event,'${safeTitle}', 'Bespoke ${p.category}', '${p.url || ''}')"><i class="bi bi-scissors"></i> Tailor This</button>
             </div>
           </div>
         </div>`;

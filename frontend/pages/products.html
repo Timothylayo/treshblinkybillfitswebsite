@@ -272,9 +272,8 @@
   const prods = liveCollections.filter(item => (item.category || '').toLowerCase() === tab);
   document.getElementById('sortCount').textContent = `${prods.length} outfit${prods.length !== 1 ? 's' : ''}`; 
 
-  document.getElementById('prodGrid').innerHTML = prods.length ? prods.map((p, index) => {
+  document.getElementById('prodGrid').innerHTML = prods.length ? prods.map(p => {
     const safeTitle = (p.title || 'Custom Tailored Fit').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-    const displayNumber = String(index + 1).padStart(2, '0');
     const imgUrl = p.url ? (p.url.startsWith('http') ? p.url : `${BACKEND_URL}${p.url}`) : '';
     
     return `
@@ -287,12 +286,12 @@
       
       <div class="p-body">
         <div class="p-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-          Bespoke ${p.category} ${displayNumber}
+          Bespoke ${p.category}
         </div>
         
         <!-- 👇 ADDED: The crucial subtitle anchored in blue to fix the vertical gap -->
         <div class="p-sub" style="color: #60a5fa; font-size: 11px; margin-top: 4px; font-weight: 600;">
-          Ref: Custom Fit
+          Ref: ${p.title}
         </div>
         
         <div style="display:flex; gap:8px; margin-top:14px; width:100%;">
@@ -300,7 +299,7 @@
           <!-- 👇 TWEAKED: Font size down to 12px and gap to 4px to completely eliminate "Tail..." truncation -->
           <button class="btn btn--mint btn-with-icon" 
               style="flex: 1; min-width: 0; height: 42px; display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 12px; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; color: var(--navy); box-shadow: 0 2px 4px rgba(10,31,68,0.05);" 
-              onclick="window.addToStyleBag(event, '${safeTitle}', 'Bespoke ${p.category} ${displayNumber}', '${p.url || ''}')">
+              onclick="window.addToStyleBag(event, '${safeTitle}', 'Bespoke ${p.category}', '${p.url || ''}')">
             <i class="bi bi-scissors" style="font-size: 13px; flex-shrink: 0; margin: 0; display: flex;"></i> 
             <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Tailor</span>
           </button>
@@ -310,7 +309,7 @@
               style="width: 42px; height: 42px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: none; background: #F0F4F8; color: var(--navy); cursor: pointer; transition: background 0.2s;" 
               onmouseover="this.style.background='#E2E8F0'" 
               onmouseout="this.style.background='#F0F4F8'"
-              onclick="openOutfitDetails('${p.batchId}', '${safeTitle}', 'Bespoke ${p.category} ${displayNumber}', '${p.url || ''}')" 
+              onclick="openOutfitDetails('${p.batchId}', '${safeTitle}', 'Bespoke ${p.category}', '${p.url || ''}')" 
               title="View Details">
             <i class="bi bi-eye" style="font-size: 16px; margin:0; display: flex;"></i>
           </button>
