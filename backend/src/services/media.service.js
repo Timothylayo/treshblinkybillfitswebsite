@@ -7,17 +7,12 @@ import imagekit from '../config/imagekit.js';
 export const MediaService = {
 
   async getAll(filters = {}) {
-    const { category, designNum, batchId, isPrimary } = filters;
+    const { category, batchId, isPrimary } = filters;
     const where = {};
 
     // 1. Filter by Category (e.g. 'designs', 'natives', 'agbada')
     if (category && category !== 'all') {
       where.category = category;
-    }
-
-    // 👉 THE MISSING LOCK: Forces Prisma to match the exact TBF-XXX reference
-    if (designNum) {
-      where.designNum = designNum;
     }
 
     // 3. Filter by upload batch (Used by Collections 'Angles' modal)
@@ -63,7 +58,6 @@ export const MediaService = {
 
           category:     meta.category || 'general',
           title:        meta.title || null,
-          designNum:    meta.designNum || null,
           batchId:      meta.batchId || null,
 
           isPrimary: index === 0

@@ -209,24 +209,12 @@
           <div class="admin-section__title">Log Finished Job (Multi-Angle Upload)</div>
         </div>
         <div style="padding:var(--space-md);">
-          
-          <div class="field-row-3" style="margin-bottom: 16px;">
-            <div class="field">
-              <label class="field__label">Job Ref / Title *</label>
-              <input type="text" id="mediaJobTitle" class="field__input" placeholder="e.g. Chief Okeke White Senator" />
-            </div>
-            <div class="field">
-              <label class="field__label">Base Design Blueprint *</label>
-              <select id="mediaDesignSelect" class="field__select">
-                <option value="">Loading designs...</option>
-              </select>
-            </div>
             <div class="field">
               <label class="field__label">Collection Category *</label>
               <select id="mediaCatSelect" class="field__select">
-                <option value="natives">Natives</option>
-                <option value="english">English Wear</option>
-                <option value="agbada">Agbada</option>
+                <option value="Native">Native</option>
+                <option value="English Wear">English Wear</option>
+                <option value="Agbada">Agbada</option>
               </select>
             </div>
           </div>
@@ -248,7 +236,6 @@
           </div>
 
         </div>
-      </div>
 
       <div class="filter-row">
         <input type="text" id="mediaSearch" placeholder="🔍 Search uploaded jobs..." oninput="renderMediaGrid()"/>
@@ -722,25 +709,14 @@
   function dragLeave()  { document.getElementById('uploadZone').classList.remove('drag-over'); }
   function handleDrop(e) { e.preventDefault(); dragLeave(); handleFileSelect(e.dataTransfer.files); }
 
-  // Populates the base design dropdown inside the Media tab
-  function populateMediaDesignDropdown() {
-    const select = document.getElementById('mediaDesignSelect');
-    if (!select) return;
-    select.innerHTML = '<option value="">Select Base Design Blueprint...</option>' + 
-      allDesigns.map(d => `<option value="${d.num || d.number}">${d.name} (${d.num || d.number})</option>`).join('');
-  }
-
  // UPDATED: Captures the 3 inputs + assigns the Batch ID
   async function handleFileSelect(files) {
     if (!files.length) return;
     
-    const title = document.getElementById('mediaJobTitle').value.trim();
-    const designNum = document.getElementById('mediaDesignSelect').value;
     const category = document.getElementById('mediaCatSelect').value;
 
-    // Title is now optional! We only require the Blueprint.
-    if (!designNum) {
-      TBF.Utils.showToast('Please select a Base Design Blueprint', 'error');
+    if(!category) {
+      TBF.Utils.showToast('Please select a Category')
       return;
     }
 
@@ -754,11 +730,13 @@
     bar.style.width = '10%';
     label.textContent = `Compressing ${files.length} photo${files.length > 1 ? 's' : ''}...`;
 
+    const randomNum = Math.floor(Math.random() * 900) + 100;
+    const customJobRef = `P${randomNum}`; 
     const batchId = 'batch_' + Date.now();
 
+    
     const metadataObj = {
-      title,
-      designNum,
+      title: customJobRef,
       category,
       batchId,
       isPrimaryBatchCover: true // The API can use this to know which image to show first
@@ -783,6 +761,7 @@
       const uploaded = response.data || response; 
 
       bar.style.width = '100%';
+      label.textContent = 'Logged as ${customJobRef}';
       
       // Safety check to ensure we get the correct count whether it's an array or object
       const uploadedCount = Array.isArray(uploaded) ? uploaded.length : filesToUpload.length;
@@ -791,8 +770,6 @@
       allMedia = [...uploaded, ...allMedia];
       renderMediaGrid();
       
-      // Reset form
-      document.getElementById('mediaJobTitle').value = '';
       setTimeout(() => { progress.style.display = 'none'; bar.style.width = '0%'; }, 2000);
       TBF.Utils.showToast(`Job logged successfully`);
     } catch (err) {
@@ -801,27 +778,13 @@
     }
 }
 
-  async function deleteImageCard(btn) {
-    if (!confirm('Delete this image?')) return;
-    const card = btn.closest('.img-card');
-    const id   = parseInt(card.dataset.id, 10);
-    
-    // Call the Service layer
-    await TBF.MediaService.delete(id);
-    
-    allMedia = allMedia.filter(m => m.id !== id);
-    renderMediaGrid();
-    TBF.Utils.showToast('Image deleted');
-  }
-
-
  function renderMediaGrid() {
     const q   = (document.getElementById('mediaSearch')?.value || '').toLowerCase();
     const cat = document.getElementById('mediaCatFilter')?.value || 'all';
     
     const filtered = allMedia.filter(m => {
       const matchCat = cat === 'all' || (m.category || '').toLowerCase() === cat;
-      const matchQ   = !q || (m.title || m.name || '').toLowerCase().includes(q);
+      const matchQ   = !q || (m.category || '').toLowerCase().includes(q) || (m.title || '').toLowerCase().includes(q);
       return matchCat && matchQ;
     });
 
@@ -838,8 +801,8 @@
             <button class="btn btn--danger btn--sm" onclick="deleteImageCard(this)">🗑 Delete</button>
           </div>
           <div class="img-card__meta">
-            <div class="img-card__name">${m.title || m.designNum || 'Untilted'}</div>
-            <div class="img-card__cat">${m.category || 'General'} · Ref: ${m.designNum || 'N/A'}</div>
+            <div class="img-card__cat">${m.category || 'General'} Wear</div>
+            <div class="img-card__cat">Ref: ${m.title || 'P----'}</div> 
           </div>
         </div>
       `).join('')
@@ -1405,7 +1368,6 @@ function printInvoice(orderId) {
     allMedia = media.filter(item => item.category !== 'designs' && item.category !== 'bespoke'); // Exclude designs and orders from the media grid
     allDesigns = designs;
     
-    populateMediaDesignDropdown();
     updateStats();
     
     // 👇 THE FIX: Read the memory directly, NO event listener wrapper!

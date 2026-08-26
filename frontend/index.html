@@ -704,13 +704,7 @@
       } catch(e) { console.warn("Could not load designs"); }
       const topDesigns = designsData.slice(0, 8);
 
-      let collectionsData = [];
-      try {
-        const res = await window.TBF_API.Media.getAll();
-        const dataArr = Array.isArray(res) ? res : (res.data || []);
-        collectionsData = dataArr.filter(item => item.category !== 'designs' && item.category !== 'bespoke');
-      } catch(e) { console.warn("Could not load collections"); }
-      const topCollections = collectionsData.slice(0, 8);
+      
 
      // Render Designs Carousel (Single Tailor Button)
       document.getElementById('designsCarousel').innerHTML = topDesigns.length ? topDesigns.map(d => {
@@ -737,9 +731,20 @@
         </div>`;
       }).join('') : '<div style="padding: 20px; font-size:12px; color:var(--text-muted);">No designs available.</div>';
 
+      let collectionsData = [];
+      try {
+        const res = await window.TBF_API.Media.getAll({isPrimary: true});
+        const dataArr = Array.isArray(res) ? res : (res.data || []);
+        collectionsData = dataArr.filter(item => {
+        const cat = (item.category || '').toLowerCase();
+        return ['native', 'agbada', 'english wear'].includes(cat);
+      });
+      } catch(e) { console.warn("Could not load collections"); }
+      const topCollections = collectionsData.slice(0, 8);
       // Render Collections Carousel (Single Tailor Button)
-      document.getElementById('collectionsCarousel').innerHTML = topCollections.length ? topCollections.map(p => {
+      document.getElementById('collectionsCarousel').innerHTML = topCollections.length ? topCollections.map((p, index) => {
         const safeTitle = (p.title || 'Custom Tailored Fit').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const displayNumber = String(index + 1).padStart(2, '0');
         let rawColImg = p.url || '';
         let firstColImg = rawColImg.split(',')[0].trim();
 
@@ -747,15 +752,14 @@
         <div class="card">
           <div class="p-img">
             <img src="${firstColImg.startsWith('http') ? firstColImg : `${BACKEND_URL}${firstColImg}`}" alt="${safeTitle}" loading="lazy"/>
-            <div class="p-badge-pos"><span class="badge badge--production">${p.designNum || 'Bespoke'}</span></div>
           </div>
           <div class="p-body">
-            <div class="p-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.title || 'Custom Tailored Fit'}</div>
-            <div class="p-sub" style="color:var(--blue);">Ref: ${p.designNum || 'Bespoke'}</div>
+            <div class="p-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Bespoke ${p.category} ${displayNumber}</div>
+            <div class="p-sub" style="color:var(--blue);">Ref: 'Custom'</div>
             
             <div style="margin-top:auto; padding-top: 12px; width:100%;">
               <button class="btn btn--mint btn-with-icon" style="width: 100%; padding:9px 0; font-size:12px; font-weight:600; border-radius:6px; border:none; cursor:pointer; justify-content: center; box-shadow:0 2px 4px rgba(0,0,0,0.1);" 
-                    onclick="window.addToStyleBag(event, '${p.designId || p.designNum}', '${safeTitle}', '${firstColImg}')"><i class="bi bi-scissors"></i> Tailor This</button>
+                    onclick="window.addToStyleBag(event,'${safeTitle}', 'Bespoke ${p.category} (${displayNumber})', '${p.url || ''}')"><i class="bi bi-scissors"></i> Tailor This</button>
             </div>
           </div>
         </div>`;

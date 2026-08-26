@@ -17,8 +17,7 @@ export async function getAllMedia(req, res, next) {
       page, 
       limit, 
       batchId, 
-      isPrimary, 
-      designNum 
+      isPrimary,
     });
     
     return res.success(data, 200, { total, page: Number(page), limit: Number(limit) });

@@ -189,8 +189,7 @@ model Media {
   // NEW: PORTFOLIO / BATCH FIELDS
   // ==============================================================
   batchId   String? // Groups multiple angles of the same job (e.g. "batch_17192...")
-  title     String? // Job Ref (e.g. "Chief Okeke White Senator")
-  designNum String? // Linked Base Blueprint (e.g. "TBF-001")
+  title     String? // Job Ref 
   isPrimary Boolean @default(false) // True if this is the Cover Photo for the batch
 
   createdAt DateTime @default(now())
